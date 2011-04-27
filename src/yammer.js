@@ -2,6 +2,9 @@ var util = require('util');
 var events = require('events');
 var request = require('request');
 var os = require('os');
+var querystring = require('querystring');
+var fs = require('fs');
+var path = require('path');
 
 var Yammer = function (userEmail, consumerKey, consumerSecret, authorizeCallback) {
 	events.EventEmitter.call(this);
@@ -12,6 +15,7 @@ var Yammer = function (userEmail, consumerKey, consumerSecret, authorizeCallback
 	this._userEmail = userEmail;
 	this._consumerKey = consumerKey;
 	this._consumerSecret = consumerSecret;
+	this._serverHost = 'www.yammer.com';
 	this._requestTokenURI = 'https://www.yammer.com/oauth/request_token';
 	this._accessTokenURL = 'https://www.yammer.com/oauth/access_token';
 	this._authorizeURL = 'https://www.yammer.com/oauth/authorize';
@@ -23,6 +27,8 @@ var Yammer = function (userEmail, consumerKey, consumerSecret, authorizeCallback
 	this._accessTokenSecret = null;
 	this._currentUserId = null;
 	this._users = new Array();
+
+	this.setupDataDirs();
 };
 
 util.inherits(Yammer, events.EventEmitter);
@@ -71,7 +77,14 @@ Yammer.prototype._oauthRequestToken = function (requestedCallback) {
 		}
 	}, 
 	function (error, response, body) {
-		console.log(body);
+				var vars = querystring.parse(body);
+//				fs.writeFileSync(self.data_dir() + '/oauth/request.tokens', response_body);
+
+				self._oauthToken = vars.oauth_token;
+				self._oauthTokenSecret = vars.oauth_token_secret;
+
+				var authorizeURI = 'https://' + self._serverHost + self._authorizeURL + '?oauth_token=' + self._oauthToken;
+				requestedCallback(authorizeURI);
 	});
 }
 
@@ -83,7 +96,44 @@ Yammer.prototype.userAgent = function () {
 };
 
 Yammer.prototype.logon = function () {
-	this._oauthRequestToken();
+	this._oauthRequestToken(function (authorizeURI) {
+		console.log(authorizeURI);
+	});
+};
+
+Yammer.prototype.dataDir = function () {
+	var dataDir = './data/' + this._userEmail.replace(/[^a-z0-9]/gi, '_');
+	return dataDir;
+}
+
+Yammer.prototype.setupDataDirs = function () {
+
+	var dirs = [
+		this.dataDir() + '/threads', 
+		this.dataDir() + '/messages', 
+		this.dataDir() + '/oauth'
+	];
+
+	for (var i in dirs) {
+		var dir = dirs[i];
+		this.mkdirRecursiveSync(dir);
+	}
+};
+
+Yammer.prototype.mkdirRecursiveSync = function (dir) {
+	var dir_tree = dir.split('/');
+	var current_dir = '';
+
+	for (var i in dir_tree) {
+		if (i != 0) {
+			current_dir += '/';
+		}
+		current_dir += dir_tree[i];
+
+		if (!path.existsSync(current_dir)) {
+			fs.mkdirSync(current_dir, 0755);
+		}
+	}
 };
 
 var Thread = function () {
