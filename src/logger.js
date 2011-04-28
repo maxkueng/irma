@@ -1,4 +1,4 @@
-var sys = require('sys');
+var util = require('util');
 
 var _prefix = function(){ return ''; };
 
@@ -7,19 +7,19 @@ var setPrefix = function (callback) {
 }
 
 var log = function (message) {
-	sys.puts(_prefix() + '>>> ' + message);
+	util.puts(_prefix() + '>>> ' + message);
 };
 
 var info = function (message) {
-	sys.puts(_prefix() + '[info] ' + message);
+	util.puts(_prefix() + '[info] ' + message);
 };
 
 var warn = function (message) {
-	sys.puts(_prefix() + '[warn] ' + message);
+	util.puts(_prefix() + '[warn] ' + message);
 };
 
 var error = function (message) {
-	sys.puts(_prefix() + '[error] ' + message);
+	util.puts(_prefix() + '[error] ' + message);
 };
 
 
