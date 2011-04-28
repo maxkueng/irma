@@ -22,11 +22,16 @@ var y = new Yammer(yammer_account.email, yammer_account.api.consumer_key, yammer
 
 y.on('loggedon', function () {
 	console.log('logged on');		
+	y.loadUsers();
 	y.pollMessages();
 	
 	new cron.CronJob('0 0 11 * * *', function () {
 		console.log('yeah');	
 	});
+});
+
+y.on('usersloaded', function () {
+	console.log('users loaded');		
 });
 
 y.on('message', function (message) {

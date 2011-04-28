@@ -188,6 +188,42 @@ Yammer.prototype.pollMessages = function (previousMessageId) {
 	});
 };
 
+Yammer.prototype.loadUsers = function () {
+	var self = this;
+
+	var uri = 'https://www.yammer.com/api/v1/users.json';
+
+	request({
+		'method' : 'GET', 
+		'uri' : uri, 
+		'headers' : {
+			'User-Agent' : self.userAgent(), 
+			'Authorization' : self._oauthHeaders(self._accessToken, self._accessTokenSecret, null)
+		}
+	}, 
+	function (error, response, body) {
+		if (response.statusCode == 200) {
+			var users = JSON.parse(body);
+
+			if (users) {
+				for (var i = 0; i < users.length; i++) {
+					var user = new User(users[i]);
+					self._users[user.id()] = user;
+				}
+			}
+
+			self.emit('usersloaded');
+
+		} else {
+			self.emit('error', { 
+				'method' : 'Yammer.loadUsers', 
+				'statusCode' : response.statusCode, 
+				'body' : body
+			});
+		}
+	});
+};
+
 Yammer.prototype.logon = function () {
 	var self = this;
 
@@ -262,8 +298,12 @@ Message.prototype.data = function () {
 	return this._data;
 };
 
-var User = function () {
+var User = function (data) {
+	this._data = data;
+};
 
+User.prototype.id = function () {
+	return this._data.id;
 };
 
 
