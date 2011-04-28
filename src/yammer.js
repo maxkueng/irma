@@ -5,6 +5,7 @@ var os = require('os');
 var querystring = require('querystring');
 var fs = require('fs');
 var path = require('path');
+var timers = require('timers');
 
 var Yammer = function (userEmail, consumerKey, consumerSecret, authorizeCallback) {
 	events.EventEmitter.call(this);
@@ -17,9 +18,9 @@ var Yammer = function (userEmail, consumerKey, consumerSecret, authorizeCallback
 	this._consumerSecret = consumerSecret;
 	this._serverHost = 'www.yammer.com';
 	this._requestTokenURI = 'https://www.yammer.com/oauth/request_token';
-	this._accessTokenURL = 'https://www.yammer.com/oauth/access_token';
-	this._authorizeURL = 'https://www.yammer.com/oauth/authorize';
-	this._aothorizeCallback = authorizeCallback;
+	this._accessTokenURI = 'https://www.yammer.com/oauth/access_token';
+	this._authorizeURI = 'https://www.yammer.com/oauth/authorize';
+	this._authorizeCallback = authorizeCallback;
 	this._oauthToken = null;
 	this._oauthTokenSecret = null;
 	this._oauthVerifier = null;
@@ -29,6 +30,13 @@ var Yammer = function (userEmail, consumerKey, consumerSecret, authorizeCallback
 	this._users = new Array();
 
 	this.setupDataDirs();
+
+	if (path.existsSync(this.dataDir() + '/oauth/access_tokens.json')) {
+		var tokensData = fs.readFileSync(this.dataDir() + '/oauth/access_tokens.json', 'utf8');
+		var tokens = JSON.parse(tokensData);
+		this._accessToken = tokens.oauth_token;
+		this._accessTokenSecret = tokens.oauth_token_secret;
+	}
 };
 
 util.inherits(Yammer, events.EventEmitter);
@@ -77,14 +85,45 @@ Yammer.prototype._oauthRequestToken = function (requestedCallback) {
 		}
 	}, 
 	function (error, response, body) {
-				var vars = querystring.parse(body);
-//				fs.writeFileSync(self.data_dir() + '/oauth/request.tokens', response_body);
+		var vars = querystring.parse(body);
 
-				self._oauthToken = vars.oauth_token;
-				self._oauthTokenSecret = vars.oauth_token_secret;
+		self._oauthToken = vars.oauth_token;
+		self._oauthTokenSecret = vars.oauth_token_secret;
 
-				var authorizeURI = 'https://' + self._serverHost + self._authorizeURL + '?oauth_token=' + self._oauthToken;
-				requestedCallback(authorizeURI);
+		var authorizeURI = self._authorizeURI + '?oauth_token=' + self._oauthToken;
+		requestedCallback(authorizeURI);
+	});
+};
+
+Yammer.prototype._oauthAuthorize = function (verifier) {
+	var self = this;
+
+	request({
+		'method' : 'POST', 
+		'uri' : self._accessTokenURI, 
+		'headers' : {
+			'User-Agent' : self.userAgent(), 
+			'Content-Type' : 'application/x-www-form-urlencoded', 
+			'Authorization' : self._oauthHeaders(self._oauthToken, self._oauthTokenSecret, verifier)
+		}
+	}, 
+	function (error, response, body) {
+		if (response.statusCode == 200) {
+			var vars = querystring.parse(body);
+
+			self._accessToken = vars.oauth_token;
+			self._accessTokenSecret = vars.oauth_token_secret;
+
+			console.log(response.statusCode);
+			console.log(body);
+
+			fs.writeFileSync(self.dataDir() + '/oauth/access_tokens.json', JSON.stringify(vars));
+			self.emit('loggedon');
+
+		} else {
+			util.puts('Authorization failed.');
+			process.exit(1);
+		}
 	});
 }
 
@@ -95,10 +134,75 @@ Yammer.prototype.userAgent = function () {
 	              + ')';
 };
 
-Yammer.prototype.logon = function () {
-	this._oauthRequestToken(function (authorizeURI) {
-		console.log(authorizeURI);
+Yammer.prototype.pollMessages = function (previousMessageId) {
+	var self = this;
+
+	var latestMessageId = 0;
+	var latestMessageTime = 0;
+
+	var uri = 'https://www.yammer.com/api/v1/messages.json';
+	if (previousMessageId) {
+		latestMessageId = previousMessageId;
+		uri += '?newer_than=' + previousMessageId;
+	}
+
+	request({
+		'method' : 'GET', 
+		'uri' : uri, 
+		'headers' : {
+			'User-Agent' : self.userAgent(), 
+			'Authorization' : self._oauthHeaders(self._accessToken, self._accessTokenSecret, null)
+		}
+	}, 
+	function (error, response, body) {
+		if (response.statusCode == 200) {
+			var data = JSON.parse(body);
+
+			if (data.meta) {
+				self._currentUserId = data.meta.current_user_id;
+			}
+
+			if (data.messages) {
+				for (var i = 0; i < data.messages.length; i++) {
+					var messageTime = Date.parse(data.messages[i].created_at);			
+					if (messageTime > latestMessageTime) {
+						latestMessageTime = messageTime;
+						latestMessageId = data.messages[i].id;
+					}
+
+					var message = new Message(data.messages[i]);
+					self.emit('message', message);
+				}
+			}
+
+		} else {
+			self.emit('error', { 
+				'statusCode' : response.statusCode, 
+				'body' : body
+			});
+		}
+
+		timers.setTimeout(function () {
+			self.pollMessages(latestMessageId);
+		}, 30000);
 	});
+};
+
+Yammer.prototype.logon = function () {
+	var self = this;
+
+	if (self._accessToken && self._accessTokenSecret) {
+		self.emit('loggedon');
+
+	} else {
+		this._oauthRequestToken(function (authorizeURI) {
+			self._authorizeCallback(authorizeURI, function (verifier) {
+				verifier = verifier.replace(/(\n|\r)+$/, '');
+				console.log('VERIFIER: "' + verifier + "'");
+				self._oauthAuthorize(verifier);
+			});
+		});
+	}
 };
 
 Yammer.prototype.dataDir = function () {
@@ -121,17 +225,17 @@ Yammer.prototype.setupDataDirs = function () {
 };
 
 Yammer.prototype.mkdirRecursiveSync = function (dir) {
-	var dir_tree = dir.split('/');
-	var current_dir = '';
+	var dirTree = dir.split('/');
+	var currentDir = '';
 
-	for (var i in dir_tree) {
+	for (var i in dirTree) {
 		if (i != 0) {
-			current_dir += '/';
+			currentDir += '/';
 		}
-		current_dir += dir_tree[i];
+		currentDir += dirTree[i];
 
-		if (!path.existsSync(current_dir)) {
-			fs.mkdirSync(current_dir, 0755);
+		if (!path.existsSync(currentDir)) {
+			fs.mkdirSync(currentDir, 0755);
 		}
 	}
 };
@@ -142,8 +246,20 @@ var Thread = function () {
 
 util.inherits(Thread, events.EventEmitter);
 
-var Message = function () {
+var Message = function (data) {
+	this._data = data;
+};
 
+Message.prototype.id = function () {
+	return this._data.id;
+};
+
+Message.prototype.plainBody = function () {
+	return this._data.body.plain;
+};
+
+Message.prototype.data = function () {
+	return this._data;
 };
 
 var User = function () {
