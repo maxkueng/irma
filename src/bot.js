@@ -23,15 +23,22 @@ var y = new Yammer(yammer_account.email, yammer_account.api.consumer_key, yammer
 y.on('loggedon', function () {
 	console.log('logged on');		
 	y.loadUsers();
+});
+
+y.on('usersloaded', function () {
 	y.pollMessages();
+	y.pollPrivateMessages();
 	
 	new cron.CronJob('0 0 11 * * *', function () {
 		console.log('yeah');	
 	});
-});
 
-y.on('usersloaded', function () {
-	console.log('users loaded');		
+	y.sendMessage('Yeah baby woohoo', function (error, message) {
+		console.log('sent message ' + message.id() + ': ' + message.parsedBody());
+		var th = y.thread(message.threadId());
+		th.setProperty('type', 'test');
+		y.persistThread(th);
+	});
 });
 
 y.on('message', function (message) {

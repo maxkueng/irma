@@ -27,6 +27,7 @@ var Yammer = function (userEmail, consumerKey, consumerSecret, authorizeCallback
 	this._accessToken = null;
 	this._accessTokenSecret = null;
 	this._currentUserId = null;
+	this._threads =  new Array();
 	this._users = new Array();
 
 	this.setupDataDirs();
@@ -37,6 +38,8 @@ var Yammer = function (userEmail, consumerKey, consumerSecret, authorizeCallback
 		this._accessToken = tokens.oauth_token;
 		this._accessTokenSecret = tokens.oauth_token_secret;
 	}
+
+	this.loadThreads();
 };
 
 util.inherits(Yammer, events.EventEmitter);
@@ -171,12 +174,17 @@ Yammer.prototype.pollMessages = function (previousMessageId) {
 					}
 
 					var message = new Message(data.messages[i]);
-					self.emit('message', message);
+					if (self.messageIsForMe(message) && self.messageIsUnread(message)) {
+						self.persistMessage(message);
+						self.createThread(message.threadId());
+						self.emit('message', message);
+					}
 				}
 			}
 
 		} else {
 			self.emit('error', { 
+				'method' : 'pollMessages', 
 				'statusCode' : response.statusCode, 
 				'body' : body
 			});
@@ -188,14 +196,117 @@ Yammer.prototype.pollMessages = function (previousMessageId) {
 	});
 };
 
-Yammer.prototype.loadUsers = function () {
+Yammer.prototype.pollPrivateMessages = function (previousMessageId) {
 	var self = this;
 
-	var uri = 'https://www.yammer.com/api/v1/users.json';
+	var latestMessageId = 0;
+	var latestMessageTime = 0;
+
+	var uri = 'https://www.yammer.com/api/v1/messages/private.json';
+	if (previousMessageId) {
+		latestMessageId = previousMessageId;
+		uri += '?newer_than=' + previousMessageId;
+	}
 
 	request({
 		'method' : 'GET', 
 		'uri' : uri, 
+		'headers' : {
+			'User-Agent' : self.userAgent(), 
+			'Authorization' : self._oauthHeaders(self._accessToken, self._accessTokenSecret, null)
+		}
+	}, 
+	function (error, response, body) {
+		if (response.statusCode == 200) {
+			var data = JSON.parse(body);
+
+			if (data.meta) {
+				self._currentUserId = data.meta.current_user_id;
+			}
+
+			if (data.messages) {
+				for (var i = 0; i < data.messages.length; i++) {
+					var messageTime = Date.parse(data.messages[i].created_at);			
+					if (messageTime > latestMessageTime) {
+						latestMessageTime = messageTime;
+						latestMessageId = data.messages[i].id;
+					}
+
+					var message = new Message(data.messages[i]);
+					if (self.messageIsForMe(message) && self.messageIsUnread(message)) {
+						self.persistMessage(message);
+						self.createThread(message.threadId());
+						self.emit('message', message);
+					}
+				}
+			}
+
+		} else {
+			self.emit('error', { 
+				'method' : 'pollMessages', 
+				'statusCode' : response.statusCode, 
+				'body' : body
+			});
+		}
+
+		timers.setTimeout(function () {
+			self.pollPrivateMessages(latestMessageId);
+		}, 30000);
+	});
+};
+
+Yammer.prototype.sendMessage = function (text, callback, options) {
+	var self = this;
+
+	var data = {};
+	data.body = text;
+	if (typeof options != 'undefined') {
+		if (typeof options.reply_to != 'undefined') {
+			data.replied_to_id = options.reply_to;
+		}
+
+		if (typeof options.direct_to != 'undefined') {
+			data.direct_to_id = options.direct_to;
+		}
+	}
+
+	request({
+		'method' : 'POST', 
+		'uri' : 'https://www.yammer.com/api/v1/messages.json', 
+		'headers' : {
+			'User-Agent' : self.userAgent(), 
+			'Authorization' : self._oauthHeaders(self._accessToken, self._accessTokenSecret, null)
+		}, 
+		'body' : querystring.stringify(data), 
+	}, 
+	function (error, response, body) {
+		if (response.statusCode == 201) {
+			var data = JSON.parse(body);
+			if (data.messages && data.messages.length > 0) {
+				var message = new Message(data.messages[0]);
+
+				fs.writeFileSync(self.dataDir() + '/messages/sent/message_' + message.id() + '.json', JSON.stringify(message.data()));
+				self.createThread(message.threadId());
+
+				callback(null, message);
+			}
+
+		} else {
+			self.emit('error', { 
+				'method' : 'sendMessages', 
+				'statusCode' : response.statusCode, 
+				'body' : body
+			});
+		}
+	});
+}
+
+Yammer.prototype.loadUsers = function () {
+	var self = this;
+
+	request({
+		'method' : 'GET', 
+		'uri' : 'https://www.yammer.com/api/v1/users.json', 
 		'headers' : {
 			'User-Agent' : self.userAgent(), 
 			'Authorization' : self._oauthHeaders(self._accessToken, self._accessTokenSecret, null)
@@ -222,6 +333,14 @@ Yammer.prototype.loadUsers = function () {
 			});
 		}
 	});
+};
+
+Yammer.prototype.user = function (userId) {
+	if (this._users[userId]) {
+		return this._users[userId];
+	}
+
+	return null;
 };
 
 Yammer.prototype.logon = function () {
@@ -251,6 +370,7 @@ Yammer.prototype.setupDataDirs = function () {
 	var dirs = [
 		this.dataDir() + '/threads', 
 		this.dataDir() + '/messages', 
+		this.dataDir() + '/messages/sent', 
 		this.dataDir() + '/oauth'
 	];
 
@@ -276,11 +396,98 @@ Yammer.prototype.mkdirRecursiveSync = function (dir) {
 	}
 };
 
-var Thread = function () {
+Yammer.prototype.messageIsUnread = function (message) {
+	return !path.existsSync(this.dataDir() + '/messages/message_' + message.id() + '.json');
+};
+
+Yammer.prototype.messageIsForMe = function (message) {
+	var user = this.user(this._currentUserId);
+
+	return (
+		( message.senderId() != user.id() )
+		&& (
+			message.isDirect() 
+			|| this._threads[message.threadId()]
+			|| message.parsedBody().search('[[user:' + user.id() + ']]') != -1 
+			|| message.plainBody().search(user.username()) != -1 
+		)
+	);
+};
+
+Yammer.prototype.createThread = function (threadId) {
+	if (threadId && !this._threads[threadId]) {
+		var thread = new Thread({ 'id' : threadId });
+		this._threads[thread.id()] = thread;
+		this.persistThread(thread);
+
+		return thread;
+	}
+
+	return null;
+};
+
+Yammer.prototype.loadThreads = function () {
+	if (path.existsSync(this.dataDir() + '/threads')) {
+		var files = fs.readdirSync(this.dataDir() + '/threads');
+		for (var i in files) {
+			var threadData = fs.readFileSync(this.dataDir() + '/threads/' + files[i], 'utf8');
+			var thread = new Thread(JSON.parse(threadData));
+			this._threads[thread.id()] = thread;
+		}
+	}
+};
+
+Yammer.prototype.persistThread = function (thread) {
+	fs.writeFileSync(this.dataDir() + '/threads/thread_' + thread.id() + '.json', JSON.stringify(thread.data()));
+};
+
+Yammer.prototype.persistMessage = function (message) {
+	fs.writeFileSync(this.dataDir() + '/messages/message_' + message.id() + '.json', JSON.stringify(message.data()));
+};
+
+Yammer.prototype.thread = function (threadId) {
+	if (this._threads[threadId]) {
+		return this._threads[threadId];
+	}
+
+	return null;
+};
+
+// Thread ---------------------------------------------------------------
+
+var Thread = function (data) {
 	events.EventEmitter.call(this);
+
+	this._data = data;
 };
 
 util.inherits(Thread, events.EventEmitter);
+
+Thread.prototype.id = function () {
+	return this._data.id;
+};
+
+Thread.prototype.data = function () {
+	return this._data;
+};
+
+Thread.prototype.property = function (key) {
+	if (this._data.properties && this._data.properties[key]) {
+		return this._data.properties[key];
+	}
+
+	return null;
+};
+
+Thread.prototype.setProperty = function (key, value) {
+	if (!this._data.properties) {
+		this._data.properties = {};
+	}
+
+	this._data.properties[key] = value;
+};
+
+// Message --------------------------------------------------------------
 
 var Message = function (data) {
 	this._data = data;
@@ -290,13 +497,31 @@ Message.prototype.id = function () {
 	return this._data.id;
 };
 
+Message.prototype.senderId = function () {
+	return this._data.sender_id;
+};
+
+Message.prototype.threadId = function () {
+	return this._data.thread_id;
+};
+
+Message.prototype.isDirect = function () {
+	return this._data.direct_message;
+};
+
 Message.prototype.plainBody = function () {
 	return this._data.body.plain;
+};
+
+Message.prototype.parsedBody = function () {
+	return this._data.body.parsed;
 };
 
 Message.prototype.data = function () {
 	return this._data;
 };
+
+// User -----------------------------------------------------------------
 
 var User = function (data) {
 	this._data = data;
@@ -305,6 +530,46 @@ var User = function (data) {
 User.prototype.id = function () {
 	return this._data.id;
 };
+
+User.prototype.isAdmin = function () {
+	return this._data.admin;
+};
+
+User.prototype.isActive = function () {
+	return (this._data.state == 'active');
+};
+
+User.prototype.username = function () {
+	return '@' + this._data.name;
+};
+
+User.prototype.fullName = function () {
+	return this._data.full_name;
+};
+
+User.prototype.email = function () {
+	for (var i in this._data.contact.email_addresses) {
+		var email = this._data.contact.email_addresses[i];
+		if (email.type == 'primary') {
+			return email.address;
+		}
+	}
+
+	return null;
+};
+
+User.prototype.mobilePhone = function () {
+	for (var i in this._data.contact.phone_numbers) {
+		var phone = this._data.contact.phone_numbers[i];
+		if (phone.type == 'mobile') {
+			return phone.number;
+		}
+	}
+
+	return null;
+};
+
+
 
 
 
