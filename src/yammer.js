@@ -32,8 +32,8 @@ var Yammer = function (userEmail, consumerKey, consumerSecret, authorizeCallback
 
 	this.setupDataDirs();
 
-	if (path.existsSync(this.dataDir() + '/oauth/access_tokens.json')) {
-		var tokensData = fs.readFileSync(this.dataDir() + '/oauth/access_tokens.json', 'utf8');
+	if (path.existsSync(this.profileDir() + '/oauth/access_tokens.json')) {
+		var tokensData = fs.readFileSync(this.profileDir() + '/oauth/access_tokens.json', 'utf8');
 		var tokens = JSON.parse(tokensData);
 		this._accessToken = tokens.oauth_token;
 		this._accessTokenSecret = tokens.oauth_token_secret;
@@ -120,7 +120,7 @@ Yammer.prototype._oauthAuthorize = function (verifier) {
 			console.log(response.statusCode);
 			console.log(body);
 
-			fs.writeFileSync(self.dataDir() + '/oauth/access_tokens.json', JSON.stringify(vars));
+			fs.writeFileSync(self.profileDir() + '/oauth/access_tokens.json', JSON.stringify(vars));
 			self.emit('loggedon');
 
 		} else {
@@ -285,7 +285,7 @@ Yammer.prototype.sendMessage = function (text, callback, options) {
 			if (data.messages && data.messages.length > 0) {
 				var message = new Message(data.messages[0]);
 
-				fs.writeFileSync(self.dataDir() + '/messages/sent/message_' + message.id() + '.json', JSON.stringify(message.data()));
+				fs.writeFileSync(self.profileDir() + '/messages/sent/message_' + message.id() + '.json', JSON.stringify(message.data()));
 				self.createThread(message.threadId());
 
 				callback(null, message);
@@ -361,17 +361,22 @@ Yammer.prototype.logon = function () {
 };
 
 Yammer.prototype.dataDir = function () {
-	var dataDir = './data/' + this._userEmail.replace(/[^a-z0-9]/gi, '_');
+	var dataDir = process.cwd() + '/data';
 	return dataDir;
+}
+
+Yammer.prototype.profileDir = function () {
+	var profileDir = this.dataDir() + '/' + this._userEmail.replace(/[^a-z0-9]/gi, '_');
+	return profileDir;
 }
 
 Yammer.prototype.setupDataDirs = function () {
 
 	var dirs = [
-		this.dataDir() + '/threads', 
-		this.dataDir() + '/messages', 
-		this.dataDir() + '/messages/sent', 
-		this.dataDir() + '/oauth'
+		this.profileDir() + '/threads', 
+		this.profileDir() + '/messages', 
+		this.profileDir() + '/messages/sent', 
+		this.profileDir() + '/oauth'
 	];
 
 	for (var i in dirs) {
@@ -385,19 +390,20 @@ Yammer.prototype.mkdirRecursiveSync = function (dir) {
 	var currentDir = '';
 
 	for (var i in dirTree) {
+
 		if (i != 0) {
 			currentDir += '/';
 		}
 		currentDir += dirTree[i];
 
-		if (!path.existsSync(currentDir)) {
+		if (currentDir != '' && !path.existsSync(currentDir)) {
 			fs.mkdirSync(currentDir, 0755);
 		}
 	}
 };
 
 Yammer.prototype.messageIsUnread = function (message) {
-	return !path.existsSync(this.dataDir() + '/messages/message_' + message.id() + '.json');
+	return !path.existsSync(this.profileDir() + '/messages/message_' + message.id() + '.json');
 };
 
 Yammer.prototype.messageIsForMe = function (message) {
@@ -427,10 +433,10 @@ Yammer.prototype.createThread = function (threadId) {
 };
 
 Yammer.prototype.loadThreads = function () {
-	if (path.existsSync(this.dataDir() + '/threads')) {
-		var files = fs.readdirSync(this.dataDir() + '/threads');
+	if (path.existsSync(this.profileDir() + '/threads')) {
+		var files = fs.readdirSync(this.profileDir() + '/threads');
 		for (var i in files) {
-			var threadData = fs.readFileSync(this.dataDir() + '/threads/' + files[i], 'utf8');
+			var threadData = fs.readFileSync(this.profileDir() + '/threads/' + files[i], 'utf8');
 			var thread = new Thread(JSON.parse(threadData));
 			this._threads[thread.id()] = thread;
 		}
@@ -438,11 +444,11 @@ Yammer.prototype.loadThreads = function () {
 };
 
 Yammer.prototype.persistThread = function (thread) {
-	fs.writeFileSync(this.dataDir() + '/threads/thread_' + thread.id() + '.json', JSON.stringify(thread.data()));
+	fs.writeFileSync(this.profileDir() + '/threads/thread_' + thread.id() + '.json', JSON.stringify(thread.data()));
 };
 
 Yammer.prototype.persistMessage = function (message) {
-	fs.writeFileSync(this.dataDir() + '/messages/message_' + message.id() + '.json', JSON.stringify(message.data()));
+	fs.writeFileSync(this.profileDir() + '/messages/message_' + message.id() + '.json', JSON.stringify(message.data()));
 };
 
 Yammer.prototype.thread = function (threadId) {

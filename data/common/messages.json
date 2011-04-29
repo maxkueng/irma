@@ -1,0 +1,78 @@
+{
+	"veggie" : [
+		"Oh my God it's Veggie-Thursday, yeah!! Go out, hug a bear, run with the wolves, spread love!\nGood karma.", 
+		"It's Veggie-Thursday, yeah!! Kiss the Soyboy, fly with the Tofucopter and touch the sun!", 
+		"Hey hey hey, it's Veggie-Day!! Be a Tofuman and safe the planet!", 
+		"It's Thursday, my favorite day. I get to remind you it's Veggie-Day!",
+		"Oh yeah, it's Veggie Day!! Stop the blod spill, take the tofu pill, high-five that critter, don't be a chicken hitter! Be magic, be happy!", 
+		"A Tofu a day, keeps the doctor away!", 
+		"I love Tofu! And I know you'll love it, too.\nSo don't be shy, you just have to try!", 
+		"Eat carrots not rabbits, man!", 
+		"Ladies and gentlemen, may I have your attention please! It's Fakemeat Day, yay!", 
+		"Mayday mayday, Tofucopter captain speaking. Aaaaahh.. five Tofurockets incoming!!! Can barely see with all the soy fog. Asking for permission to land.", 
+		"Balanciere dein Leben mit dem richtigen Essen,\nich hoffe nur du willst doch keine Tiere fressen!\nAlle fressen Fleisch, das zieht dich runter man!\nIch bezweifle stark das man so besser Leben sehen kann.",
+		"Oh happy day it's Tofu-Day."
+	], 
+
+	"spaghetti_opening" : [
+		"Spaghetti today? If you'd like join today's spaghetti feast, please reply to this message by no later than 11:45.", 
+		"Spaghetti today? If you'd like join today's \"Spaghettiplausch\", please reply to this message by no later than 11:45.", 
+		"Who's down for some serious spaghetti madness? If you want to join please reply to this message by no later than 11:45.",
+		"Countdown 10 to 0, Spaghetti for lunch? Cause I'm your hero. Vote for me and I'll set you free. WATCH OUT, WATCH OUT: Your Vote won't count after 11:45.",
+		"Hungry? You can holla at me till 11:45. Spaghetti.",
+		"Hungry? Well, maybe I don't feel like cooking today. Okay, anyway... I'll do it for the animals. You can answer me till 11:45 and I might consider your request.",
+		"Barilla want's to know: To eat or not to eat Spaghetti, today for lunch, OK. You've got the choice. Answer me till 11:45.", 
+		"May I suggest our unbelievable blend of tasteful Pasta today? It's yummie yummie!"
+	], 
+
+	"spaghetti_closing" : [
+		"Woohoo, [count] hungry monkeys!", 
+		"Cool cool cool, so we are [count]! I'll ask [chef_name] to start cooking.",
+		"Run baby run... [count] want to mantsch. [chef_name], hurry hurry [count] are so hungry.",
+		"[chef_name], on your marks get set GO! [count] Veggies want Spaghetti!",
+		"[chef_name], you've got to move it move it. [count] want to see you sweat. Thank you\n[joiners]."
+	], 
+
+	"spaghetti_chef" : [
+		"Hey [chef_name], [count] colleagues would love it if you cooked some spaghetti for them.\nNamely: [joiners]", 
+		"G'day [chef_name], [count] hungry mouths need to be stuffed.\n[joiners]", 
+		"Hello hello [chef_name], [count] hungry kittens to feed.\n[joiners]"
+	], 
+
+	"weather_future" : [
+		"It will be [desc]. The temperature will be between [temp_from] and [temp_to] degrees Celsuis."
+	], 
+
+	"weather_present" : [
+		"It's [desc]. The temperature is between [temp_from] and [temp_to] degrees Celsuis.", 
+		"Can't you just look out the window? Anyway, it's [desc]. The temperature is between [temp_from] and [temp_to] degrees Celsuis."
+	], 
+
+	"weather_past" : [
+		"It was [desc]. The temperature was between [temp_from] and [temp_to] degrees Celsuis.", 
+		"Who cares about the weather of the past?"
+	], 
+
+	"weather_unknown" : [
+		"I don't know.", 
+		"It will suck big time! Hahah, I'm just kidding. Actually I don't know.", 
+		"I know alot about the future but this part is very blurry.", 
+		"Only God knows."
+	], 
+
+	"unknown" : [
+		"Did you know that the plastic things on the end of shoelaces are called aglets?", 
+		"Yeah.. whatever.", 
+		"Did you know that fingernails grow nearly 4 times faster than toenails?"
+	], 
+
+	"shutdown" : [
+		"Alright, I'm off.", 
+		"Bye bye."
+	], 
+
+	"permission_denied" : [
+		"You can't tell me what to do.", 
+		"No."
+	]
+}

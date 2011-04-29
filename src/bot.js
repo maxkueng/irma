@@ -1,7 +1,9 @@
+require('datejs');
 var util = require('util');
 var fs = require('fs');
 var path = require('path');
 var cron = require('cron');
+var messages = require('./messages');
 var Yammer = require('./yammer').Yammer;
 
 var cwd = process.cwd();
@@ -21,24 +23,34 @@ var y = new Yammer(yammer_account.email, yammer_account.api.consumer_key, yammer
 });
 
 y.on('loggedon', function () {
-	console.log('logged on');		
+	util.log('logged on');		
+
+	if (!messages.load(y.dataDir() + '/common/messages.json', y.profileDir())) {
+		util.log('Failed to load messages');
+		process.exit(1);
+	}
+
+	console.log(messages.get('veggie'));
+
 	y.loadUsers();
 });
 
 y.on('usersloaded', function () {
+	util.log('users loaded');		
 	y.pollMessages();
 	y.pollPrivateMessages();
 	
-	new cron.CronJob('0 0 11 * * *', function () {
+	new cron.CronJob('0 27 17 * * *', function () {
 		console.log('yeah');	
+
+		y.sendMessage('Yeah baby woohoo, timed message', function (error, message) {
+			util.log('sent message ' + message.id() + ': ' + message.parsedBody());
+			var th = y.thread(message.threadId());
+			th.setProperty('type', 'test');
+			y.persistThread(th);
+		});
 	});
 
-	y.sendMessage('Yeah baby woohoo', function (error, message) {
-		console.log('sent message ' + message.id() + ': ' + message.parsedBody());
-		var th = y.thread(message.threadId());
-		th.setProperty('type', 'test');
-		y.persistThread(th);
-	});
 });
 
 y.on('message', function (message) {
