@@ -255,7 +255,7 @@ Yammer.prototype.pollPrivateMessages = function (previousMessageId) {
 	});
 };
 
-Yammer.prototype.sendMessage = function (text, callback, options) {
+Yammer.prototype.sendMessage = function (callback, text, options) {
 	var self = this;
 
 	var data = {};

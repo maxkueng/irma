@@ -36,8 +36,6 @@ y.on('loggedon', function () {
 		process.exit(1);
 	}
 
-	console.log(messages.get('veggie'));
-
 	y.loadUsers();
 });
 
@@ -46,16 +44,38 @@ y.on('usersloaded', function () {
 	y.pollMessages();
 	y.pollPrivateMessages();
 	
-	new cron.CronJob('0 27 17 * * *', function () {
-		console.log('yeah');	
+//	Veggie Message
+	new cron.CronJob('0 0 11 * * *', function () {
+		if (Date.today().is().thursday()) {
+			logger.info('sending veggie message');
+			var message = messages.get('veggie');
 
-		y.sendMessage('Yeah baby woohoo, timed message', function (error, message) {
-			logger.info('sent message ' + message.id() + ': ' + message.parsedBody());
-			var th = y.thread(message.threadId());
-			th.setProperty('type', 'test');
-			y.persistThread(th);
-		});
+			y.sendMessage(function (error, message) {
+				logger.info('veggie message OK: ' + message.id());
+				var thread = y.thread(message.threadId());
+				thread.setProperty('type', 'veggie');
+				thread.setProperty('status', 'closed');
+				y.persistThread(thread);
+			}, message);
+		}
 	});
+
+//	Spaghetti Opening Message
+	new cron.CronJob('0 15 9 * * *', function () {
+		if (Date.today().is().thursday()) {
+			logger.info('sending spaghetti opening message');
+			var message = messages.get('spaghetti_opening');
+
+			y.sendMessage(function (error, message) {
+				logger.info('spaghetti opening message OK: ' + message.id());
+				var thread = y.thread(message.threadId());
+				thread.setProperty('type', 'spaghetti');
+				thread.setProperty('status', 'open');
+				y.persistThread(thread);
+			}, message);
+		}
+	});
+
 
 });
 
