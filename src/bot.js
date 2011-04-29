@@ -3,12 +3,18 @@ var util = require('util');
 var fs = require('fs');
 var path = require('path');
 var cron = require('cron');
+var logger = require('./logger');
 var messages = require('./messages');
 var Yammer = require('./yammer').Yammer;
 
 var cwd = process.cwd();
 var config = load_config();
 var yammer_account = config.yammer[config.yammer_account];
+
+logger.setPrefix(function () {
+	var d = new Date().toString("yyyy-MM-dd HH:mm:ss");		
+	return '[' + d + '] ';
+});
 
 var y = new Yammer(yammer_account.email, yammer_account.api.consumer_key, yammer_account.api.consumer_secret, function (authorizeURI, continueCallback) {
 	util.puts(authorizeURI);
@@ -23,10 +29,10 @@ var y = new Yammer(yammer_account.email, yammer_account.api.consumer_key, yammer
 });
 
 y.on('loggedon', function () {
-	util.log('logged on');		
+	logger.info('logged on');
 
 	if (!messages.load(y.dataDir() + '/common/messages.json', y.profileDir())) {
-		util.log('Failed to load messages');
+		logger.error('failed to load messages');
 		process.exit(1);
 	}
 
@@ -36,7 +42,7 @@ y.on('loggedon', function () {
 });
 
 y.on('usersloaded', function () {
-	util.log('users loaded');		
+	logger.info('users loaded');
 	y.pollMessages();
 	y.pollPrivateMessages();
 	
@@ -44,7 +50,7 @@ y.on('usersloaded', function () {
 		console.log('yeah');	
 
 		y.sendMessage('Yeah baby woohoo, timed message', function (error, message) {
-			util.log('sent message ' + message.id() + ': ' + message.parsedBody());
+			logger.info('sent message ' + message.id() + ': ' + message.parsedBody());
 			var th = y.thread(message.threadId());
 			th.setProperty('type', 'test');
 			y.persistThread(th);
