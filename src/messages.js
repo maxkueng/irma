@@ -30,7 +30,7 @@ exports.load = function (filePath, profDir) {
 	return false;
 };
 
-exports.get = function (type) {
+exports.get = function (type, vars) {
 	var msgs = messages[type];
 	var usedMsgs = usedMessages[type];
 
@@ -50,6 +50,13 @@ exports.get = function (type) {
 		if (message == null) {
 			var i = Math.floor(Math.random() * msgs.length);
 			message = msgs[i];
+		}
+	}
+
+	if (typeof vars != 'undefined') {
+		for (var key in vars) {
+			var regex = new RegExp('\\[' + key + '\\]', 'g');
+			message = message.replace(regex, vars[key]);
 		}
 	}
 

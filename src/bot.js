@@ -16,6 +16,10 @@ logger.setPrefix(function () {
 	return '[' + d + '] ';
 });
 
+process.on('uncaughtException', function (ex) {
+	logger.error('uncaught exception: ' + ex);
+});
+
 var y = new Yammer(yammer_account.email, yammer_account.api.consumer_key, yammer_account.api.consumer_secret, function (authorizeURI, continueCallback) {
 	util.puts(authorizeURI);
 	util.puts('Please visit the link above, \nauthorize the request and enter the verifier code: ');
@@ -71,8 +75,59 @@ y.on('usersloaded', function () {
 				var thread = y.thread(message.threadId());
 				thread.setProperty('type', 'spaghetti');
 				thread.setProperty('status', 'open');
+				thread.setProperty('joiners', []);
 				y.persistThread(thread);
 			}, message);
+		}
+	});
+
+//	Spaghetti Closing Message
+	new cron.CronJob('0 45 11 * * *', function () {
+		if (Date.today().is().thursday()) {
+			for (var threadId in y.threads()) {
+				var thread = y.thread(threadId);
+
+				if (thread.property('type') == 'spaghetti' && thread.property('status') == 'open') {
+					var joiners = thread.property('joiners');
+					var joinersList = '';
+
+					for (var i in joiners) {
+						var user = y.user(joiners[i]);
+						if (i > 0) {
+							joinersList += ', ';
+						}
+
+						joinersList += user.username();
+					}
+
+					var chef = y.user(yammer_account.chef_user_id);
+
+					var closingMessage = messages.get('spaghetti_closing', {
+						'count' : joiners.length, 
+						'joiners' : joinersList, 
+						'chef' : chef.username(), 
+						'chef_name' : chef.fullName()
+					});
+
+					var chefMessage = messages.get('spaghetti_chef', {
+						'count' : joiners.length, 
+						'joiners' : joinersList, 
+						'chef' : chef.username(), 
+						'chef_name' : chef.fullName()
+					});
+
+					y.sendMessage(function (error, message) {
+						logger.info('spaghetti chef message OK: ' + message.id());
+
+						y.sendMessage(function (error, message) {
+							logger.info('spaghetti closing message OK: ' + message.id());
+
+							thread.setProperty('status', 'closed');
+							y.persistThread(thread);
+						}, closingMessage);
+					}, chefMessage);
+				}
+			}
 		}
 	});
 

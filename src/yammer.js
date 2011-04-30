@@ -293,7 +293,7 @@ Yammer.prototype.sendMessage = function (callback, text, options) {
 
 		} else {
 			self.emit('error', { 
-				'method' : 'sendMessages', 
+				'method' : 'sendMessage', 
 				'statusCode' : response.statusCode, 
 				'body' : body
 			});
@@ -341,6 +341,10 @@ Yammer.prototype.user = function (userId) {
 	}
 
 	return null;
+};
+
+Yammer.prototype.users = function () {
+	return this._users;
 };
 
 Yammer.prototype.logon = function () {
@@ -457,6 +461,10 @@ Yammer.prototype.thread = function (threadId) {
 	}
 
 	return null;
+};
+
+Yammer.prototype.threads = function () {
+	return this._threads;
 };
 
 // Thread ---------------------------------------------------------------
