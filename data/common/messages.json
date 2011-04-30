@@ -27,10 +27,10 @@
 
 	"spaghetti_closing" : [
 		"Woohoo, [count] hungry monkeys!", 
-		"Cool cool cool, so we are [count]! I'll ask [chef_name] to start cooking.",
-		"Run baby run... [count] want to mantsch. [chef_name], hurry hurry [count] are so hungry.",
-		"[chef_name], on your marks get set GO! [count] Veggies want Spaghetti!",
-		"[chef_name], you've got to move it move it. [count] want to see you sweat. Thank you\n[joiners]."
+		"Cool cool cool, so we are [count]! I'll ask [chef] to start cooking.",
+		"Run baby run... [count] want to mantsch. [chef], hurry hurry [count] are so hungry.",
+		"[chef], on your marks get set GO! [count] Veggies want Spaghetti!",
+		"[chef], you've got to move it move it. [count] want to see you sweat. Thank you\n[joiners]."
 	], 
 
 	"spaghetti_chef" : [
