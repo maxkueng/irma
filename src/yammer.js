@@ -176,7 +176,8 @@ Yammer.prototype.pollMessages = function (previousMessageId) {
 					var message = new Message(data.messages[i]);
 					if (self.messageIsForMe(message) && self.messageIsUnread(message)) {
 						self.persistMessage(message);
-						self.createThread(message.threadId());
+						var thread = self.createThread(message);
+						thread.addMessage(message);
 						self.emit('message', message);
 					}
 				}
@@ -235,7 +236,7 @@ Yammer.prototype.pollPrivateMessages = function (previousMessageId) {
 					var message = new Message(data.messages[i]);
 					if (self.messageIsForMe(message) && self.messageIsUnread(message)) {
 						self.persistMessage(message);
-						self.createThread(message.threadId());
+						self.createThread(message);
 						self.emit('message', message);
 					}
 				}
@@ -286,7 +287,7 @@ Yammer.prototype.sendMessage = function (callback, text, options) {
 				var message = new Message(data.messages[0]);
 
 				fs.writeFileSync(self.profileDir() + '/messages/sent/message_' + message.id() + '.json', JSON.stringify(message.data()));
-				self.createThread(message.threadId());
+				self.createThread(message);
 
 				callback(null, message);
 			}
@@ -424,16 +425,23 @@ Yammer.prototype.messageIsForMe = function (message) {
 	);
 };
 
-Yammer.prototype.createThread = function (threadId) {
-	if (threadId && !this._threads[threadId]) {
-		var thread = new Thread({ 'id' : threadId });
+Yammer.prototype.createThread = function (message) {
+	var thread;
+
+	if (message.threadId() && !this._threads[message.threadId()]) {
+		thread = new Thread({ 
+			'id' : message.threadId(), 
+			'message_id' : message.id(), 
+			'originator_id' : message.senderId()
+		});
 		this._threads[thread.id()] = thread;
 		this.persistThread(thread);
 
-		return thread;
+	} else {
+		thread = this._threads[message.threadId()];
 	}
 
-	return null;
+	return thread;
 };
 
 Yammer.prototype.loadThreads = function () {
@@ -481,6 +489,14 @@ Thread.prototype.id = function () {
 	return this._data.id;
 };
 
+Thread.prototype.messageId = function () {
+	return this._data.message_id;
+};
+
+Thread.prototype.originatorId = function () {
+	return this._data.originator_id;
+};
+
 Thread.prototype.data = function () {
 	return this._data;
 };
@@ -499,6 +515,10 @@ Thread.prototype.setProperty = function (key, value) {
 	}
 
 	this._data.properties[key] = value;
+};
+
+Thread.prototype.addMessage = function (message) {
+	this.emit('message', message);
 };
 
 // Message --------------------------------------------------------------

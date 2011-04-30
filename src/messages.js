@@ -6,6 +6,14 @@ var messageTypes = [];
 var usedMessages = {};
 var profileDir = '';
 
+var loadUsedMessages = function (type) {
+	var filePath = profileDir + '/used_messages_' + type + '.json';
+	if (path.existsSync(filePath)) {
+		var usedMessagesData = fs.readFileSync(filePath, 'utf8');
+		usedMessages[type] = JSON.parse(usedMessagesData);
+	}
+};
+
 exports.load = function (filePath, profDir) {
 	profileDir = profDir;
 
@@ -13,21 +21,29 @@ exports.load = function (filePath, profDir) {
 		var messagesData = fs.readFileSync(filePath, 'utf8');
 		messages = JSON.parse(messagesData);
 
-		for (var key in messages) {
-			messageTypes.push(key);
-			usedMessages[key] = [];
-
-			var filePath = profileDir + '/used_messages_' + key + '.json';
-			if (path.existsSync(filePath)) {
-				var usedMessagesData = fs.readFileSync(filePath, 'utf8');
-				usedMessages[key] = JSON.parse(usedMessagesData);
-			}
+		for (var type in messages) {
+			messageTypes.push(type);
+			usedMessages[type] = [];
+			loadUsedMessages(type);
 		}
 
 		return true;
 	}
 
 	return false;
+};
+
+exports.add = function (type, message) {
+	if (typeof messages[type] == 'undefined') {
+		messages[type] = [];
+	}
+
+	if (typeof usedMessages[type] == 'undefined') {
+		usedMessages[type] = [];
+		loadUsedMessages(type);
+	}
+
+	messages[type].push(message);
 };
 
 exports.get = function (type, vars) {
