@@ -46,7 +46,6 @@ y.on('error', function (error) {
 
 y.on('loggedon', function () {
 	logger.info('logged on');
-
 	y.loadUsers();
 });
 
