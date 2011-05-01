@@ -38,7 +38,7 @@ if (!messages.load(y.dataDir() + '/common/messages.json', y.profileDir())) {
 	process.exit(1);
 }
 
-//plugins.load(y, config, messages, cron, logger, cwd + '/plugins');
+plugins.load(y, config, messages, cron, logger, cwd + '/plugins');
 
 y.on('error', function (error) {
 	logger.error(JSON.stringify(error));

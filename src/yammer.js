@@ -236,7 +236,8 @@ Yammer.prototype.pollPrivateMessages = function (previousMessageId) {
 					var message = new Message(data.messages[i]);
 					if (self.messageIsForMe(message) && self.messageIsUnread(message)) {
 						self.persistMessage(message);
-						self.createThread(message);
+						var thread = self.createThread(message);
+						thread.addMessage(message);
 						self.emit('message', message);
 					}
 				}

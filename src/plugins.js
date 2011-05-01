@@ -6,7 +6,7 @@ exports.load = function (y, config, messages, cron, logger, pluginsDir) {
 		var files = fs.readdirSync(pluginsDir);
 		for (var i in files) {
 			require(pluginsDir + '/' + files[i]).init(y, config, messages, cron, logger);
-			logger.info('plugin \'' + files[i] + '\' loaded');
+			logger.info('plugin \'' + files[i] + '\' initialized');
 		}
 	}
 };

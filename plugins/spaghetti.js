@@ -20,14 +20,13 @@ exports.init = function (y, config, messages, cron, logger) {
 	messages.add('spaghetti_chef', "G'day [chef_name], [count] hungry mouths need to be stuffed.\n[joiners]");
 	messages.add('spaghetti_chef', "Hello hello [chef_name], [count] hungry kittens to feed.\n[joiners]");
 
+	messages.add('spaghetti_threadclosed', "Sorry, you're to late.");
+	messages.add('spaghetti_threadclosed', "Too late!");
+
 	var yammer_account = config.yammer[config.yammer_account];
 
-	y.on('message', function (message) {
-		logger.info('nothing');
-	});
-
 //	Spaghetti Opening Message
-	new cron.CronJob('*/30 * * * * *', function () {
+	new cron.CronJob('0 45 3 * * *', function () {
 //		if (Date.today().is().thursday()) {
 		if (true) {
 			logger.info('sending spaghetti opening message');
@@ -39,13 +38,35 @@ exports.init = function (y, config, messages, cron, logger) {
 				thread.setProperty('type', 'spaghetti');
 				thread.setProperty('status', 'open');
 				thread.setProperty('joiners', []);
+
+				thread.on('message', function (message) {
+					if (thread.property('status') == 'open') {
+						logger.info('thm: ' + message.parsedBody());
+						thread.property('joiners').push(message.senderId());
+						y.persistThread(thread);
+
+					} else {
+						var sender = y.user(message.senderId());
+
+						if (thread.property('joiners').indexOf(sender.id()) == -1) {
+							var threadclosedMessage = messages.get('spaghetti_threadclosed', {
+								'sender' : sender.username()	
+							});
+
+							y.sendMessage(function (error, message) {
+								logger.info('spaghetti threadclosed messsage: OK');
+							}, threadclosedMessage, { 'reply_to' : message.id() });
+						}
+					}
+				});
+
 				y.persistThread(thread);
 			}, message);
 		}
 	});
 
 //	Spaghetti Closing Message
-	new cron.CronJob('* */2 * * * *', function () {
+	new cron.CronJob('30 45 3 * * *', function () {
 //		if (Date.today().is().thursday()) {
 		if (true) {
 			for (var threadId in y.threads()) {
