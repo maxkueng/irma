@@ -26,9 +26,8 @@ exports.init = function (y, config, messages, cron, logger) {
 	var yammer_account = config.yammer[config.yammer_account];
 
 //	Spaghetti Opening Message
-	new cron.CronJob('0 45 3 * * *', function () {
-//		if (Date.today().is().thursday()) {
-		if (true) {
+	new cron.CronJob('0 15 9 * * *', function () {
+		if (Date.today().is().thursday()) {
 			logger.info('sending spaghetti opening message');
 			var message = messages.get('spaghetti_opening');
 
@@ -66,9 +65,8 @@ exports.init = function (y, config, messages, cron, logger) {
 	});
 
 //	Spaghetti Closing Message
-	new cron.CronJob('30 45 3 * * *', function () {
-//		if (Date.today().is().thursday()) {
-		if (true) {
+	new cron.CronJob('0 45 11 * * *', function () {
+		if (Date.today().is().thursday()) {
 			for (var threadId in y.threads()) {
 				var thread = y.thread(threadId);
 
