@@ -117,9 +117,6 @@ Yammer.prototype._oauthAuthorize = function (verifier) {
 			self._accessToken = vars.oauth_token;
 			self._accessTokenSecret = vars.oauth_token_secret;
 
-			console.log(response.statusCode);
-			console.log(body);
-
 			fs.writeFileSync(self.profileDir() + '/oauth/access_tokens.json', JSON.stringify(vars));
 			self.emit('loggedon');
 
@@ -359,7 +356,6 @@ Yammer.prototype.logon = function () {
 		this._oauthRequestToken(function (authorizeURI) {
 			self._authorizeCallback(authorizeURI, function (verifier) {
 				verifier = verifier.replace(/(\n|\r)+$/, '');
-				console.log('VERIFIER: "' + verifier + "'");
 				self._oauthAuthorize(verifier);
 			});
 		});
