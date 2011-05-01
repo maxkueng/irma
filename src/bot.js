@@ -56,10 +56,6 @@ y.on('usersloaded', function () {
 	y.pollPrivateMessages();
 });
 
-y.on('message', function (message) {
-	console.log(message.id() + ': ' + message.plainBody());
-});
-
 y.logon();
 
 //
