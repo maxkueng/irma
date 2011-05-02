@@ -3,10 +3,10 @@ var util = require('util');
 var fs = require('fs');
 var path = require('path');
 var cron = require('cron');
-var logger = require('./logger');
-var messages = require('./messages');
-var plugins = require('./plugins');
-var Yammer = require('./yammer').Yammer;
+var logger = require('../lib/logger');
+var messages = require('../lib/messages');
+var plugins = require('../lib/plugins');
+var Yammer = require('../lib/yammer').Yammer;
 
 var cwd = process.cwd();
 var config = load_config();
@@ -18,6 +18,7 @@ logger.setPrefix(function () {
 });
 
 process.on('uncaughtException', function (ex) {
+
 	logger.error('uncaught exception: ' + ex);
 });
 
