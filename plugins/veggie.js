@@ -6,7 +6,7 @@ exports.init = function (y, config, messages, cron, logger) {
 	messages.add('veggie', "Hey hey hey, it's Veggie-Day!! Be a Tofuman and safe the planet!"); 
 	messages.add('veggie', "It's Thursday, my favorite day. I get to remind you it's Veggie-Day!");
 	messages.add('veggie', "Oh yeah, it's Veggie Day!! Stop the blod spill, take the tofu pill, high-five that critter, don't be a chicken hitter! Be magic, be happy!"); 
-	messages.add('veggie', "A Tofu a day, keeps the doctor away!"); 
+	messages.add('veggie', "A Tofu a day keeps the doctor away!"); 
 	messages.add('veggie', "I love Tofu! And I know you'll love it, too.\nSo don't be shy, you just have to try!"); 
 	messages.add('veggie', "Eat carrots not rabbits, man!"); 
 	messages.add('veggie', "Ladies and gentlemen, may I have your attention please! It's Fakemeat Day, yay!"); 
