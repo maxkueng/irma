@@ -29,18 +29,17 @@ exports.init = function (y, config, messages, cron, logger) {
 	new cron.CronJob('0 15 9 * * *', function () {
 		if (Date.today().is().thursday()) {
 			logger.info('sending spaghetti opening message');
-			var message = messages.get('spaghetti_opening');
+			var openingMessage = messages.get('spaghetti_opening');
 
-			y.sendMessage(function (error, message) {
-				logger.info('spaghetti opening message OK: ' + message.id());
-				var thread = y.thread(message.threadId());
+			y.sendMessage(function (error, msg) {
+				logger.info('spaghetti opening message OK: ' + msg.id());
+				var thread = y.thread(msg.threadId());
 				thread.setProperty('type', 'spaghetti');
 				thread.setProperty('status', 'open');
 				thread.setProperty('joiners', []);
 
 				thread.on('message', function (message) {
 					if (thread.property('status') == 'open') {
-						logger.info('thm: ' + message.parsedBody());
 						thread.property('joiners').push(message.senderId());
 						y.persistThread(thread);
 
@@ -60,7 +59,7 @@ exports.init = function (y, config, messages, cron, logger) {
 				});
 
 				y.persistThread(thread);
-			}, message);
+			}, openingMessage);
 		}
 	});
 
@@ -68,9 +67,11 @@ exports.init = function (y, config, messages, cron, logger) {
 	new cron.CronJob('0 45 11 * * *', function () {
 		if (Date.today().is().thursday()) {
 			for (var threadId in y.threads()) {
-				var thread = y.thread(threadId);
+				var th = y.thread(threadId);
 
-				if (thread.property('type') == 'spaghetti' && thread.property('status') == 'open') {
+				if (th.property('status') == 'open' && th.property('type') == 'spaghetti') {
+					var thread = th;
+					console.log(thread.data());
 					var joiners = thread.property('joiners');
 					var joinersList = '';
 
