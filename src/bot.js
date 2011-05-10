@@ -1,3 +1,4 @@
+require('v8-profiler');
 require('datejs');
 var util = require('util');
 var fs = require('fs');
