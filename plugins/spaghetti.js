@@ -8,7 +8,7 @@ exports.init = function (y, config, messages, cron, logger) {
 	messages.add('spaghetti_opening', "Hungry? You can holla at me till 11:45. Spaghetti.");
 	messages.add('spaghetti_opening', "Hungry? Well, maybe I don't feel like cooking today. Okay, anyway... I'll do it for the animals. You can answer me till 11:45 and I might consider your request.");
 	messages.add('spaghetti_opening', "Barilla want's to know: To eat or not to eat Spaghetti, today for lunch, OK. You've got the choice. Answer me till 11:45.");
-	messages.add('spaghetti_opening', "May I suggest our unbelievable blend of tasteful Pasta today? It's yummie yummie!");
+	messages.add('spaghetti_opening', "Hungry bears?");
 
 	messages.add('spaghetti_closing', "Woohoo, [count] hungry monkeys!");
 	messages.add('spaghetti_closing', "Cool cool cool, so we are [count]! I'll ask [chef] to start cooking.");
