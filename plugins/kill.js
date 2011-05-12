@@ -7,7 +7,7 @@ exports.init = function (y, config, messages, cron, logger) {
 	var yammer_account = config.yammer[config.yammer_account];
 
 	y.on('message', function (message) {
-		if (/(kill|die|shut\s*down)/i.test(message.plainBody())) {
+		if (/\b(kill|die|shut\s*down)\b/i.test(message.plainBody())) {
 			var thread = y.thread(message.threadId());
 			thread.setProperty('type', 'kill');
 
