@@ -1,4 +1,5 @@
 require('datejs');
+var util = require('util');
 
 exports.init = function (y, config, messages, cron, logger) {
 	messages.add('spaghetti_opening', "Spaghetti today? If you'd like join today's spaghetti feast, please reply to this message by no later than 11:45.");
@@ -25,8 +26,40 @@ exports.init = function (y, config, messages, cron, logger) {
 
 	var yammer_account = config.yammer[config.yammer_account];
 
+	var handleSpaghettiReply = function (message) {
+		var thread = y.thread(message.threadId());
+
+		if (thread.property('status') == 'open') {
+			thread.property('joiners').push(message.senderId());
+			y.persistThread(thread);
+
+		} else {
+			var sender = y.user(message.senderId());
+
+			if (thread.property('joiners').indexOf(sender.id()) == -1) {
+				var threadclosedMessage = messages.get('spaghetti_threadclosed', {
+					'sender' : sender.username()	
+				});
+
+				y.sendMessage(function (error, message) {
+					logger.info('spaghetti threadclosed messsage: OK');
+				}, threadclosedMessage, { 'reply_to' : message.id() });
+			}
+		}
+	}
+
+//	Resume open threads after restart
+	y.on('threadloaded', function (thread) {
+		if (thread.property('type') == 'spaghetti' && thread.property('status') == 'open') {
+			if (thread.listeners('message').length == 0) {
+				thread.on('message', handleSpaghettiReply);
+				console.log(thread.data());
+			}
+		}
+	});
+
 //	Spaghetti Opening Message
-	new cron.CronJob('0 15 9 * * *', function () {
+	new cron.CronJob('0 39 22 * * *', function () {
 		if (Date.today().is().thursday()) {
 			logger.info('sending spaghetti opening message');
 			var openingMessage = messages.get('spaghetti_opening');
@@ -39,23 +72,6 @@ exports.init = function (y, config, messages, cron, logger) {
 				thread.setProperty('joiners', []);
 
 				thread.on('message', function (message) {
-					if (thread.property('status') == 'open') {
-						thread.property('joiners').push(message.senderId());
-						y.persistThread(thread);
-
-					} else {
-						var sender = y.user(message.senderId());
-
-						if (thread.property('joiners').indexOf(sender.id()) == -1) {
-							var threadclosedMessage = messages.get('spaghetti_threadclosed', {
-								'sender' : sender.username()	
-							});
-
-							y.sendMessage(function (error, message) {
-								logger.info('spaghetti threadclosed messsage: OK');
-							}, threadclosedMessage, { 'reply_to' : message.id() });
-						}
-					}
 				});
 
 				y.persistThread(thread);
@@ -71,7 +87,6 @@ exports.init = function (y, config, messages, cron, logger) {
 
 				if (th.property('status') == 'open' && th.property('type') == 'spaghetti') {
 					var thread = th;
-					console.log(thread.data());
 					var joiners = thread.property('joiners');
 					var joinersList = '';
 
