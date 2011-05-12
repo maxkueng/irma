@@ -71,8 +71,7 @@ exports.init = function (y, config, messages, cron, logger) {
 				thread.setProperty('status', 'open');
 				thread.setProperty('joiners', []);
 
-				thread.on('message', function (message) {
-				});
+				thread.on('message', handleSpaghettiReply);
 
 				y.persistThread(thread);
 			}, openingMessage);
