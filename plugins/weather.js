@@ -17,7 +17,7 @@ exports.init = function (y, config, messages, cron, logger) {
 	messages.add('weather_now', "[condition]. It's [temperature]°C and humidity is at [humidity]%. There's wind from [wind_direction] at [wind_speed]km/h.");
 	messages.add('weather_present', "[condition]. Temperatures are between [low_temperature]°C and [high_temperature]°C.");
 	messages.add('weather_future', "[condition]. Temperatures will be between [low_temperature]°C and [high_temperature]°C.");
-	messages.add('weather_present', "[condition]. Temperatures were between [low_temperature]°C and [high_temperature]°C.");
+	messages.add('weather_past', "[condition]. Temperatures were between [low_temperature]°C and [high_temperature]°C.");
 	messages.add('weather_dateproblem', "Sorry, I don't get it. Which day was that?");
 	messages.add('weather_unknown', "Only the Gods know.");
 
@@ -26,7 +26,7 @@ exports.init = function (y, config, messages, cron, logger) {
 	y.on('message', function (message) {
 		var thread = y.thread(message.threadId());
 
-		if (/(weather|forecast)/i.test(message.plainBody()) || thread.property('type') == 'weather') {
+		if (/\b(weather|forecast)\b/i.test(message.plainBody()) || thread.property('type') == 'weather') {
 			thread.setProperty('type', 'weather');
 			
 			var dateString = extractDateString(message.plainBody());
@@ -63,6 +63,9 @@ exports.init = function (y, config, messages, cron, logger) {
 					gw.get(function (current, forecast) {
 						console.log(forecast);
 						var weatherMessage = messages.get(messageType, {
+							'condition' : forecast.condition, 
+							'low_temperature' : forecast.temperature.low, 
+							'high_temperature' : forecast.temperature.high
 						});
 
 						y.sendMessage(function (error, msg) {
