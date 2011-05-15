@@ -38,8 +38,8 @@ Configuration
 
  - `yammer_account`: The name of your Yammer profile. This is custom and
    basically just points to the Yammer profile config. You can configure multiple
-   Yammer accounts and chose one here.
- - `yammer.xxx`: Name of your yamme profile. `yammer_account` points here.
+   Yammer accounts and choose one here.
+ - `yammer.xxx`: Name of your Yammer profile. `yammer_account` points here.
  - `yammer.xxx.email`: The email address used with your yammer account.
  - `yammer.xxx.api.consumer_key`: Your Yammer API OAuth consumer key.
  - `yammer.xxx.api.consumer_secret`: Your Yammer API OAuth consumer secret.
@@ -48,7 +48,7 @@ Configuration
  - `yammer.xxx.chef_user_id`: User ID of the spaghetti chef. You only need this
    if you're using the _spaghetti_ plugin.
 
-You can add additional peoperties to the configuration file and access them in
+You can add additional properties to the configuration file and access them in
 your plugin code.
 
 Here's what a configuration file might look like. It's usually located at
@@ -79,6 +79,8 @@ Writing a Plugin
  - `messages`: The none-boring messages manager used to add and get messages.
  - `cron`: The cron instance used to schedule code
  - `logger`: The logger instance
+
+Here's what a plugin that does nothing might look like. `./plugins/nothing.js`
 
 ```javascript
 exports.init = function (y, config, messages, cron, logger) {
