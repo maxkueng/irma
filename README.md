@@ -28,9 +28,23 @@ Some plugins require additional modules:
 Installation
 ------------
 
+Get the code:
+
 ```sh
 git clone git://github.com/maxkueng/irma.git
 cd irma
+```
+
+Install dependencies:
+
+```sh
+sudo npm install . -g
+```
+
+Run:
+
+```sh
+bin/bot.js
 ```
 
 Configuration
