@@ -30,8 +30,10 @@ exports.init = function (y, config, messages, cron, logger) {
 		var thread = y.thread(message.threadId());
 
 		if (thread.property('status') == 'open') {
-			thread.property('joiners').push(message.senderId());
-			y.persistThread(thread);
+			if (thread.property('joiners').indexOf(sender.id()) == -1) {
+				thread.property('joiners').push(message.senderId());
+				y.persistThread(thread);
+			}
 
 		} else {
 			var sender = y.user(message.senderId());
@@ -59,7 +61,7 @@ exports.init = function (y, config, messages, cron, logger) {
 	});
 
 //	Spaghetti Opening Message
-	new cron.CronJob('0 39 22 * * *', function () {
+	new cron.CronJob('0 15 9 * * *', function () {
 		if (Date.today().is().thursday()) {
 			logger.info('sending spaghetti opening message');
 			var openingMessage = messages.get('spaghetti_opening');
