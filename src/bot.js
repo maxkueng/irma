@@ -29,8 +29,7 @@ logger.setPrefix(function () {
 	return '[' + d + '] ';
 });
 
-process.on('xuncaughtException', function (ex) {
-
+process.on('uncaughtException', function (ex) {
 	logger.error('uncaught exception: ' + ex);
 });
 
