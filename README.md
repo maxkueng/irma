@@ -102,11 +102,68 @@ exports.init = function (y, config, messages, cron, logger) {
 //	Your plugin code goes here
 
 };
-
 ```
 
-More?
------
+### Managing Messages
+
+The messages manager keeps a list of one or more messages per message type. This
+means you can say the same thing in different ways so your bot will apear less
+boring.
+
+Example:
+
+```javascript
+messages.add('saysomething', 'Something');
+messages.add('saysomething', 'Another thing');
+messages.add('saysomething', 'Anything');
+
+console.log(messages.get('saysomething')); // Will print one of the the above.
+```
+
+### Sending Messages
+
+Send a message to your network:
+
+```javascript
+var messageText = messages.get('saysomething');
+
+y.sendMessage(function (error, message) {
+	console.log('Sent message with ID ' + message.id());
+}, messageText);
+```
+Reply to a message:
+
+```javascript
+var messageText = messages.get('saysomething');
+
+y.sendMessage(function (errr, message) {
+	console.log('Sent message with ID ' + message.id());
+}, messageText, { 'reply_to': 999876543 }); // <-- this is the message id
+
+Send direct message:
+
+```javascript
+var messageText = messages.get('saysomething');
+
+y.sendMessage(function (error, message) {
+	console.log('Sent message with ID ' + message.id());
+}, messageText, { 'direct_to': 1234567 }); // <-- this is the user id
+```
+
+### Receiving messages
+
+```javascript
+y.on('message', function (message) {
+	console.log('Received message with ID ' + message.id());
+});
+```
+
+### Scheduling messages
+
+Read the [cron documentation][crondoc]. Sending a message is the same as above.
+
+
+### More?
 
 More documentation will be added some time in the future. For now, please look
 at the existing plugins. It's easy. You'll get it.
@@ -115,4 +172,5 @@ at the existing plugins. It's easy. You'll get it.
 [yammer]: https://www.yammer.com/
 [datejs]: http://www.datejs.com/
 [cron]: https://github.com/ncb000gt/node-cron
+[crondoc]: https://github.com/ncb000gt/node-cron#readme
 [googleweather]: https://github.com/maxkueng/node-googleweather
