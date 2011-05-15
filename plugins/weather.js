@@ -51,7 +51,6 @@ exports.init = function (y, config, messages, cron, logger) {
 					}, weatherLocation, Date.today().toString('yyyy-MM-dd'));
 
 				} else {
-					console.log(d);
 					var messageType = 'weather_present';
 
 					if (Date.parse(d).isAfter(Date.today())) {
@@ -61,21 +60,32 @@ exports.init = function (y, config, messages, cron, logger) {
 					}
 
 					gw.get(function (current, forecast) {
-						console.log(forecast);
-						var weatherMessage = messages.get(messageType, {
-							'condition' : forecast.condition, 
-							'low_temperature' : forecast.temperature.low, 
-							'high_temperature' : forecast.temperature.high
-						});
+						if (typeof forecast != 'undefined') {
+							var weatherMessage = messages.get(messageType, {
+								'condition' : forecast.condition, 
+								'low_temperature' : forecast.temperature.low, 
+								'high_temperature' : forecast.temperature.high
+							});
 
-						y.sendMessage(function (error, msg) {
-							logger.info('weather message OK: ' + msg.id());
-						}, weatherMessage, { 'reply_to' : message.id() });
+							y.sendMessage(function (error, msg) {
+								logger.info('weather message OK: ' + msg.id());
+							}, weatherMessage, { 'reply_to' : message.id() });
+
+						} else {
+							var weatherMessage = messages.get('weather_unknown');
+							y.sendMessage(function (error, msg) {
+								logger.info('weather message OK: ' + msg.id());
+							}, weatherMessage, { 'reply_to' : message.id() });
+						}
 					}, weatherLocation, d);
 				}
 
 			} else {
 				logger.warn('invalid date string');
+				var weatherMessage = messages.get('weather_dateproblem');
+				y.sendMessage(function (error, msg) {
+					logger.info('weather message OK: ' + msg.id());
+				}, weatherMessage, { 'reply_to' : message.id() });
 			}
 
 		}
