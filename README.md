@@ -153,8 +153,23 @@ y.sendMessage(function (error, message) {
 
 ### Receiving Messages
 
+Note: The bot will only receive messages that are either sent to it directly ore
+mention it in the message body.
+
+Receive channel message:
+
 ```javascript
 y.on('message', function (message) {
+	logger.info('Received message with ID ' + message.id());
+});
+```
+
+Receive reply to a thread:
+
+```javascript
+var thread = y.thread(9997654767); // <-- this is the thread id
+
+thread.on('message', function (message) {
 	logger.info('Received message with ID ' + message.id());
 });
 ```
