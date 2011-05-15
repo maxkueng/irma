@@ -128,7 +128,7 @@ Send a message to your network:
 var messageText = messages.get('saysomething');
 
 y.sendMessage(function (error, message) {
-	console.log('Sent message with ID ' + message.id());
+	logger.info('Sent message with ID ' + message.id());
 }, messageText);
 ```
 Reply to a message:
@@ -137,8 +137,9 @@ Reply to a message:
 var messageText = messages.get('saysomething');
 
 y.sendMessage(function (errr, message) {
-	console.log('Sent message with ID ' + message.id());
+	logger.info('Sent message with ID ' + message.id());
 }, messageText, { 'reply_to': 999876543 }); // <-- this is the message id
+```
 
 Send direct message:
 
@@ -146,21 +147,42 @@ Send direct message:
 var messageText = messages.get('saysomething');
 
 y.sendMessage(function (error, message) {
-	console.log('Sent message with ID ' + message.id());
+	logger.info('Sent message with ID ' + message.id());
 }, messageText, { 'direct_to': 1234567 }); // <-- this is the user id
 ```
 
-### Receiving messages
+### Receiving Messages
 
 ```javascript
 y.on('message', function (message) {
-	console.log('Received message with ID ' + message.id());
+	logger.info('Received message with ID ' + message.id());
 });
 ```
 
-### Scheduling messages
+### Scheduling Messages
 
 Read the [cron documentation][crondoc]. Sending a message is the same as above.
+
+Send a message at 9.15am every day:
+
+```javascript
+new cron.CronJob('0 15 9 * * *', function () {
+	y.sendMessage(function (error, message) {
+		logger.info('Sent message with ID ' + message.id());
+
+	}, "This is the daily announcement!");
+});
+```
+
+### Logging
+
+Examples:
+
+```javascript
+logger.info('Something happened');
+logger.warn('Something strange happened');
+logger.error('Something bad happened');
+```
 
 
 ### More?
