@@ -18,7 +18,7 @@ logger.setPrefix(function () {
 	return '[' + d + '] ';
 });
 
-process.on('uncaughtException', function (ex) {
+process.on('xuncaughtException', function (ex) {
 
 	logger.error('uncaught exception: ' + ex);
 });
@@ -35,11 +35,7 @@ var y = new Yammer(yammer_account.email, yammer_account.api.consumer_key, yammer
 	});
 });
 
-if (!messages.load(y.dataDir() + '/common/messages.json', y.profileDir())) {
-	logger.error('failed to load messages');
-	process.exit(1);
-}
-
+messages.init(y.profileDir());
 plugins.load(y, config, messages, cron, logger, cwd + '/plugins');
 
 y.on('error', function (error) {
