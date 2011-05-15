@@ -1,5 +1,16 @@
-require('v8-profiler');
-require('datejs');
+Date.prototype.pad = function (n) {
+	return (n < 10) ? '0' + n : n;
+};
+
+Date.prototype.toISODateTime = function () {
+	return this.getFullYear() + '-'
+		+ this.pad(this.getMonth() + 1) + '-'
+		+ this.pad(this.getDate()) + 'T'
+		+ this.pad(this.getHours()) + ':'
+		+ this.pad(this.getMinutes()) + ':'
+		+ this.pad(this.getSeconds());
+};
+
 var util = require('util');
 var fs = require('fs');
 var path = require('path');
@@ -14,7 +25,7 @@ var config = load_config();
 var yammer_account = config.yammer[config.yammer_account];
 
 logger.setPrefix(function () {
-	var d = new Date().toString("yyyy-MM-dd HH:mm:ss");		
+	var d = new Date().toISODateTime();		
 	return '[' + d + '] ';
 });
 
