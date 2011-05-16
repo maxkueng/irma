@@ -50,6 +50,13 @@ bin/bot.js
 Configuration
 -------------
 
+Copy the distribution configuration file and edit it:
+
+```sh
+cp config.dist.json config.json
+vim config.json
+```
+
  - `yammer_account`: The name of your Yammer profile. This is custom and
    basically just points to the Yammer profile config. You can configure multiple
    Yammer accounts and choose one here.
