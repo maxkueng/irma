@@ -1,7 +1,7 @@
 I.R.M.A. - Interactive Robotic Messagaging Assistant
 ====================================================
 
-I.R.M.A. is chat bot for your [Yammer][yammer] network. I's written in
+I.R.M.A. is chat bot for your [Yammer][yammer] network. It's written in
 JavaScript and runs inside a [node.js][node] environment.
 
 Features
@@ -12,6 +12,25 @@ Features
  - Thread management
  - Plugin architecture
  - None-boring messages
+
+Plugins
+-------
+
+I.R.M.A. comes with a small number of plugins:
+
+ - **spaghetti.js**
+   Asks everyone in the network if they wish to join the spaghetti lunch. Just
+   before lunch time it counts all the replies and tells the chef how many
+   people he should cook for.
+ - **veggie.js** 
+   Announces every Thursday that it's Veggie-Day.
+ - **weather.js** 
+   If asked, looks up the weather for a specific date using the Google weather
+   API.
+ - **webinterface.js**
+   Provides a web interface and shows open and closed threads, active Yammer
+   account and PID. This is mainly for debugging purposes.
+   
 
 Dependencies
 ------------
