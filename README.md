@@ -68,6 +68,8 @@ vim config.json
    plugin so only an admin can kill the bot.
  - `yammer.xxx.chef_user_id`: User ID of the spaghetti chef. You only need this
    if you're using the _spaghetti_ plugin.
+ - `webinterface.ip`: IP the web interface plugin should listen on
+ - `webinterface.port`: Port the web interface plugin should listen on
 
 You can add additional properties to the configuration file and access them in
 your plugin code.
@@ -88,6 +90,10 @@ Here's what a configuration file might look like. It's usually located at
 			"admin_user_id" : "1234567", 
 			"chef_user_id" : "7654321"
 		}
+	}, 
+	"webinterface" : {
+		"ip" : "0.0.0.0", 
+		"port" : "1337"
 	}
 }
 ```
