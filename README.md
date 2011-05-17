@@ -30,6 +30,8 @@ I.R.M.A. comes with a small number of plugins:
  - **webinterface.js**
    Provides a web interface and shows open and closed threads, active Yammer
    account and PID. This is mainly for debugging purposes.
+ - **kill.js** 
+   Allows an admin to shut down the bot by sending a Yammer message
    
 
 Dependencies
