@@ -1,11 +1,11 @@
 {
   "name": "irma",
-  "description": "Interactive Romotic Messaging Assistant. It's Yammer bot!",
+  "description": "Interactive Romotic Messaging Assistant. It's a Yammer bot!",
   "version": "0.1.0",
   "homepage": "http://maxkueng.com/irma",
   "repository": {
     "type": "git",
-    "url": "git://github.com/maxkueng/node-aspsms.git"
+    "url": "git://github.com/maxkueng/irma.git"
   },
   "author": "Max Kueng <me@maxkueng.com> (http://maxkueng.com/)",
   "dependencies" : {
