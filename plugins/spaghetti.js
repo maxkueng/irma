@@ -10,16 +10,19 @@ exports.init = function (y, config, messages, cron, logger) {
 	messages.add('spaghetti_opening', "Hungry? Well, maybe I don't feel like cooking today. Okay, anyway... I'll do it for the animals. You can answer me till 11:45 and I might consider your request.");
 	messages.add('spaghetti_opening', "Barilla want's to know: To eat or not to eat Spaghetti, today for lunch, OK. You've got the choice. Answer me till 11:45.");
 	messages.add('spaghetti_opening', "Hungry bears?");
+	messages.add('spaghetti_opening', "Spaghetti time!! Can you dig it?");
 
 	messages.add('spaghetti_closing', "Woohoo, [count] hungry monkeys!");
 	messages.add('spaghetti_closing', "Cool cool cool, so we are [count]! I'll ask [chef] to start cooking.");
 	messages.add('spaghetti_closing', "Run baby run... [count] want to mantsch. [chef], hurry hurry [count] are so hungry.");
 	messages.add('spaghetti_closing', "[chef], on your marks get set GO! [count] Veggies want Spaghetti!");
 	messages.add('spaghetti_closing', "[chef], you've got to move it move it. [count] want to see you sweat. Thank you\n[joiners].");
+	messages.add('spaghetti_closing', "[chef], we're [count]. Can you make us food please?");
 
 	messages.add('spaghetti_chef', "Hey [chef_name], [count] colleagues would love it if you cooked some spaghetti for them.\nNamely: [joiners]");
 	messages.add('spaghetti_chef', "G'day [chef_name], [count] hungry mouths need to be stuffed.\n[joiners]");
 	messages.add('spaghetti_chef', "Hello hello [chef_name], [count] hungry kittens to feed.\n[joiners]");
+	messages.add('spaghetti_chef', "[joiners] are starving!");
 
 	messages.add('spaghetti_threadclosed', "Sorry, you're to late.");
 	messages.add('spaghetti_threadclosed', "Too late!");
