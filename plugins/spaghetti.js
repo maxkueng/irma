@@ -18,11 +18,13 @@ exports.init = function (y, config, messages, cron, logger) {
 	messages.add('spaghetti_closing', "[chef], on your marks get set GO! [count] Veggies want Spaghetti!");
 	messages.add('spaghetti_closing', "[chef], you've got to move it move it. [count] want to see you sweat. Thank you\n[joiners].");
 	messages.add('spaghetti_closing', "[chef], we're [count]. Can you make us food please?");
+	messages.add('spaghetti_closing', "I can't count (will learn soon). So [chef], can you handle it?");
 
 	messages.add('spaghetti_chef', "Hey [chef_name], [count] colleagues would love it if you cooked some spaghetti for them.\nNamely: [joiners]");
 	messages.add('spaghetti_chef', "G'day [chef_name], [count] hungry mouths need to be stuffed.\n[joiners]");
 	messages.add('spaghetti_chef', "Hello hello [chef_name], [count] hungry kittens to feed.\n[joiners]");
 	messages.add('spaghetti_chef', "[joiners] are starving!");
+	messages.add('spaghetti_chef', "So many hungry spaghetti-holics... you'll have to deal with it.");
 
 	messages.add('spaghetti_threadclosed', "Sorry, you're to late.");
 	messages.add('spaghetti_threadclosed', "Too late!");

@@ -12,7 +12,7 @@ exports.init = function (y, config, messages, cron, logger) {
 	messages.add('veggie', "Eat carrots not rabbits, man!"); 
 	messages.add('veggie', "Ladies and gentlemen, may I have your attention please! It's Fakemeat Day, yay!"); 
 	messages.add('veggie', "Balanciere dein Leben mit dem richtigen Essen,\nich hoffe nur du willst doch keine Tiere fressen!\nAlle fressen Fleisch, das zieht dich runter man!\nIch bezweifle stark das man so besser Leben sehen kann.");
-	messages.add('veggie', "Oh happy day it's Tofu-Day");
+	messages.add('veggie', "Whoooo, yet another Tofu-Day!! Love is in the air!");
 
 	new cron.CronJob('0 0 11 * * *', function () {
 		if (Date.today().is().thursday()) {
