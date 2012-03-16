@@ -36,9 +36,7 @@ exports.init = function (y, config, messages, cron, logger) {
 		console.log('handling ' + thread.id());
 
 		if (thread.property('status') == 'open') {
-		console.log('open');
 			if (thread.property('joiners').indexOf(sender.id()) == -1) {
-		console.log('adding');
 				thread.property('joiners').push(message.senderId());
 				y.persistThread(thread);
 			}
@@ -95,49 +93,54 @@ exports.init = function (y, config, messages, cron, logger) {
 	new cron.CronJob('0 45 11 * * *', function () {
 		if (Date.today().is().thursday()) {
 			for (var threadId in y.threads()) {
-				var th = y.thread(threadId);
+				(function (thId) {
 
-				if (th.property('status') == 'open' && th.property('type') == 'spaghetti') {
-					var thread = th;
-					var joiners = thread.property('joiners');
-					var joinersList = '';
+					var th = y.thread(thId);
 
-					for (var i in joiners) {
-						var user = y.user(joiners[i]);
-						if (i > 0) {
-							joinersList += ', ';
+					if (th.property('status') == 'open' && th.property('type') == 'spaghetti') {
+						var thread = th;
+						var joiners = thread.property('joiners');
+						var joinersList = '';
+
+						for (var i in joiners) {
+							var user = y.user(joiners[i]);
+							if (i > 0) {
+								joinersList += ', ';
+							}
+
+							joinersList += user.username();
 						}
 
-						joinersList += user.username();
-					}
+						var chef = y.user(yammer_account.chef_user_id);
 
-					var chef = y.user(yammer_account.chef_user_id);
+						var closingMessage = messages.get('spaghetti_closing', {
+							'count' : joiners.length, 
+							'joiners' : joinersList, 
+							'chef' : chef.username(), 
+							'chef_name' : chef.fullName()
+						});
 
-					var closingMessage = messages.get('spaghetti_closing', {
-						'count' : joiners.length, 
-						'joiners' : joinersList, 
-						'chef' : chef.username(), 
-						'chef_name' : chef.fullName()
-					});
-
-					var chefMessage = messages.get('spaghetti_chef', {
-						'count' : joiners.length, 
-						'joiners' : joinersList, 
-						'chef' : chef.username(), 
-						'chef_name' : chef.fullName()
-					});
-
-					y.sendMessage(function (error, message) {
-						logger.info('spaghetti chef message OK: ' + message.id());
+						var chefMessage = messages.get('spaghetti_chef', {
+							'count' : joiners.length, 
+							'joiners' : joinersList, 
+							'chef' : chef.username(), 
+							'chef_name' : chef.fullName()
+						});
 
 						y.sendMessage(function (error, message) {
-							logger.info('spaghetti closing message OK: ' + message.id());
+							logger.info('spaghetti chef message OK: ' + message.id());
 
-							thread.setProperty('status', 'closed');
-							y.persistThread(thread);
-						}, closingMessage, { 'reply_to' : thread.messageId() });
-					}, chefMessage, { 'direct_to' : chef.id() });
-				}
+							y.sendMessage(function (error, message) {
+								logger.info('spaghetti closing message OK: ' + message.id());
+
+								thread.setProperty('status', 'closed');
+								y.persistThread(thread);
+							}, closingMessage, { 'reply_to' : thread.messageId() });
+						}, chefMessage, { 'direct_to' : chef.id() });
+					}
+
+				})(threadId);
+
 			}
 		}
 	});
