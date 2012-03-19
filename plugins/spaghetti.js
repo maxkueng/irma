@@ -1,4 +1,3 @@
-require('datejs');
 var util = require('util');
 
 exports.init = function (y, config, messages, cron, logger) {
