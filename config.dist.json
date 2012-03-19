@@ -21,5 +21,10 @@
 	}, 
 	"veggie" : {
 		"cron_start" : "0 30 11 * * 5"
+	}, 
+	"chorewars" : {
+		"username" : "asdfghjk", 
+		"password" : "asdfasdfasdfasdfasdfasdfasdfasdf", 
+		"cron_top3" : "0 30 12 * * *"
 	}
 }
