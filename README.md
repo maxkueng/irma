@@ -105,8 +105,8 @@ Here's what a configuration file might look like. It's usually located at
 		"default" : {
 			"email" : "your.bot@yournetwork.com", 
 			"api" : {
-				"consumer_key" : "UkjUbkjBKVHJfGhygygGGG", ", 
-				"consumer_secret" : "iuhuHYFUhvghyvJYfjhyVTDKbbVYTFytuyfUYvvVVVy""
+				"consumer_key" : "UkjUbkjBKVHJfGhygygGGG", 
+				"consumer_secret" : "iuhuHYFUhvghyvJYfjhyVTDKbbVYTFytuyfUYvvVVVy"
 			}, 
 			"admin_user_id" : "1234567", 
 		}
