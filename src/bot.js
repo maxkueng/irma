@@ -29,9 +29,9 @@ logger.setPrefix(function () {
 	return '[' + d + '] ';
 });
 
-/*process.on('uncaughtException', function (ex) {
+process.on('uncaughtException', function (ex) {
 	logger.error('uncaught exception: ' + ex);
-}); */
+});
 
 var y = new Yammer(yammer_account.email, yammer_account.api.consumer_key, yammer_account.api.consumer_secret, function (authorizeURI, continueCallback) {
 	util.puts(authorizeURI);
