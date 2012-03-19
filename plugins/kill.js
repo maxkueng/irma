@@ -11,7 +11,9 @@ exports.init = function (y, config, messages, cron, logger) {
 			var thread = y.thread(message.threadId());
 			thread.setProperty('type', 'kill');
 
-			if (message.senderId() == yammer_account.admin_user_id) {
+			var sender = y.user(message.senderId());
+
+			if (sender.isAdmin()) {
 				var killMessage = messages.get('kill_bye');
 
 				y.sendMessage(function (msg) {
