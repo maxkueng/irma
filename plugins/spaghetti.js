@@ -1,29 +1,16 @@
 var util = require('util');
 
 exports.init = function (y, config, messages, cron, logger) {
-	messages.add('spaghetti_opening', "Spaghetti today? If you'd like join today's spaghetti feast, please reply to this message by no later than 11:45.");
-	messages.add('spaghetti_opening', "Spaghetti today? If you'd like join today's \"Spaghettiplausch\", please reply to this message by no later than 11:45.");
-	messages.add('spaghetti_opening', "Who's down for some serious spaghetti madness? If you want to join please reply to this message by no later than 11:45.");
+	messages.add('spaghetti_opening', "Barilla want's to know: To eat or not to eat Spaghetti, today for lunch, OK. You've got the choice. Let me know 'till 11:45.");
 	messages.add('spaghetti_opening', "Countdown 10 to 0, Spaghetti for lunch? Cause I'm your hero. Vote for me and I'll set you free. WATCH OUT, WATCH OUT: Your Vote won't count after 11:45.");
-	messages.add('spaghetti_opening', "Hungry? You can holla at me till 11:45. Spaghetti.");
-	messages.add('spaghetti_opening', "Hungry? Well, maybe I don't feel like cooking today. Okay, anyway... I'll do it for the animals. You can answer me till 11:45 and I might consider your request.");
-	messages.add('spaghetti_opening', "Barilla want's to know: To eat or not to eat Spaghetti, today for lunch, OK. You've got the choice. Answer me till 11:45.");
 	messages.add('spaghetti_opening', "Hungry bears?");
-	messages.add('spaghetti_opening', "Spaghetti time!! Can you dig it?");
 
-	messages.add('spaghetti_closing', "Woohoo, [count] hungry monkeys!");
+	messages.add('spaghetti_closing', "Ohh, [count] hungry monkeys!");
 	messages.add('spaghetti_closing', "Cool cool cool, so we are [count]! I'll ask [chef] to start cooking.");
-	messages.add('spaghetti_closing', "Run baby run... [count] want to mantsch. [chef], hurry hurry [count] are so hungry.");
-	messages.add('spaghetti_closing', "[chef], on your marks get set GO! [count] Veggies want Spaghetti!");
-	messages.add('spaghetti_closing', "[chef], you've got to move it move it. [count] want to see you sweat. Thank you\n[joiners].");
-	messages.add('spaghetti_closing', "[chef], we're [count]. Can you make us food please?");
-	messages.add('spaghetti_closing', "I can't count (will learn soon). So [chef], can you handle it?");
+	messages.add('spaghetti_closing', "[chef], you've got to move it move it. [count] want to see you sweat.");
+	messages.add('spaghetti_closing', "[chef], there are [count] hungry monkeys waitig to be fed.");
 
-	messages.add('spaghetti_chef', "Hey [chef_name], [count] colleagues would love it if you cooked some spaghetti for them.\nNamely: [joiners]");
-	messages.add('spaghetti_chef', "G'day [chef_name], [count] hungry mouths need to be stuffed.\n[joiners]");
-	messages.add('spaghetti_chef', "Hello hello [chef_name], [count] hungry kittens to feed.\n[joiners]");
-	messages.add('spaghetti_chef', "[joiners] are starving!");
-	messages.add('spaghetti_chef', "So many hungry spaghetti-holics... you'll have to deal with it.");
+	messages.add('spaghetti_chef', "[chef_name], [count] mouths to feed! Hurry!!");
 
 	messages.add('spaghetti_threadclosed', "Sorry, you're to late.");
 	messages.add('spaghetti_threadclosed', "Too late!");
