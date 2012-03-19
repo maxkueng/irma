@@ -106,7 +106,7 @@ exports.init = function (y, config, messages, cron, logger) {
 						joinersList += user.username();
 					}
 
-					var chef = y.user(yammer_account.chef_user_id);
+					var chef = y.user(spaghetti.chef_user_id);
 
 					var closingMessage = messages.get('spaghetti_closing', {
 						'count' : joiners.length, 
