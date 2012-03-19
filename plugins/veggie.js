@@ -14,18 +14,16 @@ exports.init = function (y, config, messages, cron, logger) {
 	messages.add('veggie', "Balanciere dein Leben mit dem richtigen Essen,\nich hoffe nur du willst doch keine Tiere fressen!\nAlle fressen Fleisch, das zieht dich runter man!\nIch bezweifle stark das man so besser Leben sehen kann.");
 	messages.add('veggie', "Whoooo, yet another Tofu-Day!! Love is in the air!");
 
-	new cron.CronJob('0 0 11 * * *', function () {
-		if (Date.today().is().thursday()) {
-			logger.info('sending veggie message');
-			var message = messages.get('veggie');
+	new cron.CronJob(config.veggie.cron_start, function () {
+		logger.info('sending veggie message');
+		var message = messages.get('veggie');
 
-			y.sendMessage(function (error, message) {
-				logger.info('veggie message OK: ' + message.id());
-				var thread = y.thread(message.threadId());
-				thread.setProperty('type', 'veggie');
-				thread.setProperty('status', 'closed');
-				y.persistThread(thread);
-			}, message);
-		}
+		y.sendMessage(function (error, message) {
+			logger.info('veggie message OK: ' + message.id());
+			var thread = y.thread(message.threadId());
+			thread.setProperty('type', 'veggie');
+			thread.setProperty('status', 'closed');
+			y.persistThread(thread);
+		}, message);
 	});
 };
