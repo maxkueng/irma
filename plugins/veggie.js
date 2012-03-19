@@ -1,5 +1,3 @@
-require('datejs');
-
 exports.init = function (y, config, messages, cron, logger) {
 	messages.add('veggie', "Oh my God it's Veggie-Thursday, yeah!! Go out, hug a bear, run with the wolves, spread love!\nGood karma."); 
 	messages.add('veggie', "It's Veggie-Thursday, yeah!! Kiss the Soyboy, fly with the Tofucopter and touch the sun!"); 
