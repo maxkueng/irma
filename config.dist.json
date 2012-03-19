@@ -8,11 +8,18 @@
 				"consumer_secret" : "YOUR_YAMMER_OAUTH_CONSUMER_SECRET"
 			}, 
 			"admin_user_id" : "0000000", 
-			"chef_user_id" : "0000000"
 		}
 	}, 
 	"webinterface" : {
 		"ip" : "0.0.0.0", 
 		"port" : 1337
+	}, 
+	"spaghetti" : {
+		"cron_open" : "0 0 9 * * 5", 
+		"cron_close" : "0 45 11 * * 5", 
+		"chef_user_id" : "0000000"
+	}, 
+	"veggie" : {
+		"cron_start" : "0 30 11 * * 5"
 	}
 }
