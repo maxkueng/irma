@@ -33,6 +33,7 @@ exports.init = function (y, config, messages, cron, logger) {
 
 	var handleSpaghettiReply = function (message) {
 		var thread = y.thread(message.threadId());
+		var sender = y.user(message.senderId());
 		console.log('handling ' + thread.id());
 
 		if (thread.property('status') == 'open') {
@@ -42,7 +43,6 @@ exports.init = function (y, config, messages, cron, logger) {
 			}
 
 		} else {
-			var sender = y.user(message.senderId());
 
 			if (thread.property('joiners').indexOf(sender.id()) == -1) {
 				var threadclosedMessage = messages.get('spaghetti_threadclosed', {
@@ -67,7 +67,7 @@ exports.init = function (y, config, messages, cron, logger) {
 
 //	Spaghetti Opening Message
 //	new cron.CronJob('0 15 9 * * *', function () {
-	new cron.CronJob('0 57 18 * * *', function () {
+	new cron.CronJob('0 2 19 * * *', function () {
 		if (true) {
 //		if (Date.today().is().thursday()) {
 			logger.info('sending spaghetti opening message');
@@ -90,8 +90,8 @@ exports.init = function (y, config, messages, cron, logger) {
 	});
 
 //	Spaghetti Closing Message
-	new cron.CronJob('0 45 11 * * *', function () {
-		if (Date.today().is().thursday()) {
+	new cron.CronJob('0 4 19 * * *', function () {
+//		if (Date.today().is().thursday()) {
 			for (var threadId in y.threads()) {
 				(function (thId) {
 
@@ -142,6 +142,6 @@ exports.init = function (y, config, messages, cron, logger) {
 				})(threadId);
 
 			}
-		}
+//		}
 	});
 };
