@@ -87,7 +87,7 @@ vim config.json
  - `yammer.xxx.api.consumer_secret`: Your Yammer API OAuth consumer secret.
  - `yammer.xxx.admin_user_id`: User ID of an admin. This is used by the _kill_
    plugin so only an admin can kill the bot.
- - `yammer.xxx.chef_user_id`: User ID of the spaghetti chef. You only need this
+ - `spaghetti.chef_user_id`: User ID of the spaghetti chef. You only need this
    if you're using the _spaghetti_ plugin.
  - `webinterface.ip`: IP the web interface plugin should listen on.
  - `webinterface.port`: Port the web interface plugin should listen on.
@@ -100,24 +100,33 @@ Here's what a configuration file might look like. It's usually located at
 
 ```javascript
 {
-	"yammer_account" : "xxx", 
+	"yammer_account" : "default", 
 	"yammer" : {
-		"xxx" : {
-			"email" : "yourbot@yournetwork.com", 
+		"default" : {
+			"email" : "your.bot@yournetwork.com", 
 			"api" : {
-				"consumer_key" : "UkjUbkjBKVHJfGhygygGGG", 
-				"consumer_secret" : "iuhuHYFUhvghyvJYfjhyVTDKbbVYTFytuyfUYvvVVVy"
+				"consumer_key" : "UkjUbkjBKVHJfGhygygGGG", ", 
+				"consumer_secret" : "iuhuHYFUhvghyvJYfjhyVTDKbbVYTFytuyfUYvvVVVy""
 			}, 
 			"admin_user_id" : "1234567", 
-			"chef_user_id" : "7654321"
 		}
 	}, 
 	"webinterface" : {
 		"ip" : "0.0.0.0", 
 		"port" : 1337
+	}, 
+	"spaghetti" : {
+		"cron_open" : "0 0 9 * * 5", 
+		"cron_close" : "0 45 11 * * 5", 
+		"chef_user_id" : "777124"
+	}, 
+	"veggie" : {
+		"cron_start" : "0 30 11 * * 5"
 	}
 }
 ```
+
+Please node that the _cron_ module has a bug. Sunday is `1`, not `0`. So `5` is Thursday, not Friday.
 
 Writing a Plugin
 ----------------
