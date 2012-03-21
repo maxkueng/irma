@@ -2,11 +2,12 @@ var request = require('request');
 
 exports.init = function (y, config, messages, cron, logger) {
 
-	messages.add('s18_ok', "The next S18 to Stadelofen leaves in [m] minutes. Easy peasy, no rush :)");
-	messages.add('s18_tight', "Run, run, ruuuuun!!! You've got [m] minutes!");
-	messages.add('s18_tight', "[m] minutes. You better hurry!!");
+	messages.add('s18_ok', "The next S18 to Stadelofen leaves in [m] minutes.");
+	messages.add('s18_tight', "You better run, you've got [m] minutes!!");
+	messages.add('s18_tight', "[m] minutes. Hurry, hurry, hurry!!");
 	messages.add('s18_wontmake', "Forget it, the train leaves in [m] minutes. I'd say we wait for the next one in [m2] minutes ([t2]).");
-	messages.add('s18_wontmake_nonext', "[m] minutes. You either beam yourself up to the station or you take a walk. There is no other train.");
+	messages.add('s18_wontmake', "You'll never make it. That's in [m] minutes. There's another train in [m2] minutes ([t2]). Much better looking and less smelly.");
+	messages.add('s18_wontmake_nonext', "[m] minutes. There is no other train.");
 	messages.add('s18_nonext', "There is currently no train. Sorry...");
 	messages.add('s18_error', "Sorry, I don't do train lookups in my coffee break.");
 
