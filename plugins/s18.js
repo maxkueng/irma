@@ -13,7 +13,7 @@ exports.init = function (y, config, messages, cron, logger) {
 	y.on('message', function (message) {
 		var thread = y.thread(message.threadId());
 
-		if (/\b(s18|train|forchbahn)\b/i.test(message.plainBody()) || thread.property('type') == 'weather') {
+		if (/\b(s18|train|forchbahn)\b/i.test(message.plainBody()) || thread.property('type') == 's18') {
 			thread.setProperty('type', 's18');
 
 			var s18Url = 'http://online.fahrplan.zvv.ch/bin/stboard.exe/dn?L=vs_widgets&input=008503067&boardType=dep&time=now&productsFilter=01001111110&additionalTime=0&disableEquivs=false&maxJourney+s=20&start=yes&selectDate=today&monitor=1&requestType=0&timeFormat=cd&view=preview';
