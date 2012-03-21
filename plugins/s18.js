@@ -8,13 +8,14 @@ exports.init = function (y, config, messages, cron, logger) {
 	messages.add('s18_wontmake', "Forget it, the train leaves in [m] minutes. I'd say we wait for the next one in [m2] minutes ([t2]).");
 	messages.add('s18_wontmake', "You'll never make it. That's in [m] minutes. There's another train in [m2] minutes ([t2]). Much better looking and less smelly.");
 	messages.add('s18_wontmake_nonext', "[m] minutes. There is no other train.");
+	messages.add('s18_zero', "The train is at the station right now. Doors are closing any second. The next train leaves in [m2] minutes.");
 	messages.add('s18_nonext', "There is currently no train. Sorry...");
 	messages.add('s18_error', "Sorry, I don't do train lookups in my coffee break.");
 
 	y.on('message', function (message) {
 		var thread = y.thread(message.threadId());
 
-		if (/\b(s18|train|forchbahn)\b/i.test(message.plainBody()) || thread.property('type') == 's18') {
+		if (/\b(s18|train|forchbahn|bahn|zug)\b/i.test(message.plainBody()) || thread.property('type') == 's18') {
 			thread.setProperty('type', 's18');
 
 			var s18Url = 'http://online.fahrplan.zvv.ch/bin/stboard.exe/dn?L=vs_widgets&input=008503067&boardType=dep&time=now&productsFilter=01001111110&additionalTime=0&disableEquivs=false&maxJourney+s=20&start=yes&selectDate=today&monitor=1&requestType=0&timeFormat=cd&view=preview';
@@ -41,7 +42,9 @@ exports.init = function (y, config, messages, cron, logger) {
 						var second = trains[1];
 
 						if (first) {
-							if (first.minutes < 3) {
+							if (first.minutes == 0) {
+								messageKey = 's18_zero';
+							} else if (first.minutes < 3) {
 								if (second) {
 									messageKey = 's18_wontmake';
 								} else {
