@@ -32,6 +32,8 @@ I.R.M.A. comes with a small number of plugins:
    account and PID. This is mainly for debugging purposes.
  - **kill.js** 
    Allows an admin to shut down the bot by sending a Yammer message
+ - **s18.js**
+   Tells you when the next S18 train departs from the Zollikerberg station
    
 
 Dependencies
