@@ -63,10 +63,12 @@ exports.init = function (y, config, messages, cron, logger) {
 	});
 
 	app.get('/', function (req, res) {
+		if (typeof req.cookies === 'undefined')  req.cookies = {};
 		var userId = req.cookies['irmakioskid'];
-		if (!userId) { res.redirect('/login'); }
+		if (!userId) { res.redirect('/login'); return; }
 
 		res.render('index.ejs', {
+			'layout' : 'layout.ejs', 
 			'req' : req, 
 			'res' : res, 
 			'items' : items
@@ -81,6 +83,7 @@ exports.init = function (y, config, messages, cron, logger) {
 		}
 
 		res.render('login.ejs', {
+			'layout' : 'layout.ejs', 
 			'req' : req, 
 			'res' : res, 
 			'users' : users
@@ -102,19 +105,21 @@ exports.init = function (y, config, messages, cron, logger) {
 	});
 
 	app.get('/pay/:id', function (req, res) {
+		if (typeof req.cookies === 'undefined')  req.cookies = {};
 		var userId = req.cookies['irmakioskid'];
-		if (!userId) { res.redirect('/login'); }
+		if (!userId) { res.redirect('/login'); return; }
 		
 		payItem(userId, req.params['id'], function (err) {
 			if (err) { res.redirect('/error'); return; }
 
-			res.redirect('/paid');
+			res.redirect('/paid/' + req.params['id']);
 		});
 	});
 
 	app.get('/fund/:amount', function (req, res) {
+		if (typeof req.cookies === 'undefined')  req.cookies = {};
 		var userId = req.cookies['irmakioskid'];
-		if (!userId) { res.redirect('/login'); }
+		if (!userId) { res.redirect('/login'); return; }
 
 		var amount = parseInt(req.params['amount']);
 		
@@ -125,23 +130,28 @@ exports.init = function (y, config, messages, cron, logger) {
 		});
 	});
 
-	app.get('/paid', function (req, res) {
+	app.get('/paid/:id', function (req, res) {
+		if (typeof req.cookies === 'undefined')  req.cookies = {};
 		var userId = req.cookies['irmakioskid'];
-		if (!userId) { res.redirect('/login'); }
+		if (!userId) { res.redirect('/login'); return; }
 
 		res.render('paid.ejs', {
+			'layout' : 'layout.ejs', 
 			'req' : req, 
 			'res' : res, 
-			'balance' : accountBalance(userId)
+			'balance' : accountBalance(userId), 
+			'item' : items[req.params['id']]
 		});
 
 	});
 
 	app.get('/account', function (req, res) {
+		if (typeof req.cookies === 'undefined')  req.cookies = {};
 		var userId = req.cookies['irmakioskid'];
-		if (!userId) { res.redirect('/login'); }
+		if (!userId) { res.redirect('/login'); return; }
 
 		res.render('account.ejs', {
+			'layout' : 'layout.ejs', 
 			'req' : req, 
 			'res' : res, 
 			'balance' : accountBalance(userId), 

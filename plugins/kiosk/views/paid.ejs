@@ -1,14 +1,3 @@
-<div class="row">
-	<div class="span12">
-		<div class="page-header">
-			<h1>Thank You!</h1>
-			<p>Your new account balance is</p>
-		</div>
-	</div>
-</div>
-
-<div class="row">
-	<div class="span12">
 		<%
 			var formatMoney = function (n, c, d, t) {
 				var c = isNaN(c = Math.abs(c)) ? 2 : c, d = d == undefined ? "," : d, t = t == undefined ? "." : t, s = n < 0 ? "-" : "", i = parseInt(n = Math.abs(+n || 0).toFixed(c)) + "", j = (j = i.length) > 3 ? j % 3 : 0;
@@ -19,10 +8,30 @@
 
 			var posneg = (balance < 0) ? 'negative' : 'positive';
 		%>
+<div class="row">
+	<div class="span12">
+		<div class="page-header">
+			<h1>Thank You!</h1>
+			<p>You just bought <strong><%= item.name %></strong> for CHF <%= formatMoney(item.value / 100, 2, '.', "'") %></p>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="span12">
+		<p text-align: center;>Your new account balance is: </p>
+	</div>
+
+	<div class="span12">
 		<div class="well">
 			<p class="balance <%= posneg %>"><%= displayBalance %></p>
 		</div>
 	</div>
 </div>
 
-<%- partial('usernavigation') %>
+<div class="row" style="margin-top: 36px; margin-bottom: 36px;">
+	<div class="span12" style="text-align: center;">
+		<a class="btn btn-large" href="/">Home</a>
+		<a class="btn btn-large" href="/account">View account</a>
+	</div>
+</div>
