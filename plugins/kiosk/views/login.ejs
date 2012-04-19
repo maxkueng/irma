@@ -1,0 +1,23 @@
+<div class="row">
+	<div class="span12">
+		<div class="page-header">
+			<h1>Who are you?</h1>
+			<p>Tap your picture to log in.</p>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="span12">
+		<ul class="thumbnails">
+			<% for (var i in users) { %>
+				<li class="">
+					<div class="thumbnail">
+						<a href="/login/<%= users[i].id() %>"><img src="<%= users[i].mugshot(160, 120) %>" style="width: 160px" /></a> 
+						<div class="caption"><h5><%= users[i].fullName() %></h5></div>
+					</div>
+				</li>
+			<% } %>
+		<ul>
+	</div>
+</div>

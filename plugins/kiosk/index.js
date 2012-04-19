@@ -6,10 +6,35 @@ exports.init = function (y, config, messages, cron, logger) {
 	var pluginDir = __dirname;
 	var publicDir = path.join(pluginDir, 'public');
 	var viewsDir = path.join(pluginDir, 'views');
+	var dataDir = path.join(pluginDir, 'data');
 
 	if (!path.existsSync(pluginDir)) fs.mkdirSync(pluginDir, '0777');
 	if (!path.existsSync(publicDir)) fs.mkdirSync(publicDir, '0777');
 	if (!path.existsSync(viewsDir)) fs.mkdirSync(viewsDir, '0777');
+	if (!path.existsSync(dataDir)) fs.mkdirSync(dataDir, '0777');
+
+	var userAccounts = {};
+
+	var items = {
+		'03032ac58f81' : {
+			'name' : 'Spaghetti', 
+			'description' : 'Spaghetti for one person', 
+			'value' : 300, 
+			'displayValue' : '3.-'
+		}, 
+		'72080d0c8bcb' : {
+			'name' : 'Kiosk 1', 
+			'description' : 'Small item', 
+			'value' : 50, 
+			'displayValue' : '-.50'
+		}, 
+		'dbbe85aec38e' : {
+			'name' : 'Kiosk 2', 
+			'description' : 'Big item', 
+			'value' : 100, 
+			'displayValue' : '1.-'
+		}
+	};
 
 
 	var app = express.createServer(
@@ -28,13 +53,24 @@ exports.init = function (y, config, messages, cron, logger) {
 	});
 
 	app.get('/', function (req, res) {
-		console.log(req.cookies);
+		var userId = req.cookies['irmakioskid'];
+		if (!userId) { res.redirect('/login'); }
+
+		res.render('index.ejs', {
+			'req' : req, 
+			'res' : res, 
+			'items' : items
+		});
+
+	});
+
+	app.get('/login', function (req, res) {
 		var users = [];
 		for (var id in y.users()) {
 			users.push(y.user(id));
 		}
 
-		res.render('index.ejs', {
+		res.render('login.ejs', {
 			'req' : req, 
 			'res' : res, 
 			'users' : users
@@ -42,14 +78,102 @@ exports.init = function (y, config, messages, cron, logger) {
 	});
 
 	app.get('/login/:id', function (req, res) {
-
 		var userId = req.params['id'];
-
 		if (user = y.user(userId)) {
 			res.cookie('irmakioskid', user.id(), { 'path' : '/', 'expires' : new Date(Date.now() + (360*24*3600*1000)), 'httpOnly' : true });
 		}
 
 		res.redirect('/');
 	});
+
+	app.get('/logout', function (req, res) {
+		res.clearCookie('irmakioskid', { 'path' : '/' });
+		res.redirect('/');
+	});
+
+	app.get('/pay/:id', function (req, res) {
+		var userId = req.cookies['irmakioskid'];
+		if (!userId) { res.redirect('/login'); }
+		
+		payItem(userId, req.params['id'], function (err) {
+			if (err) { res.redirect('/error'); return; }
+
+			res.redirect('/paid');
+		});
+	});
+
+	app.get('/paid', function (req, res) {
+		var userId = req.cookies['irmakioskid'];
+		if (!userId) { res.redirect('/login'); }
+
+		res.render('paid.ejs', {
+			'req' : req, 
+			'res' : res, 
+			'balance' : accountBalance(userId)
+		});
+
+	});
+
+
+	var userAccount = function (userId) {
+		if (typeof userAccounts[userId] !== 'undefined') return userAccounts[userId];
+
+		var accountFile = path.join(dataDir, userId + '.json');
+
+		if (path.existsSync(accountFile)) {
+
+			var data = fs.readFileSync(accountFile, 'UTF-8');
+			var accountData = JSON.parse(data);
+			userAccounts[userId] = accountData;
+			return userAccounts[userId];
+
+		} else {
+			userAccounts[userId] = [];
+			return userAccounts[userId];
+		}
+
+	};
+
+	var persistAccount = function (userId, callback) {
+		var accountFile = path.join(dataDir, userId + '.json');
+		var data = JSON.stringify(userAccount(userId));
+
+		fs.writeFile(accountFile, data, function (err) {
+			if (err) throw err;
+			callback();
+		});
+	};
+
+	var payItem = function (userId, itemId, callback) {
+		console.log(userAccount(userId));
+		var account = userAccount(userId);
+		var item = items[itemId];
+		console.log(account);
+		console.log(item);
+
+		if (!account || !item) { callback(true); return; }
+
+		var accountEntry = {
+			'item' : itemId, 
+			'time' : Date.now(), 
+			'amount' : item.value * -1
+		};
+
+		userAccounts[userId].push(accountEntry);
+		persistAccount(userId, function () {
+			callback(false);		
+		});
+	};
+
+	var accountBalance = function (userId) {
+		var account = userAccount(userId);
+		var balance = 0;
+
+		for (var i = account.length -1; i >= 0; --i) {
+			balance += account[i].amount;
+		}
+
+		return balance;
+	};
 
 };
