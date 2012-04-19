@@ -1,0 +1,6 @@
+<%= users.length%>
+<ul>
+<% for (var i in users) { %>
+	<li><a href="/login/<%= users[i].id() %>"><img src="<%= users[i].mugshot() %>" /> <%= users[i].fullName() %></a></li>
+<% } %>
+<ul>
