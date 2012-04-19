@@ -2,7 +2,7 @@
 <div class="row">
 	<div class="span12">
 		<div class="page-header">
-			<h1>What do you want to do?</h1>
+			<h1>What Do You Want To Do?</h1>
 			<p>Select the item you wish to pay.</p>
 		</div>
 	</div>
@@ -10,14 +10,18 @@
 
 <ul class="items">
 <% for (var id in items) { %>
-<li class="item row">
-	<div class="span12">
-		<a href="/pay/<%= id %>">
-			<span class="name"><%= items[id].name %></span>
-			<span class="description"><%= items[id].description %></span>
-			<span class="price"><%= items[id].displayValue %></span>
-		</a>
-	</div>
-</li>
+	<% if (items[id].buyable) { %>
+	<li class="item row">
+		<div class="span12">
+			<a href="/pay/<%= id %>">
+				<span class="name"><%= items[id].name %></span>
+				<span class="description"><%= items[id].description %></span>
+				<span class="price"><%= items[id].displayValue %></span>
+			</a>
+		</div>
+	</li>
+	<% } %>
 <% } %>
 </ul>
+
+<%- partial('usernavigation') %>

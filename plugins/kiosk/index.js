@@ -20,19 +20,29 @@ exports.init = function (y, config, messages, cron, logger) {
 			'name' : 'Spaghetti', 
 			'description' : 'Spaghetti for one person', 
 			'value' : 300, 
-			'displayValue' : '3.-'
+			'displayValue' : '3.-', 
+			'buyable' : true
 		}, 
 		'72080d0c8bcb' : {
 			'name' : 'Kiosk 1', 
 			'description' : 'Small item', 
 			'value' : 50, 
-			'displayValue' : '-.50'
+			'displayValue' : '-.50', 
+			'buyable' : true
 		}, 
 		'dbbe85aec38e' : {
 			'name' : 'Kiosk 2', 
 			'description' : 'Big item', 
 			'value' : 100, 
-			'displayValue' : '1.-'
+			'displayValue' : '1.-', 
+			'buyable' : true
+		}, 
+		'102f5037fe64' : {
+			'name' : 'Funding', 
+			'description' : 'Funding', 
+			'value' : -100, 
+			'displayValue' : '1.-', 
+			'buyable' : false
 		}
 	};
 
@@ -102,6 +112,19 @@ exports.init = function (y, config, messages, cron, logger) {
 		});
 	});
 
+	app.get('/fund/:amount', function (req, res) {
+		var userId = req.cookies['irmakioskid'];
+		if (!userId) { res.redirect('/login'); }
+
+		var amount = parseInt(req.params['amount']);
+		
+		fundAccount(userId, amount, function (err) {
+			if (err) { res.redirect('/error'); return; }
+
+			res.redirect('/account');
+		});
+	});
+
 	app.get('/paid', function (req, res) {
 		var userId = req.cookies['irmakioskid'];
 		if (!userId) { res.redirect('/login'); }
@@ -110,6 +133,20 @@ exports.init = function (y, config, messages, cron, logger) {
 			'req' : req, 
 			'res' : res, 
 			'balance' : accountBalance(userId)
+		});
+
+	});
+
+	app.get('/account', function (req, res) {
+		var userId = req.cookies['irmakioskid'];
+		if (!userId) { res.redirect('/login'); }
+
+		res.render('account.ejs', {
+			'req' : req, 
+			'res' : res, 
+			'balance' : accountBalance(userId), 
+			'account' : userAccounts[userId], 
+			'items' : items
 		});
 
 	});
@@ -145,11 +182,8 @@ exports.init = function (y, config, messages, cron, logger) {
 	};
 
 	var payItem = function (userId, itemId, callback) {
-		console.log(userAccount(userId));
 		var account = userAccount(userId);
 		var item = items[itemId];
-		console.log(account);
-		console.log(item);
 
 		if (!account || !item) { callback(true); return; }
 
@@ -165,12 +199,30 @@ exports.init = function (y, config, messages, cron, logger) {
 		});
 	};
 
+	var fundAccount = function (userId, amount, callback) {
+		var account = userAccount(userId);
+
+		if (!account) { callback(true); return; }
+
+		var accountEntry = {
+			'item' : '102f5037fe64', 
+			'time' : Date.now(), 
+			'amount' : amount
+		};
+
+		userAccounts[userId].push(accountEntry);
+		persistAccount(userId, function () {
+			callback(false);		
+		});
+
+	};
+
 	var accountBalance = function (userId) {
 		var account = userAccount(userId);
 		var balance = 0;
 
 		for (var i = account.length -1; i >= 0; --i) {
-			balance += account[i].amount;
+			balance += parseInt(account[i].amount);
 		}
 
 		return balance;

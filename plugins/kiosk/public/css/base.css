@@ -53,10 +53,10 @@ p.balance {
 	font-weight: bold;
 }
 
-p.balance.positive {
+.positive {
 	color: #5bb75b;
 }
 
-p.balance.negative {
+.negative {
 	color: #da4f49;
 }
