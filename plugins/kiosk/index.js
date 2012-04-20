@@ -41,7 +41,14 @@ exports.init = function (y, config, messages, cron, logger) {
 			'name' : 'Funding', 
 			'description' : 'Funding', 
 			'value' : -100, 
-			'displayValue' : '1.-', 
+			'displayValue' : '0.-', 
+			'buyable' : false
+		}, 
+		'c15906790e4a' : {
+			'name' : 'Init', 
+			'description' : 'Account initial balance', 
+			'value' : 0, 
+			'displayValue' : '0.-', 
 			'buyable' : false
 		}
 	};
@@ -72,6 +79,15 @@ exports.init = function (y, config, messages, cron, logger) {
 			'req' : req, 
 			'res' : res, 
 			'items' : items
+		});
+
+	});
+
+	app.get('/about', function (req, res) {
+		res.render('about.ejs', {
+			'layout' : 'layout2.ejs', 
+			'req' : req, 
+			'res' : res, 
 		});
 
 	});
