@@ -85,7 +85,7 @@ exports.init = function (y, config, messages, cron, logger) {
 
 	app.get('/about', function (req, res) {
 		res.render('about.ejs', {
-			'layout' : 'layout2.ejs', 
+			'layout' : 'layout.ejs', 
 			'req' : req, 
 			'res' : res, 
 		});
