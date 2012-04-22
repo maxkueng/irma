@@ -1,25 +1,27 @@
 <%
-	balance = account.balance();
 	var posneg = (balance < 0) ? 'negative' : 'positive';
 %>
 <div class="row">
 	<div class="span12">
 		<div class="page-header">
-			<h1>Thank You!</h1>
-			<p>You've just purchased <strong><%= item.name() %></strong> for CHF&nbsp;<%=: item.price() / 100 | money %></p>
+			<h1>Initialize</h1>
+			<p>Successfully initialized account</p>
+		</div>
+	</div>
+</div>
+
+
+<div class="row">
+	<div class="span12">
+		<div class="well">
+			<p class="balance <%= posneg %>"><%=: balance / 100 | money %></p>
 		</div>
 	</div>
 </div>
 
 <div class="row">
-	<div class="span12">
-		<p text-align: center;>Your new account balance is: </p>
-	</div>
-
-	<div class="span12">
-		<div class="well">
-			<p class="balance <%= posneg %>"><%=: balance / 100 | money %></p>
-		</div>
+	<div class="span12" style="text-align: center;">
+		<p><a class="btn btn-large btn-success" href="/initialize">OK</a></p>
 	</div>
 </div>
 

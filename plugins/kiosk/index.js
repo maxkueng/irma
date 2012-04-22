@@ -1,7 +1,32 @@
 exports.init = function (y, config, messages, cron, logger) {
+	messages.add('kiosk_monthly_archive', "Hey [name], I have archived all your Kiosk bookings for [month]. This is the automatic monthly archive. \nYour current account balance is CHF [balance]");
+	messages.add('kiosk_tally', "Hey [name], your tally marks have been carried over to your digital kiosk account. \nYour new account balance is CHF [balance]");
+	messages.add('kiosk_deposit', "Hey [name], you have successfully deposited CHF [deposit] to your digital kiosk account. \nYour new account balance is CHF [balance]");
+	messages.add('kiosk_withdraw', "Hey [name], you have successfully withdrawn CHF [withdrawal] from your digital kiosk account. \nYour new account balance is CHF [balance]");
+
 	var path = require('path');
 	var fs = require('fs');
 	var express = require('express');
+	var ejs = require('ejs');
+	require('datejs');
+
+	var formatMoney = function (n) {
+		var c = 2, d = '.', t = "'";
+		c = isNaN(c = Math.abs(c)) ? 2 : c, d = d == undefined ? "," : d, t = t == undefined ? "." : t, s = n < 0 ? "-" : "", i = parseInt(n = Math.abs(+n || 0).toFixed(c)) + "", j = (j = i.length) > 3 ? j % 3 : 0;
+		return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
+	};
+
+	ejs.filters.isodate = function(time) {
+		return new Date(time).toString("yyyy-MM-dd HH:mm:ss");
+	};
+
+	ejs.filters.isodate_short = function(time) {
+		return new Date(time).toString("MM-dd HH:mm");
+	};
+
+	ejs.filters.money = function (n) {
+		return formatMoney(n);
+	};
 
 	var pluginDir = __dirname;
 	var publicDir = path.join(pluginDir, 'public');
@@ -13,49 +38,43 @@ exports.init = function (y, config, messages, cron, logger) {
 	if (!path.existsSync(viewsDir)) fs.mkdirSync(viewsDir, '0777');
 	if (!path.existsSync(dataDir)) fs.mkdirSync(dataDir, '0777');
 
-	var userAccounts = {};
+	var items = require('./items');
+	var Item = items.Item;
+	var accounts = require('./accounts');
+	accounts.dataDir = dataDir;
+	var Account = accounts.Account;
+	var bookings = require('./bookings');
+	var Booking = bookings.Booking;
 
-	var items = {
-		'03032ac58f81' : {
-			'name' : 'Spaghetti', 
-			'description' : 'Spaghetti for one person', 
-			'value' : 300, 
-			'displayValue' : '3.-', 
-			'buyable' : true
-		}, 
-		'72080d0c8bcb' : {
-			'name' : 'Kiosk 1', 
-			'description' : 'Small item', 
-			'value' : 50, 
-			'displayValue' : '-.50', 
-			'buyable' : true
-		}, 
-		'dbbe85aec38e' : {
-			'name' : 'Kiosk 2', 
-			'description' : 'Big item', 
-			'value' : 100, 
-			'displayValue' : '1.-', 
-			'buyable' : true
-		}, 
-		'102f5037fe64' : {
-			'name' : 'Funding', 
-			'description' : 'Funding', 
-			'value' : -100, 
-			'displayValue' : '0.-', 
-			'buyable' : false
-		}, 
-		'c15906790e4a' : {
-			'name' : 'Init', 
-			'description' : 'Account initial balance', 
-			'value' : 0, 
-			'displayValue' : '0.-', 
-			'buyable' : false
-		}
-	};
+	items.add(new Item({
+		'id' : '03032ac58f81', 
+		'name' : 'Spaghetti', 
+		'description' : 'Spaghetti for one person', 
+		'price' : 300, 
+		'displayPrice' : '3.-', 
+		'buyable' : true
+	}));
 
+	items.add(new Item({
+		'id' : '72080d0c8bcb', 
+		'name' : 'Kiosk 1', 
+		'description' : 'Small item', 
+		'price' : 50, 
+		'displayPrice' : '-.50', 
+		'buyable' : true
+	}));
+
+	items.add(new Item({
+		'id' : 'dbbe85aec38e', 
+		'name' : 'Kiosk 2', 
+		'description' : 'Big item', 
+		'price' : 100, 
+		'displayPrice' : '1.-', 
+		'buyable' : true
+	}));
 
 	var app = express.createServer(
-		express.logger(), 
+//		express.logger(), 
 		express.static(publicDir), 
 		express.bodyParser(), 
 		express.cookieParser()
@@ -69,6 +88,11 @@ exports.init = function (y, config, messages, cron, logger) {
 		console.log('Kiosk running on port ' + config.kiosk.port);		
 	});
 
+	new cron.CronJob('0 0 8 28 * *', function () {
+//	new cron.CronJob('0 12 1 * * *', function () {
+		archiveAll();
+	});
+
 	app.get('/', function (req, res) {
 		if (typeof req.cookies === 'undefined')  req.cookies = {};
 		var userId = req.cookies['irmakioskid'];
@@ -78,7 +102,7 @@ exports.init = function (y, config, messages, cron, logger) {
 			'layout' : 'layout.ejs', 
 			'req' : req, 
 			'res' : res, 
-			'items' : items
+			'items' : items.all()
 		});
 
 	});
@@ -120,43 +144,234 @@ exports.init = function (y, config, messages, cron, logger) {
 		res.redirect('/');
 	});
 
-	app.get('/pay/:id', function (req, res) {
+	app.get('/pay/:itemId', function (req, res) {
 		if (typeof req.cookies === 'undefined')  req.cookies = {};
 		var userId = req.cookies['irmakioskid'];
 		if (!userId) { res.redirect('/login'); return; }
 		
-		payItem(userId, req.params['id'], function (err) {
+		puchaseItem(userId, req.params['itemId'], function (err, bookingId) {
 			if (err) { res.redirect('/error'); return; }
 
-			res.redirect('/paid/' + req.params['id']);
+			res.redirect('/paid/' + bookingId);
 		});
 	});
 
-	app.get('/fund/:amount', function (req, res) {
+	app.get('/reverse/:bookingId', function (req, res) {
 		if (typeof req.cookies === 'undefined')  req.cookies = {};
 		var userId = req.cookies['irmakioskid'];
 		if (!userId) { res.redirect('/login'); return; }
-
-		var amount = parseInt(req.params['amount']);
+		var account = accounts.get(userId);
 		
-		fundAccount(userId, amount, function (err) {
+		account.reverse(req.params['bookingId'], function (err, bookingId) {
 			if (err) { res.redirect('/error'); return; }
 
 			res.redirect('/account');
 		});
 	});
 
+	app.get('/admin', function (req, res) {
+		if (typeof req.cookies === 'undefined')  req.cookies = {};
+		var userId = req.cookies['irmakioskid'];
+		if (!userId) { res.redirect('/login'); return; }
+
+		res.redirect('/deposit');
+
+	});
+
+	app.get('/deposit', function (req, res) {
+		if (typeof req.cookies === 'undefined')  req.cookies = {};
+		var userId = req.cookies['irmakioskid'];
+		if (!userId) { res.redirect('/login'); return; }
+
+		res.render('deposit.ejs', {
+			'layout' : 'layout.ejs', 
+			'req' : req, 
+			'res' : res, 
+			'users' : y.users()
+		});
+
+	});
+
+	app.post('/deposit', function (req, res) {
+		if (typeof req.cookies === 'undefined')  req.cookies = {};
+		var userId = req.cookies['irmakioskid'];
+		if (!userId) { res.redirect('/login'); return; }
+		var user = parseInt(req.body['user']);
+		var amount = parseInt(req.body['amount'] * 100);
+		var account = accounts.get(user);
+
+		account.deposit(amount, function (err) {
+			res.render('depositok.ejs', {
+				'layout' : 'layout.ejs', 
+				'req' : req, 
+				'res' : res, 
+				'balance' : account.balance()
+			});
+
+			var text = messages.get('kiosk_deposit', {
+				'name' : y.user(user).fullName(), 
+				'deposit' : formatMoney(amount / 100), 
+				'balance' : formatMoney(account.balance() / 100)
+			});
+
+			y.sendMessage(function (error, msg) {
+				var thread = y.thread(msg.threadId());
+				thread.setProperty('type', 'kiosk_deposit');
+				thread.setProperty('status', 'closed');
+				y.persistThread(thread);
+
+			}, text, { 'direct_to' : user });
+		});
+	});
+
+	app.get('/withdraw', function (req, res) {
+		if (typeof req.cookies === 'undefined')  req.cookies = {};
+		var userId = req.cookies['irmakioskid'];
+		if (!userId) { res.redirect('/login'); return; }
+
+		res.render('withdraw.ejs', {
+			'layout' : 'layout.ejs', 
+			'req' : req, 
+			'res' : res, 
+			'users' : y.users()
+		});
+
+	});
+
+	app.post('/withdraw', function (req, res) {
+		if (typeof req.cookies === 'undefined')  req.cookies = {};
+		var userId = req.cookies['irmakioskid'];
+		if (!userId) { res.redirect('/login'); return; }
+		var user = parseInt(req.body['user']);
+		var amount = parseInt(req.body['amount'] * 100);
+		var account = accounts.get(user);
+
+		account.withdraw(amount, function (err) {
+			res.render('withdrawok.ejs', {
+				'layout' : 'layout.ejs', 
+				'req' : req, 
+				'res' : res, 
+				'balance' : account.balance()
+			});
+
+			var text = messages.get('kiosk_withdraw', {
+				'name' : y.user(user).fullName(), 
+				'withdrawal' : formatMoney(amount / 100), 
+				'balance' : formatMoney(account.balance() / 100)
+			});
+
+			y.sendMessage(function (error, msg) {
+				var thread = y.thread(msg.threadId());
+				thread.setProperty('type', 'kiosk_withdrawal');
+				thread.setProperty('status', 'closed');
+				y.persistThread(thread);
+
+			}, text, { 'direct_to' : user });
+		});
+	});
+
+	app.get('/tally', function (req, res) {
+		if (typeof req.cookies === 'undefined')  req.cookies = {};
+		var userId = req.cookies['irmakioskid'];
+		if (!userId) { res.redirect('/login'); return; }
+
+		res.render('tally.ejs', {
+			'layout' : 'layout.ejs', 
+			'req' : req, 
+			'res' : res, 
+			'users' : y.users(), 
+			'items' : [
+				items.get('03032ac58f81'), 
+				items.get('72080d0c8bcb')
+			]
+		});
+
+	});
+
+	app.post('/tally', function (req, res) {
+		if (typeof req.cookies === 'undefined')  req.cookies = {};
+		var userId = req.cookies['irmakioskid'];
+		if (!userId) { res.redirect('/login'); return; }
+		var user = parseInt(req.body['user']);
+		var amount = parseInt(req.body['amount'] * 100);
+		var account = accounts.get(user);
+
+		var itemIds = req.body['item'];
+		var marks = req.body['marks'];
+
+		var total = 0;
+
+		for (var i = 0; i < itemIds.length; i++) {
+			var item = items.get(itemIds[i]);
+			var mark = parseInt(marks[i]);
+
+			if (mark) {
+				total += mark * item.price();
+			}
+		}
+
+		tallyCarryOver(user, total, function () {
+			res.render('tallyok.ejs', {
+				'layout' : 'layout.ejs', 
+				'req' : req, 
+				'res' : res, 
+				'balance' : account.balance()
+			});
+		});
+
+/*		account.withdraw(amount, function (err) {
+		}); */
+	});
+
+	app.get('/initialize', function (req, res) {
+		if (typeof req.cookies === 'undefined')  req.cookies = {};
+		var userId = req.cookies['irmakioskid'];
+		if (!userId) { res.redirect('/login'); return; }
+
+		res.render('initialize.ejs', {
+			'layout' : 'layout.ejs', 
+			'req' : req, 
+			'res' : res, 
+			'users' : y.users()
+		});
+
+	});
+
+	app.post('/initialize', function (req, res) {
+		if (typeof req.cookies === 'undefined')  req.cookies = {};
+		var userId = req.cookies['irmakioskid'];
+		if (!userId) { res.redirect('/login'); return; }
+		var user = parseInt(req.body['user']);
+		var amount = parseInt(req.body['amount'] * 100);
+		var account = accounts.get(user);
+
+		account.initialize(amount, function (err) {
+			res.render('initializeok.ejs', {
+				'layout' : 'layout.ejs', 
+				'req' : req, 
+				'res' : res, 
+				'balance' : account.balance()
+			});
+		});
+	});
+
+
 	app.get('/paid/:id', function (req, res) {
 		if (typeof req.cookies === 'undefined')  req.cookies = {};
 		var userId = req.cookies['irmakioskid'];
 		if (!userId) { res.redirect('/login'); return; }
 
+		var account = accounts.get(userId);
+		var booking = account.booking(req.params['id']);
+		var item = items.get(booking.itemId());
+
 		res.render('paid.ejs', {
 			'layout' : 'layout.ejs', 
 			'req' : req, 
 			'res' : res, 
-			'balance' : accountBalance(userId), 
-			'item' : items[req.params['id']]
+			'account' : accounts.get(userId), 
+			'booking' : booking, 
+			'item' : item
 		});
 
 	});
@@ -170,88 +385,128 @@ exports.init = function (y, config, messages, cron, logger) {
 			'layout' : 'layout.ejs', 
 			'req' : req, 
 			'res' : res, 
-			'balance' : accountBalance(userId), 
-			'account' : userAccounts[userId], 
-			'items' : items
+			'account' : accounts.get(userId)
 		});
 
 	});
 
+	app.get('/booking/:id', function (req, res) {
+		if (typeof req.cookies === 'undefined')  req.cookies = {};
+		var userId = req.cookies['irmakioskid'];
+		if (!userId) { res.redirect('/login'); return; }
 
-	var userAccount = function (userId) {
-		if (typeof userAccounts[userId] !== 'undefined') return userAccounts[userId];
+		var account = accounts.get(userId);
+		var booking = account.booking(req.params['id']);
+		var item = items.get(booking.itemId());
 
-		var accountFile = path.join(dataDir, userId + '.json');
+		res.render('booking.ejs', {
+			'layout' : 'layout.ejs', 
+			'req' : req, 
+			'res' : res, 
+			'account' : account, 
+			'booking' : booking, 
+			'item' : item
+		});
 
-		if (path.existsSync(accountFile)) {
+	});
 
-			var data = fs.readFileSync(accountFile, 'UTF-8');
-			var accountData = JSON.parse(data);
-			userAccounts[userId] = accountData;
-			return userAccounts[userId];
+	app.get('/item/:id', function (req, res) {
+		if (typeof req.cookies === 'undefined')  req.cookies = {};
+		var userId = req.cookies['irmakioskid'];
+		if (!userId) { res.redirect('/login'); return; }
 
-		} else {
-			userAccounts[userId] = [];
-			return userAccounts[userId];
+		var item = items.get(req.params['id']);
+
+		res.render('item.ejs', {
+			'layout' : 'layout.ejs', 
+			'req' : req, 
+			'res' : res, 
+			'item' : item
+		});
+
+	});
+
+	var archiveAll = function () {
+		var users = y.users();
+		for (var i in users) {
+			(function (_i) {
+
+				var account = accounts.get(users[_i].id());
+				if (account.bookings().length > 1) {
+					account.archive(function (err) {
+						var now = new Date();
+						var text = messages.get('kiosk_monthly_archive', {
+							'name' : users[_i].fullName(), 
+							'month' : now.toString('MMMM yyyy'), 
+							'balance' : formatMoney(account.balance() / 100)
+						});
+
+						y.sendMessage(function (error, msg) {
+							logger.info('kiosk monthly archive for ' + users[_i].username());
+							var thread = y.thread(msg.threadId());
+							thread.setProperty('type', 'kiosk_monthly_archive');
+							thread.setProperty('status', 'closed');
+							y.persistThread(thread);
+
+						}, text, { 'direct_to' : users[_i].id() });
+					});
+				}
+
+			})(i);
 		}
-
 	};
 
-	var persistAccount = function (userId, callback) {
-		var accountFile = path.join(dataDir, userId + '.json');
-		var data = JSON.stringify(userAccount(userId));
+	var tallyCarryOver = function (userId, total, callback) {
+		var account = accounts.get(userId);
 
-		fs.writeFile(accountFile, data, function (err) {
-			if (err) throw err;
-			callback();
+		var booking = new Booking({
+			'id' : bookings.uuid(), 
+			'itemId' : null, 
+			'time' : Date.now(), 
+			'amount' : total * -1, 
+			'name' : 'Tally carry over', 
+			'description' : 'Tally list carry over', 
+			'type' : 'tally carry over', 
+			'admin' : true
+		});
+
+		account.book(booking, function () {
+			callback(false);
+
+			var text = messages.get('kiosk_tally', {
+				'name' : y.user(userId).fullName(), 
+				'balance' : formatMoney(account.balance() / 100)
+			});
+
+			y.sendMessage(function (error, msg) {
+				var thread = y.thread(msg.threadId());
+				thread.setProperty('type', 'kiosk_tally_carry_over');
+				thread.setProperty('status', 'closed');
+				y.persistThread(thread);
+
+			}, text, { 'direct_to' : userId });
 		});
 	};
 
-	var payItem = function (userId, itemId, callback) {
-		var account = userAccount(userId);
-		var item = items[itemId];
+	var puchaseItem = function (userId, itemId, callback) {
+		var account = accounts.get(userId);
+		var item = items.get(itemId);
 
 		if (!account || !item) { callback(true); return; }
 
-		var accountEntry = {
-			'item' : itemId, 
+		var booking = new Booking({
+			'id' : bookings.uuid(), 
+			'itemId' : itemId, 
 			'time' : Date.now(), 
-			'amount' : item.value * -1
-		};
-
-		userAccounts[userId].push(accountEntry);
-		persistAccount(userId, function () {
-			callback(false);		
-		});
-	};
-
-	var fundAccount = function (userId, amount, callback) {
-		var account = userAccount(userId);
-
-		if (!account) { callback(true); return; }
-
-		var accountEntry = {
-			'item' : '102f5037fe64', 
-			'time' : Date.now(), 
-			'amount' : amount
-		};
-
-		userAccounts[userId].push(accountEntry);
-		persistAccount(userId, function () {
-			callback(false);		
+			'amount' : item.price() * -1, 
+			'name' : item.name(), 
+			'description' : item.description(), 
+			'type' : 'purchase'
 		});
 
-	};
-
-	var accountBalance = function (userId) {
-		var account = userAccount(userId);
-		var balance = 0;
-
-		for (var i = account.length -1; i >= 0; --i) {
-			balance += parseInt(account[i].amount);
-		}
-
-		return balance;
+		account.book(booking, function () {
+			callback(false, booking.id());		
+		});
 	};
 
 };

@@ -8,32 +8,14 @@
 </div>
 
 <%
-Date.prototype.pad = function (n) {
-	return (n < 10) ? '0' + n : n;
-};
-
-Date.prototype.toISODateTime = function () {
-	return this.getFullYear() + '-'
-		+ this.pad(this.getMonth() + 1) + '-'
-		+ this.pad(this.getDate()) + 'T'
-		+ this.pad(this.getHours()) + ':'
-		+ this.pad(this.getMinutes()) + ':'
-		+ this.pad(this.getSeconds());
-};
-
-var formatMoney = function (n, c, d, t) {
-	var c = isNaN(c = Math.abs(c)) ? 2 : c, d = d == undefined ? "," : d, t = t == undefined ? "." : t, s = n < 0 ? "-" : "", i = parseInt(n = Math.abs(+n || 0).toFixed(c)) + "", j = (j = i.length) > 3 ? j % 3 : 0;
-	return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
-};
-
-var displayBalance = formatMoney(balance / 100, 2, '.', "'");
+var balance = account.balance();
 var posneg = (balance < 0) ? 'negative' : 'positive';
 %>
 
 <div class="row">
 	<div class="span12">
 		<div class="well">
-			<p class="balance <%= posneg %>"><%= displayBalance %></p>
+			<p class="balance <%= posneg %>"><%=: balance / 100 | money %></p>
 		</div>
 
 <table class="table table-striped table-bordered">
@@ -41,17 +23,30 @@ var posneg = (balance < 0) ? 'negative' : 'positive';
 		<tr>
 			<th>Date</th>
 			<th>Item</th>
-			<th>$$$</th>
+			<th style="text-align: right;">$$$</th>
 		</tr>
 	</thead>
 	<tbody>
-		<% for (var i = account.length -1; i >= 0; --i) { %>
-		<tr>
-			<td><time><%= new Date(account[i].time).toISODateTime() %></time></td>
-			<td><%= items[account[i].item].name %></td>
+		<% var bookings = account.bookings(); 
+		for (var i = bookings.length -1; i >= 0; --i) { %>
+		<tr id="booking-<%= bookings[i].id() %>">
+			<td><a href="/booking/<%= bookings[i].id() %>"><time><%-: bookings[i].time() | isodate_short %></time></a></td>
+			<td><%= bookings[i].name() %> 
+			<% if (bookings[i].reversed()) { %>
+				<span class="label label-important">reversed</span> 
+			<% } %>
 
-			<% var posneg = (account[i].amount < 0) ? 'negative' : 'positive'; %>
-			<td style="text-align: right;" class="<%= posneg %>"><%= formatMoney(account[i].amount / 100, 2, '.', "'") %></td>
+			<% if (bookings[i].automatic()) { %>
+				<span class="label">automatic</span> 
+			<% } %>
+
+			<% if (bookings[i].admin()) { %>
+				<span class="label label-info">admin</span> 
+			<% } %>
+			</td>
+
+			<% var posneg = (bookings[i].amount() < 0) ? 'negative' : 'positive'; %>
+			<td style="min-width: 3em;text-align: right;" class="<%= posneg %>"><%-: bookings[i].amount() / 100 | money %></td>
 		</tr>
 		<% } %>
 	</tbody>
@@ -62,9 +57,11 @@ var posneg = (balance < 0) ? 'negative' : 'positive';
 </div>
 
 
-<div class="row" style="margin-top: 36px; margin-bottom: 36px;">
+<footer>
+<div class="row">
 	<div class="span12" style="text-align: center;">
 		<a class="btn btn-large" href="/">Home</a>
 		<a style="display:inline-block; margin-left: 18px;" href="/about"><img src="/img/irma.svg" style="height: 47px;" /></a>
 	</div>
 </div>
+</footer>

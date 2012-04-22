@@ -60,3 +60,10 @@ p.balance {
 .negative {
 	color: #da4f49;
 }
+
+footer {
+	border-top: 1px solid #eee;
+	padding-top: 17px;
+	margin-bottom: 18px;
+	margin-top: 18px;
+}
