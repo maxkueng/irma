@@ -1,5 +1,6 @@
 exports.init = function (y, config, messages, cron, logger) {
 	messages.add('kiosk_monthly_archive', "Hey [name], I have archived all your Kiosk bookings for [month]. This is the automatic monthly archive. \nYour current account balance is CHF [balance]");
+	messages.add('kiosk_initialize', "Hey [name], I have initialized your digital kiosk account. Your current account balance is CHF [balance]");
 	messages.add('kiosk_tally', "Hey [name], your tally marks have been carried over to your digital kiosk account. \nYour new account balance is CHF [balance]");
 	messages.add('kiosk_deposit', "Hey [name], you have successfully deposited CHF [deposit] to your digital kiosk account. \nYour new account balance is CHF [balance]");
 	messages.add('kiosk_withdraw', "Hey [name], you have successfully withdrawn CHF [withdrawal] from your digital kiosk account. \nYour new account balance is CHF [balance]");
@@ -318,9 +319,6 @@ exports.init = function (y, config, messages, cron, logger) {
 				'balance' : account.balance()
 			});
 		});
-
-/*		account.withdraw(amount, function (err) {
-		}); */
 	});
 
 	app.get('/initialize', function (req, res) {
@@ -352,6 +350,19 @@ exports.init = function (y, config, messages, cron, logger) {
 				'res' : res, 
 				'balance' : account.balance()
 			});
+
+			var text = messages.get('kiosk_initialize', {
+				'name' : y.user(user).fullName(), 
+				'balance' : formatMoney(account.balance() / 100)
+			});
+
+			y.sendMessage(function (error, msg) {
+				var thread = y.thread(msg.threadId());
+				thread.setProperty('type', 'kiosk_initialization');
+				thread.setProperty('status', 'closed');
+				y.persistThread(thread);
+
+			}, text, { 'direct_to' : user });
 		});
 	});
 
