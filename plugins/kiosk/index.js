@@ -117,7 +117,7 @@ exports.init = function (y, config, messages, cron, logger) {
 
 	});
 
-	app.get('/login', function (req, res) {
+	app.get('/login/:b64url?', function (req, res) {
 		var users = [];
 		for (var id in y.users()) {
 			users.push(y.user(id));
@@ -127,11 +127,12 @@ exports.init = function (y, config, messages, cron, logger) {
 			'layout' : 'layout.ejs', 
 			'req' : req, 
 			'res' : res, 
-			'users' : users
+			'users' : users, 
+			'redirecturl' : req.params['b64url'] || ''
 		});
 	});
 
-	app.get('/login/:id', function (req, res) {
+	app.get('/auth/:id/:b64url?', function (req, res) {
 		var userId = req.params['id'];
 		if (user = y.user(userId)) {
 			res.cookie('irmakioskid', user.id(), { 'path' : '/', 'expires' : new Date(Date.now() + (360*24*3600*1000)), 'httpOnly' : true });
@@ -389,8 +390,9 @@ exports.init = function (y, config, messages, cron, logger) {
 
 	app.get('/account', function (req, res) {
 		if (typeof req.cookies === 'undefined')  req.cookies = {};
+		var b64URL = new Buffer(req.url).toString('base64');
 		var userId = req.cookies['irmakioskid'];
-		if (!userId) { res.redirect('/login'); return; }
+		if (!userId) { res.redirect('/login/' + b64URL); return; }
 
 		res.render('account.ejs', {
 			'layout' : 'layout.ejs', 
