@@ -94,24 +94,26 @@ exports.init = function (y, config, messages, cron, logger) {
 		archiveAll();
 	});
 
-	var authCheck = function (req, res) {
+	var authCheck = function (req, res, callback) {
 		if (typeof req.cookies === 'undefined')  req.cookies = {};
 		var b64URL = new Buffer(req.url).toString('base64');
 		var userId = req.cookies['irmakioskid'];
 		if (!userId) { res.redirect('/login/' + b64URL); return; }
 
 		req.userId = userId;
+		callback();
 	};
 
 	app.get('/', function (req, res) {
-		authCheck(req, res);
-		var userId = req.userId;
+		authCheck(req, res, function () {
+			var userId = req.userId;
 
-		res.render('index.ejs', {
-			'layout' : 'layout.ejs', 
-			'req' : req, 
-			'res' : res, 
-			'items' : items.all()
+			res.render('index.ejs', {
+				'layout' : 'layout.ejs', 
+				'req' : req, 
+				'res' : res, 
+				'items' : items.all()
+			});
 		});
 
 	});
@@ -159,244 +161,255 @@ exports.init = function (y, config, messages, cron, logger) {
 	});
 
 	app.get('/pay/:itemId', function (req, res) {
-		authCheck(req, res);
-		var userId = req.userId;
-		
-		puchaseItem(userId, req.params['itemId'], function (err, bookingId) {
-			if (err) { res.redirect('/error'); return; }
+		authCheck(req, res, function () {
+			var userId = req.userId;
+			
+			puchaseItem(userId, req.params['itemId'], function (err, bookingId) {
+				if (err) { res.redirect('/error'); return; }
 
-			res.redirect('/paid/' + bookingId);
+				res.redirect('/paid/' + bookingId);
+			});
 		});
 	});
 
 	app.get('/reverse/:bookingId', function (req, res) {
-		authCheck(req, res);
-		var userId = req.userId;
-		var account = accounts.get(userId);
-		
-		account.reverse(req.params['bookingId'], function (err, bookingId) {
-			if (err) { res.redirect('/error'); return; }
+		authCheck(req, res, function () {
+			var userId = req.userId;
+			var account = accounts.get(userId);
+			
+			account.reverse(req.params['bookingId'], function (err, bookingId) {
+				if (err) { res.redirect('/error'); return; }
 
-			res.redirect('/account');
+				res.redirect('/account');
+			});
 		});
 	});
 
 	app.get('/admin', function (req, res) {
-		authCheck(req, res);
-		var userId = req.userId;
-
-		res.redirect('/deposit');
-
+		authCheck(req, res, function () {
+			var userId = req.userId;
+			res.redirect('/deposit');
+		});
 	});
 
 	app.get('/deposit', function (req, res) {
-		authCheck(req, res);
-		var userId = req.userId;
+		authCheck(req, res, function () {
+			var userId = req.userId;
 
-		res.render('deposit.ejs', {
-			'layout' : 'layout.ejs', 
-			'req' : req, 
-			'res' : res, 
-			'users' : y.users()
+			res.render('deposit.ejs', {
+				'layout' : 'layout.ejs', 
+				'req' : req, 
+				'res' : res, 
+				'users' : y.users()
+			});
 		});
 
 	});
 
 	app.post('/deposit', function (req, res) {
-		authCheck(req, res);
-		var userId = req.userId;
-		var user = parseInt(req.body['user']);
-		var amount = parseInt(req.body['amount'] * 100);
-		var account = accounts.get(user);
+		authCheck(req, res, function () {
+			var userId = req.userId;
+			var user = parseInt(req.body['user']);
+			var amount = parseInt(req.body['amount'] * 100);
+			var account = accounts.get(user);
 
-		account.deposit(amount, function (err) {
-			res.render('depositok.ejs', {
-				'layout' : 'layout.ejs', 
-				'req' : req, 
-				'res' : res, 
-				'balance' : account.balance()
+			account.deposit(amount, function (err) {
+				res.render('depositok.ejs', {
+					'layout' : 'layout.ejs', 
+					'req' : req, 
+					'res' : res, 
+					'balance' : account.balance()
+				});
+
+				var text = messages.get('kiosk_deposit', {
+					'name' : y.user(user).fullName(), 
+					'deposit' : formatMoney(amount / 100), 
+					'balance' : formatMoney(account.balance() / 100)
+				});
+
+				y.sendMessage(function (error, msg) {
+					var thread = y.thread(msg.threadId());
+					thread.setProperty('type', 'kiosk_deposit');
+					thread.setProperty('status', 'closed');
+					y.persistThread(thread);
+
+				}, text, { 'direct_to' : user });
 			});
-
-			var text = messages.get('kiosk_deposit', {
-				'name' : y.user(user).fullName(), 
-				'deposit' : formatMoney(amount / 100), 
-				'balance' : formatMoney(account.balance() / 100)
-			});
-
-			y.sendMessage(function (error, msg) {
-				var thread = y.thread(msg.threadId());
-				thread.setProperty('type', 'kiosk_deposit');
-				thread.setProperty('status', 'closed');
-				y.persistThread(thread);
-
-			}, text, { 'direct_to' : user });
 		});
 	});
 
 	app.get('/withdraw', function (req, res) {
-		authCheck(req, res);
-		var userId = req.userId;
+		authCheck(req, res, function () {
+			var userId = req.userId;
 
-		res.render('withdraw.ejs', {
-			'layout' : 'layout.ejs', 
-			'req' : req, 
-			'res' : res, 
-			'users' : y.users()
+			res.render('withdraw.ejs', {
+				'layout' : 'layout.ejs', 
+				'req' : req, 
+				'res' : res, 
+				'users' : y.users()
+			});
 		});
 
 	});
 
 	app.post('/withdraw', function (req, res) {
-		authCheck(req, res);
-		var userId = req.userId;
-		var user = parseInt(req.body['user']);
-		var amount = parseInt(req.body['amount'] * 100);
-		var account = accounts.get(user);
+		authCheck(req, res, function () {
+			var userId = req.userId;
+			var user = parseInt(req.body['user']);
+			var amount = parseInt(req.body['amount'] * 100);
+			var account = accounts.get(user);
 
-		account.withdraw(amount, function (err) {
-			res.render('withdrawok.ejs', {
-				'layout' : 'layout.ejs', 
-				'req' : req, 
-				'res' : res, 
-				'balance' : account.balance()
+			account.withdraw(amount, function (err) {
+				res.render('withdrawok.ejs', {
+					'layout' : 'layout.ejs', 
+					'req' : req, 
+					'res' : res, 
+					'balance' : account.balance()
+				});
+
+				var text = messages.get('kiosk_withdraw', {
+					'name' : y.user(user).fullName(), 
+					'withdrawal' : formatMoney(amount / 100), 
+					'balance' : formatMoney(account.balance() / 100)
+				});
+
+				y.sendMessage(function (error, msg) {
+					var thread = y.thread(msg.threadId());
+					thread.setProperty('type', 'kiosk_withdrawal');
+					thread.setProperty('status', 'closed');
+					y.persistThread(thread);
+
+				}, text, { 'direct_to' : user });
 			});
-
-			var text = messages.get('kiosk_withdraw', {
-				'name' : y.user(user).fullName(), 
-				'withdrawal' : formatMoney(amount / 100), 
-				'balance' : formatMoney(account.balance() / 100)
-			});
-
-			y.sendMessage(function (error, msg) {
-				var thread = y.thread(msg.threadId());
-				thread.setProperty('type', 'kiosk_withdrawal');
-				thread.setProperty('status', 'closed');
-				y.persistThread(thread);
-
-			}, text, { 'direct_to' : user });
 		});
 	});
 
 	app.get('/tally', function (req, res) {
-		authCheck(req, res);
-		var userId = req.userId;
+		authCheck(req, res, function () {
+			var userId = req.userId;
 
-		res.render('tally.ejs', {
-			'layout' : 'layout.ejs', 
-			'req' : req, 
-			'res' : res, 
-			'users' : y.users(), 
-			'items' : [
-				items.get('03032ac58f81'), 
-				items.get('72080d0c8bcb')
-			]
+			res.render('tally.ejs', {
+				'layout' : 'layout.ejs', 
+				'req' : req, 
+				'res' : res, 
+				'users' : y.users(), 
+				'items' : [
+					items.get('03032ac58f81'), 
+					items.get('72080d0c8bcb')
+				]
+			});
 		});
 
 	});
 
 	app.post('/tally', function (req, res) {
-		authCheck(req, res);
-		var userId = req.userId;
-		var user = parseInt(req.body['user']);
-		var amount = parseInt(req.body['amount'] * 100);
-		var account = accounts.get(user);
+		authCheck(req, res, function () {
+			var userId = req.userId;
+			var user = parseInt(req.body['user']);
+			var amount = parseInt(req.body['amount'] * 100);
+			var account = accounts.get(user);
 
-		var itemIds = req.body['item'];
-		var marks = req.body['marks'];
+			var itemIds = req.body['item'];
+			var marks = req.body['marks'];
 
-		var total = 0;
+			var total = 0;
 
-		for (var i = 0; i < itemIds.length; i++) {
-			var item = items.get(itemIds[i]);
-			var mark = parseInt(marks[i]);
+			for (var i = 0; i < itemIds.length; i++) {
+				var item = items.get(itemIds[i]);
+				var mark = parseInt(marks[i]);
 
-			if (mark) {
-				total += mark * item.price();
+				if (mark) {
+					total += mark * item.price();
+				}
 			}
-		}
 
-		tallyCarryOver(user, total, function () {
-			res.render('tallyok.ejs', {
-				'layout' : 'layout.ejs', 
-				'req' : req, 
-				'res' : res, 
-				'balance' : account.balance()
+			tallyCarryOver(user, total, function () {
+				res.render('tallyok.ejs', {
+					'layout' : 'layout.ejs', 
+					'req' : req, 
+					'res' : res, 
+					'balance' : account.balance()
+				});
 			});
 		});
 	});
 
 	app.get('/initialize', function (req, res) {
-		authCheck(req, res);
-		var userId = req.userId;
+		authCheck(req, res, function () {
+			var userId = req.userId;
 
-		res.render('initialize.ejs', {
-			'layout' : 'layout.ejs', 
-			'req' : req, 
-			'res' : res, 
-			'users' : y.users()
+			res.render('initialize.ejs', {
+				'layout' : 'layout.ejs', 
+				'req' : req, 
+				'res' : res, 
+				'users' : y.users()
+			});
 		});
 
 	});
 
 	app.post('/initialize', function (req, res) {
-		authCheck(req, res);
-		var userId = req.userId;
-		var user = parseInt(req.body['user']);
-		var amount = parseInt(req.body['amount'] * 100);
-		var account = accounts.get(user);
+		authCheck(req, res, function () {
+			var userId = req.userId;
+			var user = parseInt(req.body['user']);
+			var amount = parseInt(req.body['amount'] * 100);
+			var account = accounts.get(user);
 
-		account.initialize(amount, function (err) {
-			res.render('initializeok.ejs', {
-				'layout' : 'layout.ejs', 
-				'req' : req, 
-				'res' : res, 
-				'balance' : account.balance()
+			account.initialize(amount, function (err) {
+				res.render('initializeok.ejs', {
+					'layout' : 'layout.ejs', 
+					'req' : req, 
+					'res' : res, 
+					'balance' : account.balance()
+				});
+
+				var text = messages.get('kiosk_initialize', {
+					'name' : y.user(user).fullName(), 
+					'balance' : formatMoney(account.balance() / 100)
+				});
+
+				y.sendMessage(function (error, msg) {
+					var thread = y.thread(msg.threadId());
+					thread.setProperty('type', 'kiosk_initialization');
+					thread.setProperty('status', 'closed');
+					y.persistThread(thread);
+
+				}, text, { 'direct_to' : user });
 			});
-
-			var text = messages.get('kiosk_initialize', {
-				'name' : y.user(user).fullName(), 
-				'balance' : formatMoney(account.balance() / 100)
-			});
-
-			y.sendMessage(function (error, msg) {
-				var thread = y.thread(msg.threadId());
-				thread.setProperty('type', 'kiosk_initialization');
-				thread.setProperty('status', 'closed');
-				y.persistThread(thread);
-
-			}, text, { 'direct_to' : user });
 		});
 	});
 
 
 	app.get('/paid/:id', function (req, res) {
-		authCheck(req, res);
-		var userId = req.userId;
+		authCheck(req, res, function () {
+			var userId = req.userId;
 
-		var account = accounts.get(userId);
-		var booking = account.booking(req.params['id']);
-		var item = items.get(booking.itemId());
+			var account = accounts.get(userId);
+			var booking = account.booking(req.params['id']);
+			var item = items.get(booking.itemId());
 
-		res.render('paid.ejs', {
-			'layout' : 'layout.ejs', 
-			'req' : req, 
-			'res' : res, 
-			'account' : accounts.get(userId), 
-			'booking' : booking, 
-			'item' : item
+			res.render('paid.ejs', {
+				'layout' : 'layout.ejs', 
+				'req' : req, 
+				'res' : res, 
+				'account' : accounts.get(userId), 
+				'booking' : booking, 
+				'item' : item
+			});
 		});
 
 	});
 
 	app.get('/account', function (req, res) {
-		authCheck(req, res);
-		var userId = req.userId;
+		authCheck(req, res, function () {
+			var userId = req.userId;
 
-		res.render('account.ejs', {
-			'layout' : 'layout.ejs', 
-			'req' : req, 
-			'res' : res, 
-			'account' : accounts.get(userId)
+			res.render('account.ejs', {
+				'layout' : 'layout.ejs', 
+				'req' : req, 
+				'res' : res, 
+				'account' : accounts.get(userId)
+			});
 		});
 	});
 
@@ -416,35 +429,37 @@ exports.init = function (y, config, messages, cron, logger) {
 	});
 
 	app.get('/booking/:id', function (req, res) {
-		authCheck(req, res);
-		var userId = req.userId;
+		authCheck(req, res, function () {
+			var userId = req.userId;
 
-		var account = accounts.get(userId);
-		var booking = account.booking(req.params['id']);
-		var item = items.get(booking.itemId());
+			var account = accounts.get(userId);
+			var booking = account.booking(req.params['id']);
+			var item = items.get(booking.itemId());
 
-		res.render('booking.ejs', {
-			'layout' : 'layout.ejs', 
-			'req' : req, 
-			'res' : res, 
-			'account' : account, 
-			'booking' : booking, 
-			'item' : item
+			res.render('booking.ejs', {
+				'layout' : 'layout.ejs', 
+				'req' : req, 
+				'res' : res, 
+				'account' : account, 
+				'booking' : booking, 
+				'item' : item
+			});
 		});
 
 	});
 
 	app.get('/item/:id', function (req, res) {
-		authCheck(req, res);
-		var userId = req.userId;
+		authCheck(req, res, function () {
+			var userId = req.userId;
 
-		var item = items.get(req.params['id']);
+			var item = items.get(req.params['id']);
 
-		res.render('item.ejs', {
-			'layout' : 'layout.ejs', 
-			'req' : req, 
-			'res' : res, 
-			'item' : item
+			res.render('item.ejs', {
+				'layout' : 'layout.ejs', 
+				'req' : req, 
+				'res' : res, 
+				'item' : item
+			});
 		});
 
 	});
