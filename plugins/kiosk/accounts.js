@@ -14,6 +14,10 @@ var get = function (userId) {
 	return accounts[userId];
 }
 
+var all = function () {
+	return accounts;
+};
+
 var Account = function (userId) {
 	this._userId = userId;
 	this._accountFile = path.join(exports.dataDir, userId + '.json');
@@ -217,4 +221,5 @@ Account.prototype.archive = function (callback) {
 
 exports.dataDir = null;
 exports.get = get;
+exports.all = all;
 exports.Account = Account;

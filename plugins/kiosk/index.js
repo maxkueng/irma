@@ -464,6 +464,27 @@ exports.init = function (y, config, messages, cron, logger) {
 
 	});
 
+	app.get('/overview', function (req, res) {
+		authCheck(req, res, function () {
+			var userId = req.userId;
+
+			var accs = {};
+			var users = y.users();
+			for (var user in users) {
+				accs[user] = accounts.get(user);
+			}
+
+			res.render('overview.ejs', {
+				'layout' : 'layout.ejs', 
+				'req' : req, 
+				'res' : res, 
+				'accounts' : accs, 
+				'users' : users
+			});
+		});
+
+	});
+
 	var archiveAll = function () {
 		var users = y.users();
 		for (var i in users) {
