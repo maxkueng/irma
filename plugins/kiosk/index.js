@@ -103,7 +103,7 @@ exports.init = function (y, config, messages, cron, logger) {
 		if (typeof req.cookies === 'undefined')  req.cookies = {};
 		var b64URL = new Buffer(req.url).toString('base64');
 		var userId = req.cookies['irmakioskid'];
-		if (!userId) { res.redirect('/login/' + b64URL); return; }
+		if (!userId || !y.user(userId)) { res.redirect('/login/' + b64URL); return; }
 
 		req.userId = userId;
 		callback();
