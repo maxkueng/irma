@@ -63,6 +63,14 @@ Account.prototype._bookingIndex = function (bookingId) {
 	return -1;
 };
 
+Account.prototype.userId = function () {
+	return this._userId;
+};
+
+Account.prototype.id = function () {
+	return this.userId();
+};
+
 Account.prototype.balance = function () {
 	var balance = 0;
 	var bookings = this.bookings();
@@ -175,7 +183,7 @@ Account.prototype.initialize = function (amount, callback) {
 	});
 
 	this.book(booking, function () {
-		callback(false);
+		callback(false, booking.id());
 	});
 
 };
@@ -211,7 +219,7 @@ Account.prototype.archive = function (callback) {
 		});
 
 		self.book(booking, function () {
-			callback(false);		
+			callback(false, booking.id());		
 		});
 	});
 

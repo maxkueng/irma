@@ -14,8 +14,9 @@ var init = function (users) {
 	if (!exports.dataDir) return;
 
 	var logFilePath = path.join(exports.dataDir, logFile);
+		console.log(logFilePath);
 	if (path.existsSync(logFilePath)) {
-		var data = fs.readFileSync(logFilePath);
+		var data = fs.readFileSync(logFilePath, 'utf8');
 		entries = JSON.parse(data);
 		initialized = true;
 		return;
@@ -26,8 +27,10 @@ var init = function (users) {
 		var bookings = account.bookings();
 
 		for (var i = 0; i < bookings.length; i++) {
-			log(null, bookings[i]);
+			entries.push(entry(null, account, bookings[i]));
 		}
+
+		persist();
 	}
 
 	initialized = true;
@@ -41,29 +44,38 @@ var persist = function () {
 	});
 };
 
-var log = function () {
-	var entry = {};
-
-	entry.time = Date.now();
-
+var entry = function () {
+	var e = {};
+	e.time = Date.now();
 	for( var i = 0; i < arguments.length; i++ ) {
-
-		if (i === 0 && arguments[i] && typeof arguments[i] == 'number' && arguments[i] % 1 == 0) {
-			entry.user = arguments[i];
+		if (i === 0 && arguments[i] && arguments[i] % 1 == 0) {
+			e.user = arguments[i];
 			continue;
 		}
 
 		if (arguments[i] && arguments[i] instanceof Booking) {
-			entry.booking = arguments[i].data();
+			e.booking = arguments[i].data();
+			continue;
+		}
+
+		if (arguments[i] && arguments[i] instanceof Account) {
+			e.accountId = arguments[i].id();
 			continue;
 		}
 	}
 
-	if (!entry.user) entry.user = null;
+	if (!e.user) e.user = null;
 
-	entries.push(entry);
+	return e;
+};
+
+var log = function () {
+	var e = entry.apply(this, Array.prototype.slice.call(arguments));
+	entries.push(e);
 	persist();
 };
 
 exports.dataDir = null;
 exports.init = init;
+exports.entries = function () { return entries; };
+exports.log = log;

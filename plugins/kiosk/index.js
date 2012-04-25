@@ -143,7 +143,7 @@ exports.init = function (y, config, messages, cron, logger) {
 			'req' : req, 
 			'res' : res, 
 			'users' : users, 
-			'redirecturl' : req.params['b64url'] || ''
+			'redirecturl' : req.params['b64url'] || '/'
 		});
 	});
 
@@ -168,11 +168,13 @@ exports.init = function (y, config, messages, cron, logger) {
 	app.get('/pay/:itemId', function (req, res) {
 		authCheck(req, res, function () {
 			var userId = req.userId;
+			var account = accounts.get(userId);
 			
 			puchaseItem(userId, req.params['itemId'], function (err, bookingId) {
 				if (err) { res.redirect('/error'); return; }
 
 				res.redirect('/paid/' + bookingId);
+				kioskLogger.log(userId, account, account.booking(bookingId));
 			});
 		});
 	});
@@ -186,6 +188,7 @@ exports.init = function (y, config, messages, cron, logger) {
 				if (err) { res.redirect('/error'); return; }
 
 				res.redirect('/account');
+				kioskLogger.log(userId, account, account.booking(bookingId));
 			});
 		});
 	});
@@ -218,13 +221,15 @@ exports.init = function (y, config, messages, cron, logger) {
 			var amount = parseInt(req.body['amount'] * 100);
 			var account = accounts.get(user);
 
-			account.deposit(amount, function (err) {
+			account.deposit(amount, function (err, bookingId) {
 				res.render('depositok.ejs', {
 					'layout' : 'layout.ejs', 
 					'req' : req, 
 					'res' : res, 
 					'balance' : account.balance()
 				});
+
+				kioskLogger.log(userId, account, account.booking(bookingId));
 
 				var text = messages.get('kiosk_deposit', {
 					'name' : y.user(user).fullName(), 
@@ -264,13 +269,15 @@ exports.init = function (y, config, messages, cron, logger) {
 			var amount = parseInt(req.body['amount'] * 100);
 			var account = accounts.get(user);
 
-			account.withdraw(amount, function (err) {
+			account.withdraw(amount, function (err, bookingId) {
 				res.render('withdrawok.ejs', {
 					'layout' : 'layout.ejs', 
 					'req' : req, 
 					'res' : res, 
 					'balance' : account.balance()
 				});
+
+				kioskLogger.log(userId, account, account.booking(bookingId));
 
 				var text = messages.get('kiosk_withdraw', {
 					'name' : y.user(user).fullName(), 
@@ -328,13 +335,15 @@ exports.init = function (y, config, messages, cron, logger) {
 				}
 			}
 
-			tallyCarryOver(user, total, function () {
+			tallyCarryOver(user, total, function (err, bookingId) {
 				res.render('tallyok.ejs', {
 					'layout' : 'layout.ejs', 
 					'req' : req, 
 					'res' : res, 
 					'balance' : account.balance()
 				});
+
+				kioskLogger.log(userId, account, account.booking(bookingId));
 			});
 		});
 	});
@@ -360,13 +369,15 @@ exports.init = function (y, config, messages, cron, logger) {
 			var amount = parseInt(req.body['amount'] * 100);
 			var account = accounts.get(user);
 
-			account.initialize(amount, function (err) {
+			account.initialize(amount, function (err, bookingId) {
 				res.render('initializeok.ejs', {
 					'layout' : 'layout.ejs', 
 					'req' : req, 
 					'res' : res, 
 					'balance' : account.balance()
 				});
+
+				kioskLogger.log(userId, account, account.booking(bookingId));
 
 				var text = messages.get('kiosk_initialize', {
 					'name' : y.user(user).fullName(), 
@@ -487,7 +498,19 @@ exports.init = function (y, config, messages, cron, logger) {
 				'users' : users
 			});
 		});
+	});
 
+	app.get('/log', function (req, res) {
+		authCheck(req, res, function () {
+			var userId = req.userId;
+
+			res.render('log.ejs', {
+				'layout' : 'layout.ejs', 
+				'req' : req, 
+				'res' : res, 
+				'log' : kioskLogger.entries()
+			});
+		});
 	});
 
 	var archiveAll = function () {
@@ -497,13 +520,15 @@ exports.init = function (y, config, messages, cron, logger) {
 
 				var account = accounts.get(users[_i].id());
 				if (account.bookings().length > 1) {
-					account.archive(function (err) {
+					account.archive(function (err, bookingId) {
 						var now = new Date();
 						var text = messages.get('kiosk_monthly_archive', {
 							'name' : users[_i].fullName(), 
 							'month' : now.toString('MMMM yyyy'), 
 							'balance' : formatMoney(account.balance() / 100)
 						});
+
+						kioskLogger.log(account, account.booking(bookingId));
 
 						y.sendMessage(function (error, msg) {
 							logger.info('kiosk monthly archive for ' + users[_i].username());
@@ -535,7 +560,7 @@ exports.init = function (y, config, messages, cron, logger) {
 		});
 
 		account.book(booking, function () {
-			callback(false);
+			callback(false, booking.id());
 
 			var text = messages.get('kiosk_tally', {
 				'name' : y.user(userId).fullName(), 
