@@ -19,6 +19,9 @@
 		"cron_close" : "0 45 11 * * 5", 
 		"chef_user_id" : "0000000"
 	}, 
+	"spaghetti_autocharge" : {
+		"cron_charge" : "0 0 12 * * 5"
+	}, 
 	"veggie" : {
 		"cron_start" : "0 30 11 * * 5"
 	}, 
