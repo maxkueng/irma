@@ -14,7 +14,6 @@ var init = function (users) {
 	if (!exports.dataDir) return;
 
 	var logFilePath = path.join(exports.dataDir, logFile);
-		console.log(logFilePath);
 	if (path.existsSync(logFilePath)) {
 		var data = fs.readFileSync(logFilePath, 'utf8');
 		entries = JSON.parse(data);
@@ -27,7 +26,9 @@ var init = function (users) {
 		var bookings = account.bookings();
 
 		for (var i = 0; i < bookings.length; i++) {
-			entries.push(entry(null, account, bookings[i]));
+			var e = entry(null, account, bookings[i]);
+			e.time = bookings[i].time();
+			entries.push(e);
 		}
 
 		persist();
@@ -46,7 +47,6 @@ var persist = function () {
 
 var entry = function () {
 	var e = {};
-	e.time = Date.now();
 	for( var i = 0; i < arguments.length; i++ ) {
 		if (i === 0 && arguments[i] && arguments[i] % 1 == 0) {
 			e.user = arguments[i];
@@ -71,6 +71,7 @@ var entry = function () {
 
 var log = function () {
 	var e = entry.apply(this, Array.prototype.slice.call(arguments));
+	e.time = Date.now();
 	entries.push(e);
 	persist();
 };
