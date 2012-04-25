@@ -46,6 +46,11 @@ exports.init = function (y, config, messages, cron, logger) {
 	var Account = accounts.Account;
 	var bookings = require('./bookings');
 	var Booking = bookings.Booking;
+	var kioskLogger = require('./logger');
+	kioskLogger.dataDir = dataDir;
+	y.on('usersloaded', function () {
+		kioskLogger.init(y.users());
+	});
 
 	items.add(new Item({
 		'id' : '03032ac58f81', 
