@@ -84,7 +84,9 @@ Account.prototype.balance = function () {
 
 Account.prototype.book = function (booking, callback) {
 	this._bookings.push(booking.data());
-	this._persist(callback);
+	this._persist(function () {
+		callback(false, booking.id());		
+	});
 };
 
 Account.prototype.updateBooking = function (bookingId, booking, callback) {

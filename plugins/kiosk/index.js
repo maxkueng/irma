@@ -296,6 +296,44 @@ exports.init = function (y, config, messages, cron, logger) {
 		});
 	});
 
+	app.get('/stock', function (req, res) {
+		authCheck(req, res, function () {
+			var userId = req.userId;
+
+			res.render('stock.ejs', {
+				'layout' : 'layout.ejs', 
+				'req' : req, 
+				'res' : res
+			});
+		});
+
+	});
+
+	app.post('/stock', function (req, res) {
+		authCheck(req, res, function () {
+			var userId = req.userId;
+			var amount = parseInt(req.body['amount'] * 100);
+			var description = req.body['description'];
+			var account = accounts.get(userId);
+
+			var booking = new Booking({
+				'id' : bookings.uuid(), 
+				'itemId' : null, 
+				'time' : Date.now(), 
+				'amount' : amount, 
+				'name' : 'Stock', 
+				'description' : description, 
+				'type' : 'stock'
+			});
+
+			account.book(booking, function (err, bookingId) {
+				res.redirect('/account');
+				kioskLogger.log(userId, account, account.booking(bookingId));
+			});
+
+		});
+	});
+
 	app.get('/tally', function (req, res) {
 		authCheck(req, res, function () {
 			var userId = req.userId;

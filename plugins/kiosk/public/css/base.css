@@ -36,6 +36,7 @@ ul.items li.item a .description {
 	color: #333;
 }
 
+ul.items li.item a i, 
 ul.items li.item a .price {
 	display: block;
 	position: absolute;
@@ -44,6 +45,20 @@ ul.items li.item a .price {
 	bottom: 14px;
 	font-size: 36px;
 	font-weight: bold;
+}
+
+ul.items li.item.stock a {
+	background-color: #414141;
+}
+
+ul.items li.item.stock a .name, 
+ul.items li.item.stock a .description {
+	color: #fff;
+}
+
+ul.items li.item.stock a:hover, 
+ul.items li.item.stock a:active {
+	background-color: #000;
 }
 
 p.balance {
