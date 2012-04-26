@@ -63,7 +63,7 @@ exports.init = function (y, config, messages, cron, logger) {
 
 										}, text, { 'direct_to' : userId });
 
-										kioskLogger.log(userId, account, account.booking(bookingId));
+										kioskLogger.log(null, account, account.booking(bookingId));
 									});
 
 								})(i);
