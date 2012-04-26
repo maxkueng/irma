@@ -454,9 +454,10 @@ exports.init = function (y, config, messages, cron, logger) {
 
 	});
 
-	app.get('/account', function (req, res) {
+	app.get('/account/:user?', function (req, res) {
 		authCheck(req, res, function () {
 			var userId = req.userId;
+			if (req.params['user']) userId = parseInt(req.params['user']);
 
 			res.render('account.ejs', {
 				'layout' : 'layout.ejs', 

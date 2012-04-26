@@ -22,7 +22,7 @@
 				</span>
 				<span class="account">
 				<% if (users[log[i].accountId]) { %>
-				<%= users[log[i].accountId].fullName() %>
+				<a href="/account/<%= log[i].accountId %>"><%= users[log[i].accountId].fullName() %></a>
 				<% } else { %>
 				<em>Unknown</em>
 				<% } %>
