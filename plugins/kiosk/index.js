@@ -546,7 +546,8 @@ exports.init = function (y, config, messages, cron, logger) {
 				'layout' : 'layout.ejs', 
 				'req' : req, 
 				'res' : res, 
-				'log' : kioskLogger.entries()
+				'log' : kioskLogger.entries(), 
+				'users' : y.users()
 			});
 		});
 	});

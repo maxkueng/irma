@@ -13,8 +13,20 @@
 		<div class="row">
 			<div class="span12">
 				<span class="time"><time><%=: log[i].time | isodate %></time></span>
-				<span class="user"><%= log[i].user %></span>
-				<span class="account"><%= log[i].accountId %></span>
+				<span class="user">
+				<% if (users[log[i].user]) { %>
+				<%= users[log[i].user].fullName() %>
+				<% } else { %>
+				<em>Unknown</em>
+				<% } %>
+				</span>
+				<span class="account">
+				<% if (users[log[i].accountId]) { %>
+				<%= users[log[i].accountId].fullName() %>
+				<% } else { %>
+				<em>Unknown</em>
+				<% } %>
+				</span>
 				<% if (log[i].booking) { %>
 				<div class="booking">
 					<pre><%= JSON.stringify(log[i].booking) %></pre>
