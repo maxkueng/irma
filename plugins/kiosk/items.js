@@ -22,7 +22,10 @@ Item.prototype.name = function () { return this._data.name; };
 Item.prototype.description = function () { return this._data.description; };
 Item.prototype.price = function () { return this._data.price; };
 Item.prototype.displayPrice = function () { return this._data.displayPrice; };
-Item.prototype.isBuyable = function () { return this._data.buyable; };
+Item.prototype.unit = function () { return this._data.unit; };
+Item.prototype.ration = function () { return this._data.ration; };
+Item.prototype.isBuyable = function () { return (this._data.buyable === true); };
+Item.prototype.isStockable = function () { return (this._data.stockable === true); };
 
 exports.Item = Item;
 exports.get = get;

@@ -46,6 +46,9 @@ exports.init = function (y, config, messages, cron, logger) {
 	var Account = accounts.Account;
 	var bookings = require('./bookings');
 	var Booking = bookings.Booking;
+	var stocks = require('./stocks');
+	stocks.dataDir = dataDir;
+	var Stock = stocks.Stock;
 	var kioskLogger = require('./logger');
 	kioskLogger.dataDir = dataDir;
 	y.on('usersloaded', function () {
@@ -58,7 +61,10 @@ exports.init = function (y, config, messages, cron, logger) {
 		'description' : 'Spaghetti for one person', 
 		'price' : 300, 
 		'displayPrice' : '3.-', 
-		'buyable' : true
+		'buyable' : true, 
+		'stockable' : true, 
+		'unit' : 'Grams', 
+		'ration' : 150
 	}));
 
 	items.add(new Item({
@@ -183,9 +189,26 @@ exports.init = function (y, config, messages, cron, logger) {
 		authCheck(req, res, function () {
 			var userId = req.userId;
 			var account = accounts.get(userId);
+			var oldBooking = account.booking(req.params['bookingId']);
 			
-			account.reverse(req.params['bookingId'], function (err, bookingId) {
+			account.reverse(oldBooking.id(), function (err, bookingId) {
 				if (err) { res.redirect('/error'); return; }
+				var booking = account.booking(bookingId);
+
+				if (oldBooking.itemId()) {
+					var item = items.get(oldBooking.itemId());
+
+					if (item.isStockable()) {
+						var stock = stocks.get(item.id());
+						var stockUpdate = stock.updateByBookingId(req.params['bookingId'])
+
+						stock.update({
+							'bookingId' : booking.id(), 
+							'type' : 'reverse', 
+							'change' : stockUpdate.change * -1
+						});
+					}
+				}
 
 				res.redirect('/account');
 				kioskLogger.log(userId, account, account.booking(bookingId));
@@ -300,10 +323,18 @@ exports.init = function (y, config, messages, cron, logger) {
 		authCheck(req, res, function () {
 			var userId = req.userId;
 
+			var allItems = items.all();
+			var stockableItems = [];
+			for (var itemId in allItems) {
+				var item = items.get(itemId);
+				if (item.isStockable()) stockableItems.push(item);
+			}
+
 			res.render('stock.ejs', {
 				'layout' : 'layout.ejs', 
 				'req' : req, 
-				'res' : res
+				'res' : res, 
+				'stockableItems' : stockableItems
 			});
 		});
 
@@ -362,27 +393,57 @@ exports.init = function (y, config, messages, cron, logger) {
 			var itemIds = req.body['item'];
 			var marks = req.body['marks'];
 
-			var total = 0;
+			var wait = itemIds.length -1;
 
 			for (var i = 0; i < itemIds.length; i++) {
-				var item = items.get(itemIds[i]);
-				var mark = parseInt(marks[i]);
+				(function (_i) {
+					var item = items.get(itemIds[_i]);
+					var mark = parseInt(marks[_i]);
 
-				if (mark) {
-					total += mark * item.price();
-				}
+					if (mark) {
+						var rec = {
+							'item' : item, 
+							'marks' : mark, 
+							'total' : mark * item.price()
+						};
+
+						tallyCarryOver(user, rec, function (err, bookingId) {
+							kioskLogger.log(userId, account, account.booking(bookingId));
+
+							if (item.isStockable()) {
+								var stock = stocks.get(item.id());
+								stock.update({
+									'bookingId' : bookingId, 
+									'type' : 'consumption', 
+									'change' : item.ration() * rec.marks * -1
+								});
+							}
+
+							if (! --wait) {
+								res.render('tallyok.ejs', {
+									'layout' : 'layout.ejs', 
+									'req' : req, 
+									'res' : res, 
+									'balance' : account.balance()
+								});
+
+								var text = messages.get('kiosk_tally', {
+									'name' : y.user(userId).fullName(), 
+									'balance' : formatMoney(account.balance() / 100)
+								});
+
+								y.sendMessage(function (error, msg) {
+									var thread = y.thread(msg.threadId());
+									thread.setProperty('type', 'kiosk_tally_carry_over');
+									thread.setProperty('status', 'closed');
+									y.persistThread(thread);
+
+								}, text, { 'direct_to' : userId });
+							}
+						});
+					}
+				})(i);
 			}
-
-			tallyCarryOver(user, total, function (err, bookingId) {
-				res.render('tallyok.ejs', {
-					'layout' : 'layout.ejs', 
-					'req' : req, 
-					'res' : res, 
-					'balance' : account.balance()
-				});
-
-				kioskLogger.log(userId, account, account.booking(bookingId));
-			});
 		});
 	});
 
@@ -553,6 +614,30 @@ exports.init = function (y, config, messages, cron, logger) {
 		});
 	});
 
+	app.get('/stocklist', function (req, res) {
+		authCheck(req, res, function () {
+			var userId = req.userId;
+
+			var itemList = items.all();
+			var stockItems = [];
+			for (var itemId in itemList) {
+				if (itemList[itemId].isStockable()) {
+					stockItems.push({
+						'item' : itemList[itemId], 
+						'stock' : stocks.get(itemId)
+					});
+				}
+			}
+
+			res.render('stocklist.ejs', {
+				'layout' : 'layout.ejs', 
+				'req' : req, 
+				'res' : res, 
+				'stockItems' : stockItems
+			});
+		});
+	});
+
 	var archiveAll = function () {
 		var users = y.users();
 		for (var i in users) {
@@ -585,15 +670,15 @@ exports.init = function (y, config, messages, cron, logger) {
 		}
 	};
 
-	var tallyCarryOver = function (userId, total, callback) {
+	var tallyCarryOver = function (userId, rec, callback) {
 		var account = accounts.get(userId);
 
 		var booking = new Booking({
 			'id' : bookings.uuid(), 
 			'itemId' : null, 
 			'time' : Date.now(), 
-			'amount' : total * -1, 
-			'name' : 'Tally carry over', 
+			'amount' : rec.total * -1, 
+			'name' : rec.marks + ' x ' + rec.item.name(), 
 			'description' : 'Tally list carry over', 
 			'type' : 'tally carry over', 
 			'admin' : true
@@ -601,19 +686,6 @@ exports.init = function (y, config, messages, cron, logger) {
 
 		account.book(booking, function () {
 			callback(false, booking.id());
-
-			var text = messages.get('kiosk_tally', {
-				'name' : y.user(userId).fullName(), 
-				'balance' : formatMoney(account.balance() / 100)
-			});
-
-			y.sendMessage(function (error, msg) {
-				var thread = y.thread(msg.threadId());
-				thread.setProperty('type', 'kiosk_tally_carry_over');
-				thread.setProperty('status', 'closed');
-				y.persistThread(thread);
-
-			}, text, { 'direct_to' : userId });
 		});
 	};
 
@@ -635,6 +707,15 @@ exports.init = function (y, config, messages, cron, logger) {
 
 		account.book(booking, function () {
 			callback(false, booking.id());		
+
+			if (item.isStockable()) {
+				var stock = stocks.get(item.id());
+				stock.update({
+					'bookingId' : booking.id(), 
+					'type' : 'consumption', 
+					'change' : item.ration() * -1
+				});
+			}
 		});
 	};
 

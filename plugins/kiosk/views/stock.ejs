@@ -16,6 +16,22 @@
 		</div>
 
 		<div class="control-group">
+			<label for="select-item">What?</label>
+			<select name="item" class="span2">
+			<% for (var i = 0; i < stockableItems.length; i++) { %>
+			<option value="<%= stockableItems[i].id() %>"><%= stockableItems[i].name() %></option>
+			<% } %>
+			</select>
+		</div>
+
+		<% for (var i = 0; i < stockableItems.length; i++) { %>
+		<div class="control-group">
+			<label for="input-unit"><%= stockableItems[i].unit() %></label>
+			<input id="input-unit" name="description" type="number" placeholder="<%= stockableItems[i].unit() %>" class="span2" />
+		</div>
+		<% } %>
+
+		<div class="control-group">
 			<label for="input-description">What?</label>
 			<input id="input-description" name="description" type="text" placeholder="e.g. Spaghetti" class="span2" />
 		</div>
