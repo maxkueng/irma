@@ -9,6 +9,8 @@ exports.init = function (y, config, messages, cron, logger) {
 	var items = require('./kiosk/items');
 	var Item = items.Item;
 	var kioskLogger = require('./kiosk/logger');
+	var stocks = require('./stocks');
+	var Stock = stocks.Stock;
 
 	messages.add('spaghetti_autocharge_notify', "Hey [name], I have automatically charged your digital kiosk account with CHF [price] for spaghetti.");
 
@@ -62,6 +64,15 @@ exports.init = function (y, config, messages, cron, logger) {
 											y.persistThread(thread);
 
 										}, text, { 'direct_to' : userId });
+
+										if (item.isStockable()) {
+											var stock = stocks.get(item.id());
+											stock.update({
+												'bookingId' : bookingId, 
+												'type' : 'consumption', 
+												'change' : item.ration() * -1
+											});
+										}
 
 										kioskLogger.log(null, account, account.booking(bookingId));
 									});
