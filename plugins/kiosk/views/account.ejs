@@ -31,7 +31,7 @@ var posneg = (balance < 0) ? 'negative' : 'positive';
 		for (var i = bookings.length -1; i >= 0; --i) { %>
 		<tr id="booking-<%= bookings[i].id() %>">
 			<td><a href="/booking/<%= bookings[i].id() %>"><time><%-: bookings[i].time() | isodate_short %></time></a></td>
-			<td><%= bookings[i].name() %> 
+			<td><%=: bookings[i].name() | truncate:17 %> 
 			<% if (bookings[i].reversed()) { %>
 				<span class="label label-important">reversed</span> 
 			<% } %>
