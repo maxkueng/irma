@@ -9,7 +9,7 @@ exports.init = function (y, config, messages, cron, logger) {
 	var items = require('./kiosk/items');
 	var Item = items.Item;
 	var kioskLogger = require('./kiosk/logger');
-	var stocks = require('./stocks');
+	var stocks = require('./kiosk/stocks');
 	var Stock = stocks.Stock;
 
 	messages.add('spaghetti_autocharge_notify', "Hey [name], I have automatically charged your digital kiosk account with CHF [price] for spaghetti.");
