@@ -345,20 +345,42 @@ exports.init = function (y, config, messages, cron, logger) {
 			var userId = req.userId;
 			var amount = parseInt(req.body['amount'] * 100);
 			var description = req.body['description'];
+			var itemId = req.body['item'];
+			var stockChange = parseInt(req.body['stock']);
+			var restockmode = req.body['restockmode'];
 			var account = accounts.get(userId);
+			var item = null;
+			console.log('rsm', restockmode);
+			if (restockmode == 'item') item = items.get(itemId);
+
+			var bookingName = 'Stock';
+			if (item && item.isStockable()) bookingName += ': ' + item.name();
+			if (!item && description) bookingName += ': ' + description;
 
 			var booking = new Booking({
 				'id' : bookings.uuid(), 
 				'itemId' : null, 
 				'time' : Date.now(), 
 				'amount' : amount, 
-				'name' : 'Stock', 
-				'description' : description, 
+				'name' : bookingName, 
+				'description' : (item && item.isStockable()) ? item.name() + ': ' + stockChange + ' ' + item.unit() : description, 
 				'type' : 'stock'
 			});
 
 			account.book(booking, function (err, bookingId) {
 				res.redirect('/account');
+
+				if (restockmode == 'item') {
+					if (item && item.isStockable()) {
+						var stock = stocks.get(item.id());
+						stock.update({
+							'bookingId' : bookingId, 
+							'type' : 'restock', 
+							'change' : stockChange
+						});
+					}
+				}
+
 				kioskLogger.log(userId, account, account.booking(bookingId));
 			});
 

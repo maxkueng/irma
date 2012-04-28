@@ -10,33 +10,40 @@
 <div class="row">
 	<div class="span12">
 		<form action="/stock" method="post" class="" >
-		<div class="control-group">
+		<div class="control-group" id="ctrl-amount">
 			<label for="input-amount">Amount</label>
 			<input id="input-amount" name="amount" type="number" placeholder="CHF" class="span2" />
 		</div>
 
-		<div class="control-group">
-			<label for="select-item">What?</label>
-			<select name="item" class="span2">
-			<% for (var i = 0; i < stockableItems.length; i++) { %>
-			<option value="<%= stockableItems[i].id() %>"><%= stockableItems[i].name() %></option>
-			<% } %>
-			</select>
-		</div>
+		<script type="text/javascript">
+		var stockableItems = <%- JSON.stringify(stockableItems) %>
+		</script>
 
-		<% for (var i = 0; i < stockableItems.length; i++) { %>
-		<div class="control-group">
-			<label for="input-unit"><%= stockableItems[i].unit() %></label>
-			<input id="input-unit" name="description" type="number" placeholder="<%= stockableItems[i].unit() %>" class="span2" />
-		</div>
-		<% } %>
-
-		<div class="control-group">
+		<div class="control-group" id="ctrl-description">
 			<label for="input-description">What?</label>
-			<input id="input-description" name="description" type="text" placeholder="e.g. Spaghetti" class="span2" />
+			<div style="float: right;">
+				<a href="#" type="button" class="btn toggle"><i class="icon-list"></i></a>
+			</div>
+			<div style="margin-right: 40px;">
+				<div id="wrapper-description">
+					<input id="input-description" name="description" type="text" placeholder="e.g. Farmers" class="span2" />
+				</div>
+				<div id="wrapper-item">
+					<select id="select-item" name="item" class="span2">
+					<% for (var i = 0; i < stockableItems.length; i++) { %>
+						<option value="<%= stockableItems[i]._data.id %>"><%= stockableItems[i]._data.name %></option>
+					<% } %>
+					</select>
+					<div id="wrapper-stock" style="margin-right: -40px;">
+						<label for="input-stock"></label>
+						<input id="input-stock" name="stock" type="number" placeholder="" class="span2" />
+					</div>
+				</div>
+			</div>
 		</div>
 
 		<div class="form-actions">
+			<input id="restock-mode" type="hidden" name="restockmode" value="text" />
             <button class="btn btn-primary" type="submit">Stock</button>
           </div>
 		</form>
@@ -52,3 +59,45 @@
 	</div>
 </div>
 </footer>
+
+<script type="text/javascript">
+(function ($) {
+
+	$(document).ready(function () {
+		var showDescriptionInput = function () {
+			$('#wrapper-item').hide();
+			$('#wrapper-description').show();
+			$('a.toggle i').removeClass('icon-pencil').addClass('icon-list');
+			$('#restock-mode').val('text');
+		};
+
+		var showItemSelect = function () {
+			$('#wrapper-description').hide();
+			$('#wrapper-item').show();
+			$('a.toggle i').removeClass('icon-list').addClass('icon-pencil');
+			$('#restock-mode').val('item');
+		};
+
+		$('a.toggle').click(function (event) {
+			event.preventDefault();
+
+			if ($('#restock-mode').val() == 'text') {
+				showItemSelect();
+			} else {
+				showDescriptionInput();
+			}
+		});
+
+		$('#select-item').change(function (event) {
+			var idx = $('#select-item').prop('selectedIndex');
+			$('#wrapper-stock label').text(stockableItems[idx]._data.unit);
+			$('#wrapper-stock input').attr('placeholder', stockableItems[idx]._data.unit);
+		});
+		$('#select-item').change();
+
+		showItemSelect();
+	});
+
+
+})(jQuery);
+</script>
