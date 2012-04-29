@@ -350,7 +350,6 @@ exports.init = function (y, config, messages, cron, logger) {
 			var restockmode = req.body['restockmode'];
 			var account = accounts.get(userId);
 			var item = null;
-			console.log('rsm', restockmode);
 			if (restockmode == 'item') item = items.get(itemId);
 
 			var bookingName = 'Stock';
