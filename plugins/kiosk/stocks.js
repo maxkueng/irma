@@ -72,13 +72,13 @@ Stock.prototype.updateByBookingId = function (bookingId) {
 Stock.prototype.info = function () {
 	var updates = this._updates;
 	var total = 0;
-	var days = [];
+	var weeks = [];
 	for (var i = 0; i < updates.length; i++) {
 		var update = updates[i];
 		if (update.type != 'consumption' && update.type != 'reverse') continue;
 
-		var day = new Date(update.time).toString('yyyy-MM-dd');
-		if (days.indexOf(day) == -1) days.push(day);
+		var week = new Date(update.time).toString('yyyy-') + new Date(update.time).getISOWeek();
+		if (weeks.indexOf(week) == -1) weeks.push(week);
 
 		if (update.type == 'consumption') total++;
 		if (update.type == 'reverse') total--;
@@ -86,13 +86,13 @@ Stock.prototype.info = function () {
 
 	var stock = this.stock();
 	var item = items.get(this._itemId);
-	var avgRations = total / days.length;
+	var avgRations = total / weeks.length;
 	var avgUnits = avgRations * item.ration();
-	var percent = 100 / (avgUnits * 2) * stock;
+	var percent = 100 / (avgUnits * 3) * stock;
 	var health = 'perfect';
-	if (percent < 101) health = 'good';
-	if (percent < 60) health = 'critical';
-	if (percent < 40) health = 'bad';
+	if (percent < 100) health = 'good';
+	if (percent < 50) health = 'critical';
+	if (percent < 30) health = 'bad';
 
 	return {
 		'stock' : stock, 
