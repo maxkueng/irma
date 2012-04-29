@@ -11,7 +11,7 @@
 	<div class="span12">
 		<% for (var i = log.length -1; i >= 0; i--) { %>
 		<div class="row">
-			<div class="span12">
+			<div class="span12 well">
 				<span class="time"><time><%=: log[i].time | isodate %></time></span>
 				<span class="user">
 				<% if (users[log[i].user]) { %>
@@ -27,6 +27,15 @@
 				<em>Unknown</em>
 				<% } %>
 				</span>
+				<% if (log[i].booking && log[i].booking.automatic) { %>
+				<span class="label">automatic</span>
+				<% } %>
+				<% if (log[i].booking && log[i].booking.admin) { %>
+				<span class="label label-info">admin</span>
+				<% } %>
+				<% if (log[i].booking && log[i].booking.reversed) { %>
+				<span class="label label-important">reversed</span>
+				<% } %>
 				<% if (log[i].booking) { %>
 				<div class="booking">
 					<pre><%= JSON.stringify(log[i].booking) %></pre>
