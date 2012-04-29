@@ -1,6 +1,6 @@
 {
 	"name" : "irma",
-	"description" : "Interactive Romotic Messaging Assistant. It's a Yammer bot!",
+	"description" : "Interactive Robotic Messaging Assistant. It's a Yammer bot!",
 	"version" : "0.1.0",
 	"homepage" : "http://maxkueng.com/irma",
 	"repository" : {
