@@ -641,12 +641,13 @@ exports.init = function (y, config, messages, cron, logger) {
 			var userId = req.userId;
 
 			var itemList = items.all();
-			var stockItems = [];
+			var info = [];
 			for (var itemId in itemList) {
 				if (itemList[itemId].isStockable()) {
-					stockItems.push({
-						'item' : itemList[itemId], 
-						'stock' : stocks.get(itemId)
+					var stock = stocks.get(itemId);
+					info.push({
+						'info' : stock.info(), 
+						'item' : itemList[itemId]
 					});
 				}
 			}
@@ -655,7 +656,7 @@ exports.init = function (y, config, messages, cron, logger) {
 				'layout' : 'layout.ejs', 
 				'req' : req, 
 				'res' : res, 
-				'stockItems' : stockItems
+				'stockInfo' : info
 			});
 		});
 	});
@@ -739,6 +740,17 @@ exports.init = function (y, config, messages, cron, logger) {
 				});
 			}
 		});
+	};
+
+	var allBookings = function () {
+		var b = [];
+		var users = y.users();
+		for (var userId in users) {
+			var account = accounts.get(userId);
+			b = b.concat(account.bookings());
+		}
+
+		return b;
 	};
 
 };

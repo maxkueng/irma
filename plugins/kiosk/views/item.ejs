@@ -15,7 +15,11 @@
 			<dt>Name</dt>
 			<dd><%= item.name() %></dd>
 			<dt>Description</dt>
-			<dd><%= item.description() %></dd>
+				<% if (item.isStockable()) { %>
+				<dd><%= item.ration() %> <%=: item.unit() | downcase %></dd>
+				<% } else { %>
+				<dd><%= item.description() %></dd>
+				<% } %>
 			<dt>Price</dt>
 			<dd><%= item.displayPrice() %></dd>
 		</dl>

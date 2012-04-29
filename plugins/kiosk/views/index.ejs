@@ -14,7 +14,11 @@
 		<div class="span12">
 			<a href="/pay/<%= id %>">
 				<span class="name"><%= items[id].name() %></span>
+				<% if (items[id].isStockable()) { %>
+				<span class="description"><%= items[id].ration() %> <%=: items[id].unit() | downcase %></span>
+				<% } else { %>
 				<span class="description"><%= items[id].description() %></span>
+				<% } %>
 				<span class="price"><%= items[id].displayPrice() %></span>
 			</a>
 		</div>

@@ -91,7 +91,7 @@
 		$('#select-item').change(function (event) {
 			var idx = $('#select-item').prop('selectedIndex');
 			$('#wrapper-stock label').text(stockableItems[idx]._data.unit);
-			$('#wrapper-stock input').attr('placeholder', stockableItems[idx]._data.unit);
+			$('#wrapper-stock input').attr('placeholder', stockableItems[idx]._data.unit.toLowerCase());
 		});
 		$('#select-item').change();
 
