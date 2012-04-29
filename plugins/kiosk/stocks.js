@@ -1,6 +1,5 @@
 require('datejs');
 var items = require('./items');
-var Item = items.Item;
 var path = require('path');
 var fs = require('fs');
 var stocks = {};
