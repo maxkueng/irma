@@ -449,7 +449,7 @@ exports.init = function (y, config, messages, cron, logger) {
 								});
 
 								var text = messages.get('kiosk_tally', {
-									'name' : y.user(userId).fullName(), 
+									'name' : y.user(user).fullName(), 
 									'balance' : formatMoney(account.balance() / 100)
 								});
 
@@ -459,7 +459,7 @@ exports.init = function (y, config, messages, cron, logger) {
 									thread.setProperty('status', 'closed');
 									y.persistThread(thread);
 
-								}, text, { 'direct_to' : userId });
+								}, text, { 'direct_to' : user });
 							}
 						});
 					}
