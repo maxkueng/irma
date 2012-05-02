@@ -10,7 +10,6 @@ exports.init = function (y, config, messages, cron, logger) {
 	messages.add('spaghetti_chef', "[chef_name], [count] mouths to feed! Hurry!!");
 
 	messages.add('spaghetti_threadclosed', "Sorry, you're to late.");
-	messages.add('spaghetti_threadclosed', "Too late!");
 
 	var yammer_account = config.yammer[config.yammer_account];
 
