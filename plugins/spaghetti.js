@@ -5,6 +5,7 @@ exports.init = function (y, config, messages, cron, logger) {
 	messages.add('spaghetti_opening', "Spaghetti for lunch? Like this message if you'd like to join.");
 
 	messages.add('spaghetti_closing', "Mamma mia ramba zamba! [count] hungry monkeys?? \nThe following are registered for lunch: [joiners]");
+	messages.add('spaghetti_closing', "Ooooooohh! [count] hungry monkeys?? \nThe following are registered for lunch: [joiners]");
 
 	messages.add('spaghetti_chef', "[chef_name], [count] mouths to feed! Hurry!!");
 
