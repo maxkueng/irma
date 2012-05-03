@@ -7,6 +7,8 @@ exports.init = function (y, config, messages, cron, logger) {
 	messages.add('spaghetti_closing', "Mamma mia ramba zamba! [count] hungry monkeys?? \nThe following are registered for lunch: [joiners]");
 	messages.add('spaghetti_closing', "Ooooooohh! [count] hungry monkeys?? \nThe following are registered for lunch: [joiners]");
 
+	messages.add('spaghetti_notenough', "A minimum of 5 joiners is required to justify the effort of making spaghetti. There will be no spaghetti today. Sorry");
+
 	messages.add('spaghetti_chef', "[chef_name], [count] mouths to feed! Hurry!!");
 
 	messages.add('spaghetti_threadclosed', "Sorry, you're to late.");
@@ -41,13 +43,13 @@ exports.init = function (y, config, messages, cron, logger) {
 						var joinersCount = message.likes();
 						var joinerNames = message.likers();
 						var joiners = [];
+						var joinerIds = [];
+						var joinersList = '';
 						
 						for (var i = 0; i < joinerNames.length; i++) {
 							joiners.push(y.userByName(joinerNames[i]));
 						}
 
-						var joinerIds = [];
-						var joinersList = '';
 						for (var i in joiners) {
 							var user = joiners[i];
 							joinerIds.push(user.id());
@@ -59,18 +61,33 @@ exports.init = function (y, config, messages, cron, logger) {
 							joinersList += user.username();
 						}
 
-						var closingMessage = messages.get('spaghetti_closing', {
-							'count' : joiners.length, 
-							'joiners' : joinersList
-						});
+						if (joinerIds.length < 5) {
+							var notenoughMessage = messages.get('spaghetti_notenough');
+							y.sendMessage(function (error, message) {
+								logger.info('spaghetti notenough message OK: ' + message.id());
 
-						y.sendMessage(function (error, message) {
-							logger.info('spaghetti closing message OK: ' + message.id());
+								th.setProperty('joiners', joinerIds);
+								th.setProperty('status', 'closed');
+								th.setProperty('charged', true);
+								y.persistThread(th);
+							}, notenoughMessage, { 'reply_to' : th.messageId() });
 
-							th.setProperty('joiners', joinerIds);
-							th.setProperty('status', 'closed');
-							y.persistThread(th);
-						}, closingMessage, { 'reply_to' : th.messageId() });
+						} else {
+
+							var closingMessage = messages.get('spaghetti_closing', {
+								'count' : joiners.length, 
+								'joiners' : joinersList
+							});
+
+							y.sendMessage(function (error, message) {
+								logger.info('spaghetti closing message OK: ' + message.id());
+
+								th.setProperty('joiners', joinerIds);
+								th.setProperty('status', 'closed');
+								y.persistThread(th);
+							}, closingMessage, { 'reply_to' : th.messageId() });
+						
+						}
 
 					});
 				}
