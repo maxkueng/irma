@@ -8,6 +8,7 @@ exports.init = function (y, config, messages, cron, logger) {
 	messages.add('spaghetti_closing', "Ooooooohh! [count] hungry monkeys?? \nThe following are registered for lunch: [joiners]");
 
 	messages.add('spaghetti_notenough', "A minimum of 5 joiners is required to justify the effort of making spaghetti. There will be no spaghetti today. Sorry");
+	messages.add('spaghetti_noone', "Noone?? Alright then... ;(");
 
 	messages.add('spaghetti_chef', "[chef_name], [count] mouths to feed! Hurry!!");
 
@@ -61,7 +62,18 @@ exports.init = function (y, config, messages, cron, logger) {
 							joinersList += user.username();
 						}
 
-						if (joinerIds.length < 5) {
+						if (joinerIds.length == 0) {
+							var nooneMessage = messages.get('spaghetti_noone');
+							y.sendMessage(function (error, message) {
+								logger.info('spaghetti noone message OK: ' + message.id());
+
+								th.setProperty('joiners', joinerIds);
+								th.setProperty('status', 'closed');
+								th.setProperty('charged', true);
+								y.persistThread(th);
+							}, nooneMessage, { 'reply_to' : th.messageId() });
+
+						} else if (joinerIds.length < 5) {
 							var notenoughMessage = messages.get('spaghetti_notenough');
 							y.sendMessage(function (error, message) {
 								logger.info('spaghetti notenough message OK: ' + message.id());
