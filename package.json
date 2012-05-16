@@ -19,6 +19,9 @@
 		"request" : ">=2.9.0", 
 		"aspsms" : "*"
 	}, 
+	"scripts" : {
+		"start" : "node src/bot.js"
+	}, 
 	"licenses" : [ 
 		{ 
 			"type" : "MIT", 
