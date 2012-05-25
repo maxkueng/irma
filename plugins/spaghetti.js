@@ -5,7 +5,7 @@ exports.init = function (y, config, messages, cron, logger) {
 	messages.add('spaghetti_opening', "Spaghetti for lunch? Like this message if you'd like to join.");
 
 	messages.add('spaghetti_closing', "Mamma mia ramba zamba! [count] hungry monkeys?? \nThe following are registered for lunch: [joiners]");
-	messages.add('spaghetti_closing', "Ooooooohh! [count] hungry monkeys?? \nThe following are registered for lunch: [joiners]");
+	messages.add('spaghetti_closing', "Ooooohh! [count] hungry monkeys?? \nThe following are registered for lunch: [joiners]");
 
 	messages.add('spaghetti_notenough', "Ooh, [count] is not enough. A minimum of 5 joiners is required to justify the effort of making spaghetti. There will be no spaghetti today. Sorry");
 	messages.add('spaghetti_noone', "Noone?? Alright then... ;(");
