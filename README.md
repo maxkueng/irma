@@ -61,13 +61,13 @@ cd irma
 Install dependencies:
 
 ```sh
-sudo npm install . -g
+npm install
 ```
 
 Run:
 
 ```sh
-bin/bot.js
+npm start
 ```
 
 Configuration
