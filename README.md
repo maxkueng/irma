@@ -80,15 +80,9 @@ cp config.dist.json config.json
 vim config.json
 ```
 
- - `yammer_account`: The name of your Yammer profile. This is custom and
-   basically just points to the Yammer profile config. You can configure multiple
-   Yammer accounts and choose one here.
- - `yammer.xxx`: Name of your Yammer profile. `yammer_account` points here.
- - `yammer.xxx.email`: The email address used with your yammer account.
- - `yammer.xxx.api.consumer_key`: Your Yammer API OAuth consumer key.
- - `yammer.xxx.api.consumer_secret`: Your Yammer API OAuth consumer secret.
- - `yammer.xxx.admin_user_id`: User ID of an admin. This is used by the _kill_
-   plugin so only an admin can kill the bot.
+ - `yammer.email`: The email address used with your yammer account.
+ - `yammer.api.consumer_key`: Your Yammer API OAuth consumer key.
+ - `yammer.api.consumer_secret`: Your Yammer API OAuth consumer secret.
  - `spaghetti.chef_user_id`: User ID of the spaghetti chef. You only need this
    if you're using the _spaghetti_ plugin.
  - `webinterface.ip`: IP the web interface plugin should listen on.
@@ -102,15 +96,11 @@ Here's what a configuration file might look like. It's usually located at
 
 ```javascript
 {
-	"yammer_account" : "default", 
 	"yammer" : {
-		"default" : {
-			"email" : "your.bot@yournetwork.com", 
-			"api" : {
-				"consumer_key" : "UkjUbkjBKVHJfGhygygGGG", 
-				"consumer_secret" : "iuhuHYFUhvghyvJYfjhyVTDKbbVYTFytuyfUYvvVVVy"
-			}, 
-			"admin_user_id" : "1234567", 
+		"email" : "your.bot@yournetwork.com", 
+		"api" : {
+			"consumer_key" : "UkjUbkjBKVHJfGhygygGGG", 
+			"consumer_secret" : "iuhuHYFUhvghyvJYfjhyVTDKbbVYTFytuyfUYvvVVVy"
 		}
 	}, 
 	"webinterface" : {

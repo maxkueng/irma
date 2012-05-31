@@ -1,13 +1,9 @@
 {
-	"yammer_account" : "default", 
 	"yammer" : {
-		"default" : {
-			"email" : "your.bot@yournetwork.com", 
-			"api" : {
-				"consumer_key" : "YOUR_YAMMER_OAUTH_CONSUMER_KEY", 
-				"consumer_secret" : "YOUR_YAMMER_OAUTH_CONSUMER_SECRET"
-			}, 
-			"admin_user_id" : "0000000", 
+		"email" : "your.bot@yournetwork.com", 
+		"api" : {
+			"consumer_key" : "YOUR_YAMMER_OAUTH_CONSUMER_KEY", 
+			"consumer_secret" : "YOUR_YAMMER_OAUTH_CONSUMER_SECRET"
 		}
 	}, 
 	"webinterface" : {

@@ -14,8 +14,6 @@ exports.init = function (y, config, messages, cron, logger) {
 
 	messages.add('spaghetti_autocharge_notify', "Hey [name], I have automatically charged your digital kiosk account with CHF [price] for spaghetti.");
 
-	var yammer_account = config.yammer[config.yammer_account];
-
 	new cron.CronJob(config.spaghetti_autocharge.cron_charge, function () {
 		for (var threadId in y.threads()) {
 			(function (thId) {

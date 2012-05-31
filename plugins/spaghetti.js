@@ -14,9 +14,6 @@ exports.init = function (y, config, messages, cron, logger) {
 
 	messages.add('spaghetti_threadclosed', "Sorry, you're to late.");
 
-	var yammer_account = config.yammer[config.yammer_account];
-
-	
 	new cron.CronJob(config.spaghetti.cron_open, function () {
 		var openingMessage = messages.get('spaghetti_opening');
 

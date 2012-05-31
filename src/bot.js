@@ -22,7 +22,7 @@ var Yammer = require('../lib/yammer').Yammer;
 
 var cwd = process.cwd();
 var config = load_config();
-var yammer_account = config.yammer[config.yammer_account];
+var yammer_account = config.yammer;
 
 logger.setPrefix(function () {
 	var d = new Date().toISODateTime();		
