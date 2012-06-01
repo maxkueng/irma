@@ -21,8 +21,6 @@ exports.init = function (y, config, messages, cron, logger) {
 	messages.add('weather_dateproblem', "Sorry, I don't get it. Which day was that?");
 	messages.add('weather_unknown', "Only the Gods know.");
 
-	var yammer_account = config.yammer[config.yammer_account];
-
 	y.on('message', function (message) {
 		var thread = y.thread(message.threadId());
 

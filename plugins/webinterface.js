@@ -1,7 +1,7 @@
 var util = require('util');
 
 exports.init = function (y, config, messages, cron, logger) {
-	var yammer_account = config.yammer[config.yammer_account];
+	var yammer_account = config.yammer;
 
 	var getHTML = function () {
 		var html = ''

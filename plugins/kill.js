@@ -4,8 +4,6 @@ exports.init = function (y, config, messages, cron, logger) {
 
 	messages.add('kill_permissiondenied', "You can't kill me! Only an admin can do that.");
 
-	var yammer_account = config.yammer[config.yammer_account];
-
 	y.on('message', function (message) {
 		if (/\b(kill|die|shut\s*down)\b/i.test(message.plainBody())) {
 			var thread = y.thread(message.threadId());
