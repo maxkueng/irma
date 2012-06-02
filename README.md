@@ -217,7 +217,7 @@ y.sendMessage(function (error, message) {
 
 ### Receiving Messages
 
-Note: The bot will only receive messages that are either sent to it directly ore
+Note: The bot will only receive messages that are either sent to it directly or
 mention it in the message body.
 
 Receive channel message:
