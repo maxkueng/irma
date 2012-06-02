@@ -27,22 +27,25 @@ Plugins
 
 I.R.M.A. comes with a small number of plugins:
 
- - **spaghetti.js**
+ - **spaghetti**
    Asks everyone in the network if they wish to join the spaghetti lunch. Just
    before lunch time it counts all the replies and tells the chef how many
    people he should cook for.
- - **veggie.js** 
+ - **veggie** 
    Announces every Thursday that it's Veggie-Day.
- - **weather.js** 
+ - **weather** 
    If asked, looks up the weather for a specific date using the Google weather
    API.
- - **webinterface.js**
+ - **webinterface**
    Provides a web interface and shows open and closed threads, active Yammer
    account and PID. This is mainly for debugging purposes.
- - **kill.js** 
-   Allows an admin to shut down the bot by sending a Yammer message
- - **s18.js**
-   Tells you when the next S18 train departs from the Zollikerberg station
+ - **kill** 
+   Allows an admin to shut down the bot by sending a Yammer message.
+ - **s18**
+   Tells you when the next S18 train departs from the Zollikerberg station.
+ - **kiosk**
+   Manages accounts for a company-internal store. Provides a mobile web
+   interface to buy and restock goods.
    
 
 Dependencies
