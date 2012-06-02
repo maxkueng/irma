@@ -54,11 +54,17 @@ Dependencies
 Required none-core modules:
 
  - [cron][cron]
+ - request
 
 Some plugins require additional modules: 
 
  - [datejs][datejs]
  - [googleweather][googleweather]
+ - express
+ - ejs
+ - node-uuid
+ - jsdom
+ - aspsms
 
 Installation
 ------------
