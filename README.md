@@ -174,7 +174,14 @@ messages.add('saysomething', 'Something');
 messages.add('saysomething', 'Another thing');
 messages.add('saysomething', 'Anything');
 
+messages.add('tellthetime', 'The time is [time].');
+messages.add('tellthetime', 'It is exactly [time].');
+
 console.log(messages.get('saysomething')); // Will print one of the the above.
+
+console.log(messages.get('tellthetime', {
+	'time' : new Date()
+}));
 ```
 
 ### Sending Messages
