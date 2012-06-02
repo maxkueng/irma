@@ -7,11 +7,20 @@ JavaScript and runs inside a [node.js][node] environment.
 Features
 --------
 
- - Public and direct messages
- - Timed messages
- - Thread management
- - Plugin architecture
- - None-boring messages
+ - **Public and direct messages**
+   Send public messages to company feed or private messages directly to
+   a specific user.
+ - **Timed messages**
+   Schedule messages and actions for a certain time or interval using
+   the internal cron-like scheduler.
+ - **Thread management**
+   Store custom data to a message thread, categorize threads by type,
+   open and close threads.
+ - **Plugin architecture**
+   Write plugins to handle messages and reply to them - or other things.
+ - **None-boring messages**
+   Have different messages for the same message type. The bot will use a
+   different message text every time to appear less boring.
 
 Plugins
 -------
