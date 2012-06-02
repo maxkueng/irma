@@ -101,6 +101,7 @@ vim config.json
  - `yammer.email`: The email address used with your yammer account.
  - `yammer.api.consumer_key`: Your Yammer API OAuth consumer key.
  - `yammer.api.consumer_secret`: Your Yammer API OAuth consumer secret.
+ - `plugins` : An array of plugin names to be loaded
  - `spaghetti.chef_user_id`: User ID of the spaghetti chef. You only need this
    if you're using the _spaghetti_ plugin.
  - `webinterface.ip`: IP the web interface plugin should listen on.
@@ -121,6 +122,10 @@ Here's what a configuration file might look like. It's usually located at
 			"consumer_secret" : "iuhuHYFUhvghyvJYfjhyVTDKbbVYTFytuyfUYvvVVVy"
 		}
 	}, 
+	"plugins" : [
+		"webinterface", 
+		"spaghetti"
+	]
 	"webinterface" : {
 		"ip" : "0.0.0.0", 
 		"port" : 1337
@@ -129,9 +134,6 @@ Here's what a configuration file might look like. It's usually located at
 		"cron_open" : "0 0 9 * * 5", 
 		"cron_close" : "0 45 11 * * 5", 
 		"chef_user_id" : "777124"
-	}, 
-	"veggie" : {
-		"cron_start" : "0 30 11 * * 5"
 	}
 }
 ```
@@ -151,6 +153,8 @@ Here's what a plugin that does nothing might look like. `./plugins/nothing.js`
 
 ```javascript
 exports.init = function (y, config, messages, cron, logger) {
+
+	logger.info("Initializing the nothing plugin. Whoooo!!");
 
 //	Your plugin code goes here
 
