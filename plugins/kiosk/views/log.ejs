@@ -27,6 +27,9 @@
 				<em>Unknown</em>
 				<% } %>
 				</span>
+				<% if (log[i].booking) { %>
+				<span class="label label-success"><%= log[i].booking.type %></span>
+				<% } %>
 				<% if (log[i].booking && log[i].booking.automatic) { %>
 				<span class="label">automatic</span>
 				<% } %>
