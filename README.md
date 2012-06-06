@@ -7,33 +7,45 @@ JavaScript and runs inside a [node.js][node] environment.
 Features
 --------
 
- - Public and direct messages
- - Timed messages
- - Thread management
- - Plugin architecture
- - None-boring messages
+ - **Public and direct messages**
+   Send public messages to company feed or private messages directly to
+   a specific user.
+ - **Timed messages**
+   Schedule messages and actions for a certain time or interval using
+   the internal cron-like scheduler.
+ - **Thread management**
+   Store custom data to a message thread, categorize threads by type,
+   open and close threads.
+ - **Plugin architecture**
+   Write plugins to handle messages and reply to them - or other things.
+ - **None-boring messages**
+   Have different messages for the same message type. The bot will use a
+   different message text every time to appear less boring.
 
 Plugins
 -------
 
 I.R.M.A. comes with a small number of plugins:
 
- - **spaghetti.js**
+ - **spaghetti**
    Asks everyone in the network if they wish to join the spaghetti lunch. Just
    before lunch time it counts all the replies and tells the chef how many
    people he should cook for.
- - **veggie.js** 
+ - **veggie** 
    Announces every Thursday that it's Veggie-Day.
- - **weather.js** 
+ - **weather** 
    If asked, looks up the weather for a specific date using the Google weather
    API.
- - **webinterface.js**
+ - **webinterface**
    Provides a web interface and shows open and closed threads, active Yammer
    account and PID. This is mainly for debugging purposes.
- - **kill.js** 
-   Allows an admin to shut down the bot by sending a Yammer message
- - **s18.js**
-   Tells you when the next S18 train departs from the Zollikerberg station
+ - **kill** 
+   Allows an admin to shut down the bot by sending a Yammer message.
+ - **s18**
+   Tells you when the next S18 train departs from the Zollikerberg station.
+ - **kiosk**
+   Manages accounts for a company-internal store. Provides a mobile web
+   interface to buy and restock goods.
    
 
 Dependencies
@@ -42,11 +54,17 @@ Dependencies
 Required none-core modules:
 
  - [cron][cron]
+ - request
 
 Some plugins require additional modules: 
 
  - [datejs][datejs]
  - [googleweather][googleweather]
+ - express
+ - ejs
+ - node-uuid
+ - jsdom
+ - aspsms
 
 Installation
 ------------
@@ -83,6 +101,7 @@ vim config.json
  - `yammer.email`: The email address used with your yammer account.
  - `yammer.api.consumer_key`: Your Yammer API OAuth consumer key.
  - `yammer.api.consumer_secret`: Your Yammer API OAuth consumer secret.
+ - `plugins` : An array of plugin names to be loaded
  - `spaghetti.chef_user_id`: User ID of the spaghetti chef. You only need this
    if you're using the _spaghetti_ plugin.
  - `webinterface.ip`: IP the web interface plugin should listen on.
@@ -103,6 +122,10 @@ Here's what a configuration file might look like. It's usually located at
 			"consumer_secret" : "iuhuHYFUhvghyvJYfjhyVTDKbbVYTFytuyfUYvvVVVy"
 		}
 	}, 
+	"plugins" : [
+		"webinterface", 
+		"spaghetti"
+	]
 	"webinterface" : {
 		"ip" : "0.0.0.0", 
 		"port" : 1337
@@ -111,9 +134,6 @@ Here's what a configuration file might look like. It's usually located at
 		"cron_open" : "0 0 9 * * 5", 
 		"cron_close" : "0 45 11 * * 5", 
 		"chef_user_id" : "777124"
-	}, 
-	"veggie" : {
-		"cron_start" : "0 30 11 * * 5"
 	}
 }
 ```
@@ -134,6 +154,8 @@ Here's what a plugin that does nothing might look like. `./plugins/nothing.js`
 ```javascript
 exports.init = function (y, config, messages, cron, logger) {
 
+	logger.info("Initializing the nothing plugin. Whoooo!!");
+
 //	Your plugin code goes here
 
 };
@@ -152,7 +174,14 @@ messages.add('saysomething', 'Something');
 messages.add('saysomething', 'Another thing');
 messages.add('saysomething', 'Anything');
 
+messages.add('tellthetime', 'The time is [time].');
+messages.add('tellthetime', 'It is exactly [time].');
+
 console.log(messages.get('saysomething')); // Will print one of the the above.
+
+console.log(messages.get('tellthetime', {
+	'time' : new Date()
+}));
 ```
 
 ### Sending Messages
@@ -188,7 +217,7 @@ y.sendMessage(function (error, message) {
 
 ### Receiving Messages
 
-Note: The bot will only receive messages that are either sent to it directly ore
+Note: The bot will only receive messages that are either sent to it directly or
 mention it in the message body.
 
 Receive channel message:
