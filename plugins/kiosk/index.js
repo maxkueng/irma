@@ -1,7 +1,7 @@
 exports.init = function (y, config, messages, cron, logger) {
 	messages.add('kiosk_monthly_archive', "Hey [name], I have archived all your Kiosk bookings for [month]. This is the automatic monthly archive. \nYour current account balance is CHF [balance]");
 	messages.add('kiosk_initialize', "Hey [name], I have initialized your digital kiosk account. Your current account balance is CHF [balance]");
-	messages.add('kiosk_tally', "Hey [name], your tally marks have been carried over to your digital kiosk account. \nYour new account balance is CHF [balance]");
+	messages.add('kiosk_tally', "Hey [name], [recs] have been carried over from the tally list to your digital kiosk account. \nYour new account balance is CHF [balance]");
 	messages.add('kiosk_deposit', "Hey [name], you have successfully deposited CHF [deposit] to your digital kiosk account. \nYour new account balance is CHF [balance]");
 	messages.add('kiosk_withdraw', "Hey [name], you have successfully withdrawn CHF [withdrawal] from your digital kiosk account. \nYour new account balance is CHF [balance]");
 
@@ -415,6 +415,7 @@ exports.init = function (y, config, messages, cron, logger) {
 			var marks = req.body['marks'];
 
 			var wait = itemIds.length -1;
+			var recString = '';
 
 			for (var i = 0; i < itemIds.length; i++) {
 				(function (_i) {
@@ -427,6 +428,9 @@ exports.init = function (y, config, messages, cron, logger) {
 							'marks' : mark, 
 							'total' : mark * item.price()
 						};
+
+						if (i != 0) recString += ', ';
+						recString += rec.marks + ' x ' + rec.item.name();
 
 						tallyCarryOver(user, rec, function (err, bookingId) {
 							kioskLogger.log(userId, account, account.booking(bookingId));
@@ -450,7 +454,8 @@ exports.init = function (y, config, messages, cron, logger) {
 
 								var text = messages.get('kiosk_tally', {
 									'name' : y.user(user).fullName(), 
-									'balance' : formatMoney(account.balance() / 100)
+									'balance' : formatMoney(account.balance() / 100), 
+									'recs' : recString
 								});
 
 								y.sendMessage(function (error, msg) {
