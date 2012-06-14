@@ -3,6 +3,7 @@ var util = require('util');
 exports.init = function (y, config, messages, cron, logger) {
 	messages.add('spaghetti_opening', "Spaghetti for lunch? Superzise? Like this message if you'd like to join.");
 	messages.add('spaghetti_opening', "Spaghetti for lunch? Like this message if you'd like to join.");
+	messages.add('spaghetti_opening', "Barilla number 7, straight from heaven! Who's in? Hit \"like\" to join. It's spaghetti time!");
 	messages.add('spaghetti_opening', "Who's a hungry monkey? Press the 'like' button to register for spaghetti.");
 
 	messages.add('spaghetti_closing', "Mamma mia ramba zamba! [count] hungry monkeys?? \nThe following are registered for lunch: [joiners]");
@@ -11,6 +12,8 @@ exports.init = function (y, config, messages, cron, logger) {
 
 	messages.add('spaghetti_notenough', "Ooh, [count] is not enough. A minimum of 5 joiners is required to justify the effort of making spaghetti. There will be no spaghetti today. Sorry");
 	messages.add('spaghetti_noone', "Noone?? Alright then... ;(");
+
+	messages.add('spaghetti_stockerror', "Warning! There is not enough spaghetti for [count] people. Current stock will last for about [available_rations] rations.");
 
 	messages.add('spaghetti_chef', "[chef_name], [count] mouths to feed! Hurry!!");
 
@@ -30,6 +33,9 @@ exports.init = function (y, config, messages, cron, logger) {
 	});
 
 	new cron.CronJob(config.spaghetti.cron_close, function () {
+		var stocks = require('./kiosk/stocks');
+		var Stock = stocks.Stock;
+
 		for (var threadId in y.threads()) {
 			(function (thId) {
 				var th = y.thread(thId);
@@ -76,7 +82,6 @@ exports.init = function (y, config, messages, cron, logger) {
 							}, notenoughMessage, { 'reply_to' : th.messageId() });
 
 						} else {
-
 							var closingMessage = messages.get('spaghetti_closing', {
 								'count' : joinerIds.length, 
 								'joiners' : joinersList
@@ -89,6 +94,23 @@ exports.init = function (y, config, messages, cron, logger) {
 								th.setProperty('status', 'closed');
 								y.persistThread(th);
 							}, closingMessage, { 'reply_to' : th.messageId() });
+
+
+							var stock = stocks.get('03032ac58f81');
+							var stockInfo = stock.info();
+							var availableRations = Math.round((stockInfo.stock / 150) * 10) / 10;
+
+							if (availableRations < joinerIds.length) {
+								var stockWarningMessage = messages.get('spaghetti_stockerror', {
+									'count' : joinerIds.length, 
+									'available_rations' : availableRations
+								});
+
+								y.sendMessage(function (error, message) {
+									logger.info('spaghetti stockerror message OK: ' + message.id());
+
+								}, stockWarningMessage, { 'reply_to' : th.messageId() });
+							}
 						
 						}
 
