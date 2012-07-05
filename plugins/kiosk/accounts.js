@@ -12,7 +12,7 @@ var get = function (userId) {
 	}
 
 	return accounts[userId];
-}
+};
 
 var all = function () {
 	return accounts;
@@ -202,7 +202,7 @@ Account.prototype.archive = function (callback) {
 	var archFile;
 	do {
 		archFile = path.join(exports.dataDir, this._userId + '_' + now.getFullYear() + '-' + pad(now.getMonth()+1) + '-' + i + '.json');
-		i++
+		i++;
 	} while (path.existsSync(archFile));
 
 	var self = this;
