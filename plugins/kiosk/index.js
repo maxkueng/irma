@@ -73,7 +73,8 @@ exports.init = function (y, config, messages, cron, logger) {
 		'description' : 'Small item', 
 		'price' : 50, 
 		'displayPrice' : '-.50', 
-		'buyable' : true
+		'buyable' : true,
+		'stockable' : true
 	}));
 
 	items.add(new Item({
@@ -82,7 +83,8 @@ exports.init = function (y, config, messages, cron, logger) {
 		'description' : 'Big item', 
 		'price' : 100, 
 		'displayPrice' : '1.-', 
-		'buyable' : true
+		'buyable' : true,
+		'stockable' : true
 	}));
 
 	var app = express.createServer(
@@ -133,7 +135,7 @@ exports.init = function (y, config, messages, cron, logger) {
 		res.render('about.ejs', {
 			'layout' : 'layout.ejs', 
 			'req' : req, 
-			'res' : res, 
+			'res' : res
 		});
 
 	});
@@ -200,7 +202,7 @@ exports.init = function (y, config, messages, cron, logger) {
 
 					if (item.isStockable()) {
 						var stock = stocks.get(item.id());
-						var stockUpdate = stock.updateByBookingId(req.params['bookingId'])
+						var stockUpdate = stock.updateByBookingId(req.params['bookingId']);
 
 						stock.update({
 							'bookingId' : booking.id(), 
