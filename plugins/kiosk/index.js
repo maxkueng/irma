@@ -74,7 +74,9 @@ exports.init = function (y, config, messages, cron, logger) {
 		'price' : 50, 
 		'displayPrice' : '-.50', 
 		'buyable' : true,
-		'stockable' : true
+		'stockable' : true, 
+		'unit' : 'Piece', 
+		'ration' : 1
 	}));
 
 	items.add(new Item({
@@ -84,7 +86,9 @@ exports.init = function (y, config, messages, cron, logger) {
 		'price' : 100, 
 		'displayPrice' : '1.-', 
 		'buyable' : true,
-		'stockable' : true
+		'stockable' : true, 
+		'unit' : 'Piece', 
+		'ration' : 1
 	}));
 
 	var app = express.createServer(
