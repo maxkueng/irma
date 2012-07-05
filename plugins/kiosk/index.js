@@ -69,7 +69,7 @@ exports.init = function (y, config, messages, cron, logger) {
 
 	items.add(new Item({
 		'id' : '72080d0c8bcb', 
-		'name' : 'Kiosk 1', 
+		'name' : 'Small Item', 
 		'description' : 'Small item', 
 		'price' : 50, 
 		'displayPrice' : '-.50', 
@@ -81,7 +81,7 @@ exports.init = function (y, config, messages, cron, logger) {
 
 	items.add(new Item({
 		'id' : 'dbbe85aec38e', 
-		'name' : 'Kiosk 2', 
+		'name' : 'Big Item', 
 		'description' : 'Big item', 
 		'price' : 100, 
 		'displayPrice' : '1.-', 
