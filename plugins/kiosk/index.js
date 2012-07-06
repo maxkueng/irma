@@ -403,7 +403,8 @@ exports.init = function (y, config, messages, cron, logger) {
 				'users' : y.users(), 
 				'items' : [
 					items.get('03032ac58f81'), 
-					items.get('72080d0c8bcb')
+					items.get('72080d0c8bcb'), 
+					items.get('dbbe85aec38e')
 				]
 			});
 		});
