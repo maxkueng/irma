@@ -401,10 +401,7 @@ exports.init = function (y, config, messages, cron, logger) {
 				'req' : req, 
 				'res' : res, 
 				'users' : y.users(), 
-				'items' : [
-					items.get('03032ac58f81'), 
-					items.get('72080d0c8bcb')
-				]
+				'items' : items.all()
 			});
 		});
 
