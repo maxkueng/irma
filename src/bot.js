@@ -1,3 +1,5 @@
+"use strict";
+
 Date.prototype.pad = function (n) {
 	return (n < 10) ? '0' + n : n;
 };
@@ -19,13 +21,23 @@ var logger = require('../lib/logger');
 var messages = require('../lib/messages');
 var plugins = require('../lib/plugins');
 var Yammer = require('../lib/yammer').Yammer;
-
 var cwd = process.cwd();
+
+var load_config = function () {
+	if (path.existsSync(cwd + '/config.json')) {
+		var config_data = fs.readFileSync(cwd + '/config.json', 'utf8');
+		return JSON.parse(config_data);
+	}
+
+	util.puts('Error: Configuration file not found');
+	process.exit(1);
+};
+
 var config = load_config();
 var yammer_account = config.yammer;
 
 logger.setPrefix(function () {
-	var d = new Date().toISODateTime();		
+	var d = new Date().toISODateTime();
 	return '[' + d + '] ';
 });
 
@@ -39,7 +51,7 @@ var y = new Yammer(yammer_account.email, yammer_account.api.consumer_key, yammer
 
 	process.stdin.resume();
 	process.stdin.setEncoding('utf8');
-	process.stdin.on('data', function(chunk) { 
+	process.stdin.on('data', function (chunk) {
 		process.stdin.pause();
 		continueCallback(chunk.toString());
 	});
@@ -64,14 +76,3 @@ y.on('usersloaded', function () {
 });
 
 y.logon();
-
-//
-function load_config () {
-	if (path.existsSync(cwd + '/config.json')) {
-		var config_data = fs.readFileSync(cwd + '/config.json', 'utf8');
-		return JSON.parse(config_data);
-	}
-
-	util.puts('Error: Configuration file not found');
-	process.exit(1);
-}
