@@ -1,16 +1,43 @@
+"use strict";
+
 require('datejs');
 var gw = require('googleweather');
 
 var weatherLocation = 'Zurich, Switzerland';
 var directions = {
-	'N' : 'North', 
-	'NE' : 'Northeast', 
-	'E' : 'East', 
-	'SE' : 'Southeast', 
-	'S' : 'South', 
-	'SW' : 'Southwest', 
-	'W' : 'West', 
+	'N' : 'North',
+	'NE' : 'Northeast',
+	'E' : 'East',
+	'SE' : 'Southeast',
+	'S' : 'South',
+	'SW' : 'Southwest',
+	'W' : 'West',
 	'NW' : 'Northwest'
+};
+
+var extractDateString = function (str) {
+	var words, c, words2;
+
+	str = str.replace(/['"]/, '');
+	words = str.split(/[^a-z0-9']+/i);
+	c = 0;
+
+	while (words.length >= 1) {
+		words2 = JSON.parse(JSON.stringify(words));
+
+		while (words2.length >= 1) {
+			if (Date.parse(words2.join(' ')) !== null) {
+				return words2.join(' ');
+			}
+
+			words2.pop();
+		}
+
+		words.splice(0, 1);
+		c++;
+	}
+
+	return null;
 };
 
 exports.init = function (y, config, messages, cron, logger) {
@@ -22,24 +49,27 @@ exports.init = function (y, config, messages, cron, logger) {
 	messages.add('weather_unknown', "Only the Gods know.");
 
 	y.on('message', function (message) {
-		var thread = y.thread(message.threadId());
+		var thread, dateString, d, messageType, weatherMessage;
 
-		if (/\b(weather|forecast)\b/i.test(message.plainBody()) || thread.property('type') == 'weather') {
+		thread = y.thread(message.threadId());
+
+		if (/\b(weather|forecast)\b/i.test(message.plainBody()) || thread.property('type') === 'weather') {
+
 			thread.setProperty('type', 'weather');
-			
-			var dateString = extractDateString(message.plainBody());
 
-			if (dateString != null) {
+			dateString = extractDateString(message.plainBody());
+
+			if (dateString !== null) {
 				dateString = dateString.replace(/^\s+|\s+$/g, '');
-				var d = Date.parse(dateString).toString('yyyy-MM-dd');
+				d = Date.parse(dateString).toString('yyyy-MM-dd');
 
-				if (dateString == 'now') {
+				if (dateString === 'now') {
 					gw.get(function (current, forecast) {
 						var weatherMessage = messages.get('weather_now', {
-							'condition' : current.condition, 
-							'temperature' : current.temperature, 
-							'humidity' : current.humidity, 
-							'wind_direction' : directions[current.wind.direction], 
+							'condition' : current.condition,
+							'temperature' : current.temperature,
+							'humidity' : current.humidity,
+							'wind_direction' : directions[current.wind.direction],
 							'wind_speed' : current.wind.speed
 						});
 
@@ -49,7 +79,7 @@ exports.init = function (y, config, messages, cron, logger) {
 					}, weatherLocation, Date.today().toString('yyyy-MM-dd'));
 
 				} else {
-					var messageType = 'weather_present';
+					messageType = 'weather_present';
 
 					if (Date.parse(d).isAfter(Date.today())) {
 						messageType = 'weather_future';
@@ -58,10 +88,10 @@ exports.init = function (y, config, messages, cron, logger) {
 					}
 
 					gw.get(function (current, forecast) {
-						if (typeof forecast != 'undefined') {
-							var weatherMessage = messages.get(messageType, {
-								'condition' : forecast.condition, 
-								'low_temperature' : forecast.temperature.low, 
+						if (typeof forecast !== 'undefined') {
+							weatherMessage = messages.get(messageType, {
+								'condition' : forecast.condition,
+								'low_temperature' : forecast.temperature.low,
 								'high_temperature' : forecast.temperature.high
 							});
 
@@ -70,7 +100,7 @@ exports.init = function (y, config, messages, cron, logger) {
 							}, weatherMessage, { 'reply_to' : message.id() });
 
 						} else {
-							var weatherMessage = messages.get('weather_unknown');
+							weatherMessage = messages.get('weather_unknown');
 							y.sendMessage(function (error, msg) {
 								logger.info('weather message OK: ' + msg.id());
 							}, weatherMessage, { 'reply_to' : message.id() });
@@ -80,7 +110,8 @@ exports.init = function (y, config, messages, cron, logger) {
 
 			} else {
 				logger.warn('invalid date string');
-				var weatherMessage = messages.get('weather_dateproblem');
+				weatherMessage = messages.get('weather_dateproblem');
+
 				y.sendMessage(function (error, msg) {
 					logger.info('weather message OK: ' + msg.id());
 				}, weatherMessage, { 'reply_to' : message.id() });
@@ -89,24 +120,3 @@ exports.init = function (y, config, messages, cron, logger) {
 		}
 	});
 };
-
-function extractDateString (str) {
-	str = str.replace(/['"]/, '');
-	var words = str.split(/[^a-z0-9']+/i);
-	var c = 0;
-	while (words.length >= 1) {
-
-		var words2 = JSON.parse(JSON.stringify(words));
-		while (words2.length >= 1) {
-			if (Date.parse(words2.join(' ')) != null) {
-				return words2.join(' ');
-			}
-
-			words2.pop();
-		}
-		words.splice(0, 1);
-		c++;
-	}
-
-	return null;
-}
