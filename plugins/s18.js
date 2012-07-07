@@ -30,14 +30,14 @@ exports.init = function (y, config, messages, cron, logger) {
 					'uri' : s18Url
 				},
 				function (error, response, body) {
-					var i, messageKey, data, journey, first, second,
+					var messageKey, data, journey, first, second,
 						messageParams, messageText;
 
 					if (!error && response.statusCode === 200) {
 						body = body.replace('journeysObj = ', '');
 						data = JSON.parse(body);
 						if (data.journey) {
-							for (i = 0; i < data.journey.length; i++) {
+							for (var i = 0; i < data.journey.length; i++) {
 								journey = data.journey[i];
 								if (journey.pr !== 'S18') { continue; }
 								if (journey.st !== 'Zürich, Bahnhof Stadelhofen') { continue; }
