@@ -1,13 +1,15 @@
+"use strict";
+
 var items = {};
 
 var get = function (id) {
-	if (items[id]) return items[id];
+	if (items[id]) { return items[id]; }
 	return null;
 };
 
 var add = function (item) {
 	items[item.id()] = item;
-}
+};
 
 var all = function () {
 	return items;
