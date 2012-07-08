@@ -1,3 +1,5 @@
+"use strict";
+
 require('datejs');
 var path = require('path');
 var fs = require('fs');
@@ -9,46 +11,11 @@ var initialized = false;
 var logFile = 'log.json';
 var entries = [];
 
-var init = function (users) {
-	if (initialized) return;
-	if (!exports.dataDir) return;
-
-	var logFilePath = path.join(exports.dataDir, logFile);
-	if (path.existsSync(logFilePath)) {
-		var data = fs.readFileSync(logFilePath, 'utf8');
-		entries = JSON.parse(data);
-		initialized = true;
-		return;
-	}
-
-	for (var userId in users) {
-		var account = accounts.get(userId);
-		var bookings = account.bookings();
-
-		for (var i = 0; i < bookings.length; i++) {
-			var e = entry(null, account, bookings[i]);
-			e.time = bookings[i].time();
-			entries.push(e);
-		}
-
-		persist();
-	}
-
-	initialized = true;
-};
-
-var persist = function () {
-	if (!exports.dataDir) return;
-	var logFilePath = path.join(exports.dataDir, logFile);
-	fs.writeFile(logFilePath, JSON.stringify(entries), function (err) {
-		if (err) throw err;
-	});
-};
-
 var entry = function () {
 	var e = {};
-	for( var i = 0; i < arguments.length; i++ ) {
-		if (i === 0 && arguments[i] && arguments[i] % 1 == 0) {
+
+	for (var i = 0; i < arguments.length; i++) {
+		if (i === 0 && arguments[i] && arguments[i] % 1 === 0) {
 			e.user = arguments[i];
 			continue;
 		}
@@ -64,9 +31,50 @@ var entry = function () {
 		}
 	}
 
-	if (!e.user) e.user = null;
+	if (!e.user) { e.user = null; }
 
 	return e;
+};
+
+var persist = function () {
+	if (!exports.dataDir) { return; }
+
+	var logFilePath = path.join(exports.dataDir, logFile);
+	fs.writeFile(logFilePath, JSON.stringify(entries), function (err) {
+		if (err) { throw err; }
+	});
+};
+
+var init = function (users) {
+	var logFilePath, data, account, bookings, e;
+
+	if (initialized) { return; }
+	if (!exports.dataDir) { return; }
+
+	logFilePath = path.join(exports.dataDir, logFile);
+	if (path.existsSync(logFilePath)) {
+		data = fs.readFileSync(logFilePath, 'utf8');
+		entries = JSON.parse(data);
+		initialized = true;
+		return;
+	}
+
+	for (var userId in users) {
+		if (users.hasOwnProperty(userId)) {
+			account = accounts.get(userId);
+			bookings = account.bookings();
+
+			for (var i = 0; i < bookings.length; i++) {
+				e = entry(null, account, bookings[i]);
+				e.time = bookings[i].time();
+				entries.push(e);
+			}
+
+			persist();
+		}
+	}
+
+	initialized = true;
 };
 
 var log = function () {
