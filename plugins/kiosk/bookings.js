@@ -1,9 +1,11 @@
+"use strict";
+
 var uuid = require('node-uuid');
 
 var Booking = function (data) {
-	if (typeof data.reversed === 'undefined') data.reversed = false;
-	if (typeof data.automatic === 'undefined') data.automatic = false;
-	if (typeof data.admin === 'undefined') data.admin = false;
+	if (typeof data.reversed === 'undefined') { data.reversed = false; }
+	if (typeof data.automatic === 'undefined') { data.automatic = false; }
+	if (typeof data.admin === 'undefined') { data.admin = false; }
 	this._data = data;
 };
 
