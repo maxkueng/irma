@@ -115,6 +115,18 @@ exports.init = function (y, config, messages, cron, logger) {
 		'ration' : 1
 	}));
 
+	items.add(new Item({
+		'id' : '73ab57313310',
+		'name' : 'Fajitas',
+		'description' : 'Fajitas',
+		'price' : 1100,
+		'displayPrice' : '11.-',
+		'buyable' : true,
+		'stockable' : false,
+		'unit' : 'Meal',
+		'ration' : 1
+	}));
+
 	authCheck = function (req, res, callback) {
 		var b64URL, userId;
 
