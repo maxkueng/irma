@@ -1,3 +1,6 @@
 .project
 .settings
 config.json
+node_modules
+data
+plugins/kiosk/data
