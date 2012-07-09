@@ -499,6 +499,74 @@ exports.init = function (y, config, messages, cron, logger) {
 		});
 	});
 
+	app.get('/sendmoney', function (req, res) {
+		authCheck(req, res, function () {
+			res.render('sendmoney.ejs', {
+				'layout' : 'layout.ejs',
+				'req' : req,
+				'res' : res,
+				'users' : y.users()
+			});
+		});
+	});
+
+	app.post('/sendmoney', function (req, res) {
+		authCheck(req, res, function () {
+			var userId, recipientId, amount, remark,
+				user, recipient,
+				sourceAccount, sourceBooking, sourceBookingId,
+				targetAccount, targetBooking, targetBookingId;
+
+			userId = req.userId;
+			recipientId = parseInt(req.body.recipient, 10);
+			amount = parseInt(req.body.amount * 100, 10);
+			remark = req.body.remark;
+			user = y.users(userId);
+			recipient = y.users(recipientId);
+
+			sourceAccount = accounts.get(userId);
+			targetAccount = accounts.get(recipientId);
+
+			sourceBookingId = bookings.uuid();
+			targetBookingId = bookings.uuid();
+
+			sourceBooking = new Booking({
+				'id' : sourceBookingId,
+				'itemId' : null,
+				'time' : Date.now(),
+				'amount' : amount * -1,
+				'name' : 'Send Money',
+				'description' : 'Sent CHF ' + formatMoney(amount / 100) + ' to ' + recipient.fullName() + ": \n" + remark,
+				'relatedBookingId' : targetBooking,
+				'type' : 'send money'
+			});
+
+			targetBooking = new Booking({
+				'id' : targetBookingId,
+				'itemId' : null,
+				'time' : Date.now(),
+				'amount' : amount,
+				'name' : 'Receive Money',
+				'description' : 'Received CHF ' + formatMoney(amount / 100) + ' from ' + user.fullName() + ": \n" + remark,
+				'relatedBookingId' : sourceBookingId,
+				'type' : 'send money'
+			});
+
+			sourceAccount.book(sourceBooking, function () {
+			});
+
+			targetAccount.book(targetBooking, function () {
+			});
+
+			res.render('sendmoneyok.ejs', {
+				'layout' : 'layout.ejs',
+				'req' : req,
+				'res' : res,
+				'users' : y.users()
+			});
+		});
+	});
+
 	app.get('/tally', function (req, res) {
 		authCheck(req, res, function () {
 			var userId = req.userId;
