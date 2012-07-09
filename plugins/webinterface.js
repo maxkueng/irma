@@ -1,11 +1,14 @@
+"use strict";
+
 var util = require('util');
+var http = require('http');
 
 exports.init = function (y, config, messages, cron, logger) {
-	var yammer_account = config.yammer;
+	var i, yammer_account, getHTML, html, threads, thread;
+	yammer_account = config.yammer;
 
-	var getHTML = function () {
-		var html = ''
-			+ '<!DOCTYPE html>'
+	getHTML = function () {
+		html = '<!DOCTYPE html>'
 			+ '<html lang="en">'
 			+ '<head>'
 			+ '<meta charset="utf-8" />'
@@ -19,36 +22,33 @@ exports.init = function (y, config, messages, cron, logger) {
 			+ '<h2>Open Threads</h2>'
 			+ '<dl>';
 
-		var threads = y.openThreads();
-		for (var i = 0; i < threads.length; i++) {
-			var thread = threads[i];
-			
+		threads = y.openThreads();
+		for (i = 0; i < threads.length; i++) {
+			thread = threads[i];
+
 			html += '<dt>' + thread.id() + '</dt>'
 				+ '<dd><pre>' + util.inspect(thread, false, 3) + '</pre></dd>';
 		}
 
-		html += ''
-			+ '</dl>'
+		html += '</dl>'
 			+ '<h2>Closed Threads</h2>'
 			+ '<dl>';
 
 		threads = y.closedThreads();
-		for (var i = 0; i < threads.length; i++) {
-			var thread = threads[i];
-			
+		for (i = 0; i < threads.length; i++) {
+			thread = threads[i];
+
 			html += '<dt>' + thread.id() + '</dt>'
 				+ '<dd><pre>' + util.inspect(thread, false, 3) + '</pre></dd>';
 		}
 
-		html += ''
-			+ '</dl>'
+		html += '</dl>'
 			+ '</body>'
 			+ '</html>';
 
 		return html;
 	};
 
-	var http = require('http');
 	http.createServer(function (req, res) {
 		res.writeHead(200, {'Content-Type': 'text/html'});
 		res.end(getHTML());
