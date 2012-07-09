@@ -521,8 +521,8 @@ exports.init = function (y, config, messages, cron, logger) {
 			recipientId = parseInt(req.body.recipient, 10);
 			amount = parseInt(req.body.amount * 100, 10);
 			remark = req.body.remark;
-			user = y.users(userId);
-			recipient = y.users(recipientId);
+			user = y.user(userId);
+			recipient = y.user(recipientId);
 
 			sourceAccount = accounts.get(userId);
 			targetAccount = accounts.get(recipientId);
@@ -535,8 +535,8 @@ exports.init = function (y, config, messages, cron, logger) {
 				'itemId' : null,
 				'time' : Date.now(),
 				'amount' : amount * -1,
-				'name' : 'Send Money',
-				'description' : 'Sent CHF ' + formatMoney(amount / 100) + ' to ' + recipient.fullName() + ": \n" + remark,
+				'name' : 'CHF ' + formatMoney(amount / 100) + ' to ' + recipient.fullName(),
+				'description' : remark,
 				'relatedBookingId' : targetBooking,
 				'type' : 'send money'
 			});
@@ -546,23 +546,40 @@ exports.init = function (y, config, messages, cron, logger) {
 				'itemId' : null,
 				'time' : Date.now(),
 				'amount' : amount,
-				'name' : 'Receive Money',
-				'description' : 'Received CHF ' + formatMoney(amount / 100) + ' from ' + user.fullName() + ": \n" + remark,
+				'name' : 'CHF ' + formatMoney(amount / 100) + ' from ' + user.fullName(),
+				'description' : remark,
 				'relatedBookingId' : sourceBookingId,
 				'type' : 'send money'
 			});
 
-			sourceAccount.book(sourceBooking, function () {
+			sourceAccount.book(sourceBooking, function (err, bookingId) {
+				res.redirect('/transaction/' + bookingId);
+
+				kioskLogger.log(userId, sourceAccount, sourceAccount.booking(bookingId));
 			});
 
-			targetAccount.book(targetBooking, function () {
+			targetAccount.book(targetBooking, function (err, bookingId) {
+				kioskLogger.log(userId, targetAccount, targetAccount.booking(bookingId));
 			});
+		});
+	});
 
-			res.render('sendmoneyok.ejs', {
+	app.get('/transaction/:id', function (req, res) {
+		authCheck(req, res, function () {
+			var userId, account, booking, item;
+
+			userId = req.userId;
+			account = accounts.get(userId);
+			booking = account.booking(req.params.id);
+			item = items.get(booking.itemId());
+
+			res.render('transaction.ejs', {
 				'layout' : 'layout.ejs',
 				'req' : req,
 				'res' : res,
-				'users' : y.users()
+				'account' : account,
+				'booking' : booking,
+				'item' : item
 			});
 		});
 	});
