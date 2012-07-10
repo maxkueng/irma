@@ -6,6 +6,7 @@ exports.init = function (y, config, messages, cron, logger) {
 	messages.add('kiosk_tally', "Hey [name], [recs] have been carried over from the tally list to your digital kiosk account. \nYour new account balance is CHF [balance]");
 	messages.add('kiosk_deposit', "Hey [name], you have successfully deposited CHF [deposit] to your digital kiosk account. \nYour new account balance is CHF [balance]");
 	messages.add('kiosk_withdraw', "Hey [name], you have successfully withdrawn CHF [withdrawal] from your digital kiosk account. \nYour new account balance is CHF [balance]");
+	messages.add('kiosk_receivemoney', "Hey [name], [senderName] has sent you CHF [amount] because \"[remark]\". \nYour new account balance is CHF [balance]");
 
 	require('datejs');
 
@@ -515,7 +516,8 @@ exports.init = function (y, config, messages, cron, logger) {
 			var userId, recipientId, amount, remark,
 				user, recipient,
 				sourceAccount, sourceBooking, sourceBookingId,
-				targetAccount, targetBooking, targetBookingId;
+				targetAccount, targetBooking, targetBookingId,
+				text;
 
 			userId = req.userId;
 			recipientId = parseInt(req.body.recipient, 10);
@@ -560,6 +562,20 @@ exports.init = function (y, config, messages, cron, logger) {
 
 			targetAccount.book(targetBooking, function (err, bookingId) {
 				kioskLogger.log(userId, targetAccount, targetAccount.booking(bookingId));
+
+				text = messages.get('kiosk_receivemoney', {
+					'name' : y.user(user).fullName(),
+					'deposit' : formatMoney(amount / 100),
+					'balance' : formatMoney(account.balance() / 100)
+				});
+
+				y.sendMessage(function (error, msg) {
+					var thread = y.thread(msg.threadId());
+					thread.setProperty('type', 'kiosk_receivemoney');
+					thread.setProperty('status', 'closed');
+					y.persistThread(thread);
+
+				}, text, { 'direct_to' : recipientId });
 			});
 		});
 	});
