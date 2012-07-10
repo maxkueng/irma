@@ -40,7 +40,7 @@ var persist = function () {
 	if (!exports.dataDir) { return; }
 
 	var logFilePath = path.join(exports.dataDir, logFile);
-	fs.writeFile(logFilePath, JSON.stringify(entries), function (err) {
+	fs.writeFile(logFilePath, JSON.stringify(entries, null, '\t'), function (err) {
 		if (err) { throw err; }
 	});
 };

@@ -36,7 +36,7 @@ Account.prototype._persist = function (path, callback) {
 
 	if (!path) { path = this._accountFile; }
 
-	var data = JSON.stringify(this._bookings);
+	var data = JSON.stringify(this._bookings, null, '\t');
 
 	fs.writeFile(path, data, function (err) {
 		if (err) { throw err; }

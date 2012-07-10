@@ -122,7 +122,7 @@ exports.init = function (y, config, messages, cron, logger) {
 		'description' : 'Fajitas',
 		'price' : 1100,
 		'displayPrice' : '11.-',
-		'buyable' : true,
+		'buyable' : false,
 		'stockable' : false,
 		'unit' : 'Meal',
 		'ration' : 1

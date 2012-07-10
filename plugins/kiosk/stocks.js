@@ -33,7 +33,7 @@ Stock.prototype._persist = function (path, callback) {
 
 	if (!path) { path = this._stockFile; }
 
-	var data = JSON.stringify(this._updates);
+	var data = JSON.stringify(this._updates, null, '\t');
 
 	fs.writeFile(path, data, function (err) {
 		if (err) { throw err; }
