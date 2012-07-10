@@ -71,6 +71,8 @@ exports.init = function (y, config, messages, cron, logger) {
 	if (!path.existsSync(viewsDir)) { fs.mkdirSync(viewsDir, '0777'); }
 	if (!path.existsSync(dataDir)) { fs.mkdirSync(dataDir, '0777'); }
 
+	items.dataDir = dataDir;
+	items.load();
 	accounts.dataDir = dataDir;
 	kioskLogger.dataDir = dataDir;
 	stocks.dataDir = dataDir;
@@ -78,54 +80,6 @@ exports.init = function (y, config, messages, cron, logger) {
 	y.on('usersloaded', function () {
 		kioskLogger.init(y.users());
 	});
-
-	items.add(new Item({
-		'id' : '03032ac58f81',
-		'name' : 'Spaghetti',
-		'description' : 'Spaghetti for one person',
-		'price' : 300,
-		'displayPrice' : '3.-',
-		'buyable' : true,
-		'stockable' : true,
-		'unit' : 'Grams',
-		'ration' : 150
-	}));
-
-	items.add(new Item({
-		'id' : '72080d0c8bcb',
-		'name' : 'Small Item',
-		'description' : 'Small item',
-		'price' : 50,
-		'displayPrice' : '-.50',
-		'buyable' : true,
-		'stockable' : true,
-		'unit' : 'Piece',
-		'ration' : 1
-	}));
-
-	items.add(new Item({
-		'id' : 'dbbe85aec38e',
-		'name' : 'Big Item',
-		'description' : 'Big item',
-		'price' : 100,
-		'displayPrice' : '1.-',
-		'buyable' : true,
-		'stockable' : true,
-		'unit' : 'Piece',
-		'ration' : 1
-	}));
-
-	items.add(new Item({
-		'id' : '73ab57313310',
-		'name' : 'Fajitas',
-		'description' : 'Fajitas',
-		'price' : 1100,
-		'displayPrice' : '11.-',
-		'buyable' : false,
-		'stockable' : false,
-		'unit' : 'Meal',
-		'ration' : 1
-	}));
 
 	authCheck = function (req, res, callback) {
 		var b64URL, userId;
