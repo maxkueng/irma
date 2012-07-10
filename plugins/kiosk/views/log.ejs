@@ -41,7 +41,7 @@
 				<% } %>
 				<% if (log[i].booking) { %>
 				<div class="booking">
-					<pre><%= JSON.stringify(log[i].booking) %></pre>
+					<pre><%= JSON.stringify(log[i].booking, null, '\t') %></pre>
 				</div>
 				<% } %>
 			</div>
