@@ -501,18 +501,25 @@ exports.init = function (y, config, messages, cron, logger) {
 
 	app.get('/tally', function (req, res) {
 		authCheck(req, res, function () {
-			var userId = req.userId;
+			var userId, allItems, item, stockableItems;
+
+			userId = req.userId;
+			allItems = items.all();
+			stockableItems = [];
+
+			for (var itemId in allItems) {
+				if (allItems.hasOwnProperty(itemId)) {
+					item = items.get(itemId);
+					if (item.isStockable()) { stockableItems.push(item); }
+				}
+			}
 
 			res.render('tally.ejs', {
 				'layout' : 'layout.ejs',
 				'req' : req,
 				'res' : res,
 				'users' : y.users(),
-				'items' : [
-					items.get('03032ac58f81'),
-					items.get('72080d0c8bcb'),
-					items.get('dbbe85aec38e')
-				]
+				'items' : stockableItems
 			});
 		});
 
