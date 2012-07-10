@@ -11,16 +11,25 @@
 		<table class="table table-striped table-bordered">
 			<thead>
 				<tr>
-					<th>ID</th>
 					<th>Name</th>
+					<th>Ration</th>
+					<th>Options</th>
 					<th style="text-align: right;">Price</th>
 				</tr>
 			</thead>
 			<tbody>
 			<% for (var id in items) { %>
 				<tr>
-					<td><a href="/item/<%= id %>/edit"><%= id %></a></td>
-					<td><%= items[id].name() %></td>
+					<td><a href="/item/<%= id %>/edit"><%= items[id].name() %></a></td>
+					<td>
+					<% if (items[id].isStockable()) { %>
+						<%= items[id].ration() %> <%=: items[id].unit() | downcase %>
+					<% } %>
+					</td>
+					<td>
+					<% if (items[id].isStockable()) { %> <span class="label">stock</span> <% } %>
+					<% if (items[id].isBuyable()) { %> <span class="label">buy</span> <% } %>
+					</td>
 					<td style="text-align: right"><%-: items[id].price() / 100 | money %></td>
 				</tr>
 			<% } %>
