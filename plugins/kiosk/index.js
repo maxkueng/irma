@@ -651,23 +651,6 @@ exports.init = function (y, config, messages, cron, logger) {
 
 	});
 
-	app.get('/item/:id', function (req, res) {
-		authCheck(req, res, function () {
-			var userId, item;
-
-			userId = req.userId;
-			item = items.get(req.params.id);
-
-			res.render('item.ejs', {
-				'layout' : 'layout.ejs',
-				'req' : req,
-				'res' : res,
-				'item' : item
-			});
-		});
-
-	});
-
 	app.get('/overview', function (req, res) {
 		authCheck(req, res, function () {
 			var accs, users;
@@ -740,6 +723,40 @@ exports.init = function (y, config, messages, cron, logger) {
 				'items' : items.all()
 			});
 		});
+	});
+
+	app.get('/item/:id', function (req, res) {
+		authCheck(req, res, function () {
+			var userId, item;
+
+			userId = req.userId;
+			item = items.get(req.params.id);
+
+			res.render('item.ejs', {
+				'layout' : 'layout.ejs',
+				'req' : req,
+				'res' : res,
+				'item' : item
+			});
+		});
+
+	});
+
+	app.get('/item/:id/edit', function (req, res) {
+		authCheck(req, res, function () {
+			var userId, item;
+
+			userId = req.userId;
+			item = items.get(req.params.id);
+
+			res.render('edititem.ejs', {
+				'layout' : 'layout.ejs',
+				'req' : req,
+				'res' : res,
+				'item' : item
+			});
+		});
+
 	});
 
 	archiveUserAccount = function (user) {

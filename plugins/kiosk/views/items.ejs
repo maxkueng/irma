@@ -19,7 +19,7 @@
 			<tbody>
 			<% for (var id in items) { %>
 				<tr>
-					<td><a href="/item/<%= id %>"><%= id %></a></td>
+					<td><a href="/item/<%= id %>/edit"><%= id %></a></td>
 					<td><%= items[id].name() %></td>
 					<td style="text-align: right"><%-: items[id].price() / 100 | money %></td>
 				</tr>
