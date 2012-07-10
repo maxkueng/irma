@@ -731,6 +731,17 @@ exports.init = function (y, config, messages, cron, logger) {
 		});
 	});
 
+	app.get('/items', function (req, res) {
+		authCheck(req, res, function () {
+			res.render('items.ejs', {
+				'layout' : 'layout.ejs',
+				'req' : req,
+				'res' : res,
+				'items' : items.all()
+			});
+		});
+	});
+
 	archiveUserAccount = function (user) {
 
 		var account = accounts.get(user.id());
