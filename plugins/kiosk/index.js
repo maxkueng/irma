@@ -564,9 +564,7 @@ exports.init = function (y, config, messages, cron, logger) {
 				kioskLogger.log(userId, targetAccount, targetAccount.booking(bookingId));
 
 				text = messages.get('kiosk_receivemoney', {
-					'name' : y.user(user).fullName(),
-					'deposit' : formatMoney(amount / 100),
-					'balance' : formatMoney(account.balance() / 100)
+					'name' : user.fullName()
 				});
 
 				y.sendMessage(function (error, msg) {
