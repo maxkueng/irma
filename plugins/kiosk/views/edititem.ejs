@@ -1,7 +1,7 @@
 <div class="row">
 	<div class="span12">
 		<div class="page-header">
-			<h1>Item <%= item.id() %></h1>
+			<h1>Edit Item <%= item.id() %></h1>
 		</div>
 	</div>
 </div>
@@ -9,58 +9,58 @@
 <div class="row">
 	<div class="span12">
 		<form action="/item/<%= item.id() %>/edit" method="post" class="" >
-
-		<div class="control-group">
-			<label for="input-name">Name</label>
-			<input id="input-name" name="name" type="text" value="<%= item.name() %>" class="span2" />
-		</div>
-
-		<div class="control-group">
-			<label for="input-description">Description</label>
-			<input id="input-description" name="description" type="text" value="<%= item.description() %>" class="span2" />
-		</div>
-
-		<div class="control-group">
-			<label for="input-price">Price</label>
-			<input id="input-price" name="price" type="number" value="<%-: item.price() / 100 | money %>" class="span2" />
-		</div>
-
-		<div class="control-group">
-			<label for="input-displayprice">Display price</label>
-			<input id="input-displayprice" name="displayprice" type="text" value="<%= item.displayPrice() %>" class="span2" />
-		</div>
-
-		<div class="control-group">
-			<label for="input-ration">Ration size</label>
-			<input id="input-ration" name="ration" type="number" value="<%= item.ration() %>" class="span2" />
-		</div>
-
-		<div class="control-group">
-			<label for="input-unit">Units</label>
-			<input id="input-unit" name="unit" type="number" value="<%= item.unit() %>" class="span2" />
-		</div>
-
-		<div class="control-group">
-			<div class="controls">
-				<label class="checkbox">
-					<input id="input-stockable" name="stockable" type="checkbox" <% if (item.isStockable()) { %> checked="checked" <% } %>" value="stockable" class="span2" />
-					Stockable
-				</label>
+			<div class="control-group">
+				<label for="input-name">Name</label>
+				<input id="input-name" name="name" type="text" value="<%= item.name() %>" class="span2" />
 			</div>
-		</div>
 
-		<div class="control-group">
-			<div class="controls">
-				<label class="checkbox">
-					<input id="input-buyable" name="buyable" type="checkbox" <% if (item.isBuyable()) { %> checked="checked" <% } %>" value="buyable" class="span2" />
-					Buyable
-				</label>
+			<div class="control-group">
+				<label for="input-description">Description</label>
+				<input id="input-description" name="description" type="text" value="<%= item.description() %>" class="span2" />
 			</div>
-		</div>
 
-		<div class="form-actions">
-            <a class="btn" href="/items">Cancel</a> <button class="btn btn-success" type="submit">Save</button>
-          </div>
+			<div class="control-group">
+				<label for="input-price">Price</label>
+				<input id="input-price" name="price" type="number" value="<%-: item.price() / 100 | money %>" class="span2" />
+			</div>
+
+			<div class="control-group">
+				<label for="input-displayprice">Display price</label>
+				<input id="input-displayprice" name="displayprice" type="text" value="<%= item.displayPrice() %>" class="span2" />
+			</div>
+
+			<div class="control-group">
+				<label for="input-ration">Ration size</label>
+				<input id="input-ration" name="ration" type="number" value="<%= item.ration() %>" class="span2" />
+			</div>
+
+			<div class="control-group">
+				<label for="input-unit">Units</label>
+				<input id="input-unit" name="unit" type="number" value="<%= item.unit() %>" class="span2" />
+			</div>
+
+			<div class="control-group">
+				<div class="controls">
+					<label class="checkbox">
+						<input id="input-stockable" name="stockable" type="checkbox" <% if (item.isStockable()) { %> checked="checked" <% } %>" value="1" class="span2" />
+						Stockable
+					</label>
+				</div>
+			</div>
+
+			<div class="control-group">
+				<div class="controls">
+					<label class="checkbox">
+						<input id="input-buyable" name="buyable" type="checkbox" <% if (item.isBuyable()) { %> checked="checked" <% } %>" value="1" class="span2" />
+						Buyable
+					</label>
+				</div>
+			</div>
+
+			<div class="form-actions">
+				<input type="hidden" name="itemid" value="<%= item.id() %>" />
+				<a class="btn" href="/items">Cancel</a> <button class="btn btn-success" type="submit">Save</button>
+			</div>
 		</form>
 	</div>
 </div>

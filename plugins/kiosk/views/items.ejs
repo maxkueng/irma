@@ -20,15 +20,20 @@
 			<tbody>
 			<% for (var id in items) { %>
 				<tr>
-					<td><a href="/item/<%= id %>/edit"><%= items[id].name() %></a></td>
+					<td>
+					<a href="/item/<%= id %>/edit"><%= items[id].name() %></a>
+					<% if (items[id].changes().length > 0) { %>
+					[<a href="/item/<%= id %>/changes">changes</a>]
+					<% } %>
+					</td>
 					<td>
 					<% if (items[id].isStockable()) { %>
 						<%= items[id].ration() %> <%=: items[id].unit() | downcase %>
 					<% } %>
 					</td>
 					<td>
-					<% if (items[id].isStockable()) { %> <span class="label">stock</span> <% } %>
-					<% if (items[id].isBuyable()) { %> <span class="label">buy</span> <% } %>
+					<% if (items[id].isStockable()) { %> <span class="label label-info">stock</span> <% } %>
+					<% if (items[id].isBuyable()) { %> <span class="label label-info">buy</span> <% } %>
 					</td>
 					<td style="text-align: right"><%-: items[id].price() / 100 | money %></td>
 				</tr>
@@ -37,6 +42,14 @@
 		</table>
 	</div>
 </div>
+<div class="row">
+	<div class="span12">
+		<div class="form-actions">
+			<a class="btn btn-primary" href="/item/new">New</a>
+		</div>
+	</div>
+</div>
+
 
 <footer>
 <div class="row">

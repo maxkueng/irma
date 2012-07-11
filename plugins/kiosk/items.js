@@ -1,7 +1,9 @@
 "use strict";
 
+require('datejs');
 var path = require('path');
 var fs = require('fs');
+var revjsion = require('revjsion');
 
 var itemIds = [];
 var items = {};
@@ -41,7 +43,7 @@ var persist = function () {
 
 		if (item) {
 			itemFilePath = path.join(exports.dataDir, 'item-' + itemIds[i] + '.json');
-			fs.writeFileSync(itemFile, JSON.parse(item.data(), null, '\t'));
+			fs.writeFileSync(itemFilePath, JSON.stringify(item.data(), null, '\t'));
 		}
 	}
 };
@@ -56,20 +58,17 @@ var all = function () {
 };
 
 var Item = function (data) {
-	this._data = {
-		'item' : {},
-		'changes' : {}
-	};
-
-	if (typeof data.item !== 'undefined' && data.changes !== 'undefined') { 
-		this._data = data;
+	if (typeof data !== 'undefined') {
+		this.setData(data);
 		return;
 	}
 
-	this._data.item = data;
+	this._data = {
+		'item' : {},
+		'changes' : []
+	};
 };
 
-Item.prototype.data = function () { return this._data; };
 Item.prototype.id = function () { return this._data.item.id; };
 Item.prototype.name = function () { return this._data.item.name; };
 Item.prototype.description = function () { return this._data.item.description; };
@@ -79,6 +78,53 @@ Item.prototype.unit = function () { return this._data.item.unit; };
 Item.prototype.ration = function () { return this._data.item.ration; };
 Item.prototype.isBuyable = function () { return (this._data.item.buyable === true); };
 Item.prototype.isStockable = function () { return (this._data.item.stockable === true); };
+
+Item.prototype.data = function () { return this._data; };
+Item.prototype.itemData = function () { return this._data.item; };
+
+Item.prototype.setData = function (data) {
+	if (typeof data.item !== 'undefined' && data.changes !== 'undefined') { 
+		this._data = data;
+		return;
+	}
+
+	this._data.item = data;
+};
+
+Item.prototype.updateData = function (data) {
+	this.saveDiff(this.itemData(), data);
+	this.setData(data);
+};
+
+Item.prototype.saveDiff = function (originalData, newData) {
+	var diff, changes, update, change, field;
+
+	if (typeof this._data.changes === 'undefined') this._data.changes = [];
+
+	diff = new revjsion.Diff(originalData, newData);
+	changes = diff.getChanges();
+
+	if (changes.length === 0) { return; }
+
+	update = {
+		'time' : Date.now(), 
+		'changes' : []
+	};
+
+	for (var i = 0; i < changes.length; i++) {
+		field = changes[i].path.replace('/', '');
+
+		change = {
+			'field' : field,
+			'originalValue' : originalData[field],
+			'newValue' : changes[i].value
+		};
+
+		update.changes.push(change);
+	}
+
+	this._data.changes.push(update);
+};
 
 Item.prototype.changes = function () {
 	if (typeof this._data.changes === 'undefined') { return []; }

@@ -13,6 +13,7 @@ exports.init = function (y, config, messages, cron, logger) {
 		fs = require('fs'),
 		express = require('express'),
 		ejs = require('ejs'),
+		sanitize = require('validator').sanitize,
 		items = require('./items'),
 		Item = items.Item,
 		accounts = require('./accounts'),
@@ -725,6 +726,21 @@ exports.init = function (y, config, messages, cron, logger) {
 		});
 	});
 
+	app.get('/item/new', function (req, res) {
+		authCheck(req, res, function () {
+			var item;
+
+			item = new Item();
+
+			res.render('edititem.ejs', {
+				'layout' : 'layout.ejs',
+				'req' : req,
+				'res' : res,
+				'item' : item
+			});
+		});
+	});
+
 	app.get('/item/:id', function (req, res) {
 		authCheck(req, res, function () {
 			var userId, item;
@@ -744,12 +760,53 @@ exports.init = function (y, config, messages, cron, logger) {
 
 	app.get('/item/:id/edit', function (req, res) {
 		authCheck(req, res, function () {
-			var userId, item;
+			var item;
 
-			userId = req.userId;
 			item = items.get(req.params.id);
 
 			res.render('edititem.ejs', {
+				'layout' : 'layout.ejs',
+				'req' : req,
+				'res' : res,
+				'item' : item
+			});
+		});
+	});
+
+	app.post('/item/:id/edit', function (req, res) {
+		authCheck(req, res, function () {
+			var item, itemId, newData;
+
+			itemId = sanitize(req.body.itemid).trim();
+			item = items.get(req.params.id);
+
+			newData = {
+				'id' : itemId,
+				'name' : sanitize(req.body.name).trim(),
+				'description' : sanitize(req.body.description).trim(),
+				'price' : parseInt(sanitize(req.body.price).toFloat() * 100, 10),
+				'displayPrice' : sanitize(req.body.displayprice).trim(),
+				'buyable' : sanitize(req.body.buyable).toBoolean(),
+				'stockable' : sanitize(req.body.stockable).toBoolean(),
+				'unit' : sanitize(req.body.unit).trim(),
+				'ration' : sanitize(req.body.ration).toInt()
+			};
+
+			item.updateData(newData);
+			items.persist();
+
+			res.redirect('/items');
+		});
+
+	});
+
+	app.get('/item/:id/changes', function (req, res) {
+		authCheck(req, res, function () {
+			var item;
+
+			item = items.get(req.params.id);
+
+			res.render('itemchanges.ejs', {
 				'layout' : 'layout.ejs',
 				'req' : req,
 				'res' : res,
