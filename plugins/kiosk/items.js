@@ -4,6 +4,7 @@ require('datejs');
 var path = require('path');
 var fs = require('fs');
 var revjsion = require('revjsion');
+var uuid = require('node-uuid');
 
 var itemIds = [];
 var items = {};
@@ -53,6 +54,20 @@ var get = function (id) {
 	return null;
 };
 
+var create = function () {
+	var item = new Item({
+		'item' : {
+			'id' : uuid.v1().substr(0, 12).replace('-', '0')
+		},
+		'changes' : []
+	});
+
+	itemIds.push(item.id());
+	items[item.id()] = item;
+
+	return item;
+};
+
 var all = function () {
 	return items;
 };
@@ -69,15 +84,48 @@ var Item = function (data) {
 	};
 };
 
-Item.prototype.id = function () { return this._data.item.id; };
-Item.prototype.name = function () { return this._data.item.name; };
-Item.prototype.description = function () { return this._data.item.description; };
-Item.prototype.price = function () { return this._data.item.price; };
-Item.prototype.displayPrice = function () { return this._data.item.displayPrice; };
-Item.prototype.unit = function () { return this._data.item.unit; };
-Item.prototype.ration = function () { return this._data.item.ration; };
-Item.prototype.isBuyable = function () { return (this._data.item.buyable === true); };
-Item.prototype.isStockable = function () { return (this._data.item.stockable === true); };
+Item.prototype.id = function () {
+	if (typeof this._data.item.id === 'undefined') { return String(); }
+	return this._data.item.id;
+};
+
+Item.prototype.name = function () { 
+	if (typeof this._data.item.name === 'undefined') { return String(); }
+	return this._data.item.name; 
+};
+
+Item.prototype.description = function () { 
+	if (typeof this._data.item.description === 'undefined') { return String(); }
+	return this._data.item.description;
+};
+
+Item.prototype.price = function () {
+	if (typeof this._data.item.price === 'undefined') { return Number(); }
+	return this._data.item.price;
+};
+
+Item.prototype.displayPrice = function () {
+	if (typeof this._data.item.displayPrice === 'undefined') { return String(); }
+	return this._data.item.displayPrice;
+};
+
+Item.prototype.unit = function () {
+	if (typeof this._data.item.unit === 'undefined') { return String(); }
+	return this._data.item.unit;
+};
+
+Item.prototype.ration = function () {
+	if (typeof this._data.item.ration === 'undefined') { return Number(); }
+	return this._data.item.ration;
+};
+
+Item.prototype.isBuyable = function () {
+	return (this._data.item.buyable === true);
+};
+
+Item.prototype.isStockable = function () {
+	return (this._data.item.stockable === true);
+};
 
 Item.prototype.data = function () { return this._data; };
 Item.prototype.itemData = function () { return this._data.item; };
@@ -136,4 +184,5 @@ exports.Item = Item;
 exports.load = load;
 exports.persist = persist;
 exports.get = get;
+exports.create = create;
 exports.all = all;

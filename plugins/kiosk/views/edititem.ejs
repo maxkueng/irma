@@ -1,14 +1,26 @@
 <div class="row">
 	<div class="span12">
 		<div class="page-header">
+		<% if (item.id() === null) { %>
+			<h1>New Item</h1>
+		<% } else { %>
 			<h1>Edit Item <%= item.id() %></h1>
+		<% } %>
 		</div>
 	</div>
 </div>
 
 <div class="row">
 	<div class="span12">
-		<form action="/item/<%= item.id() %>/edit" method="post" class="" >
+		<% 
+		var itemId;
+		if (item.id()) {
+			itemId = item.id();
+		} else {
+			itemId = 'new';
+		}
+		%>
+		<form action="/item/<%= itemId %>/edit" method="post" class="" >
 			<div class="control-group">
 				<label for="input-name">Name</label>
 				<input id="input-name" name="name" type="text" value="<%= item.name() %>" class="span2" />
@@ -21,7 +33,7 @@
 
 			<div class="control-group">
 				<label for="input-price">Price</label>
-				<input id="input-price" name="price" type="number" value="<%-: item.price() / 100 | money %>" class="span2" />
+				<input id="input-price" name="price" type="number" step="0.05" value="<%-: item.price() / 100 | money %>" class="span2" />
 			</div>
 
 			<div class="control-group">
@@ -31,12 +43,12 @@
 
 			<div class="control-group">
 				<label for="input-ration">Ration size</label>
-				<input id="input-ration" name="ration" type="number" value="<%= item.ration() %>" class="span2" />
+				<input id="input-ration" name="ration" type="number" step="any" value="<%= item.ration() %>" class="span2" />
 			</div>
 
 			<div class="control-group">
 				<label for="input-unit">Units</label>
-				<input id="input-unit" name="unit" type="number" value="<%= item.unit() %>" class="span2" />
+				<input id="input-unit" name="unit" type="text" value="<%= item.unit() %>" class="span2" />
 			</div>
 
 			<div class="control-group">
@@ -58,7 +70,7 @@
 			</div>
 
 			<div class="form-actions">
-				<input type="hidden" name="itemid" value="<%= item.id() %>" />
+				<input type="hidden" name="itemid" value="<%= itemId %>" />
 				<a class="btn" href="/items">Cancel</a> <button class="btn btn-success" type="submit">Save</button>
 			</div>
 		</form>
@@ -69,7 +81,7 @@
 <div class="row">
 	<div class="span12" style="text-align: center;">
 		<a class="btn btn-large" href="/">Home</a>
-		<a class="btn btn-large" href="/account">View account</a>
+		<a class="btn btn-large btn-primary" href="/admin">Admin</a>
 		<a style="display:inline-block; margin-left: 18px;" href="/about"><img src="/img/irma.svg" style="height: 47px;" /></a>
 	</div>
 </div>

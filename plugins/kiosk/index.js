@@ -887,8 +887,12 @@ exports.init = function (y, config, messages, cron, logger) {
 		authCheck(req, res, function () {
 			var item, itemId, newData;
 
-			itemId = sanitize(req.body.itemid).trim();
-			item = items.get(req.params.id);
+			itemId = req.params.id;
+			if (itemId === 'new') {
+				item = items.create();
+			} else {
+				item = items.get(req.params.id);
+			}
 
 			newData = {
 				'id' : itemId,
