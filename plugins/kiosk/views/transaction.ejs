@@ -1,0 +1,70 @@
+<%
+balance = account.balance();
+var posneg = (balance < 0) ? 'negative' : 'positive';
+%>
+<div class="row">
+	<div class="span12">
+		<div class="page-header">
+			<h1>Transaction #<%= booking.id() %></h1>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="span12">
+		<p>
+		<% if (booking.automatic()) { %>
+			<span class="label ">automatic</span></p>
+		<% } %>
+		<% if (booking.reversed()) { %>
+			<span class="label label-important">reversed</span>
+		<% } %>
+		<% if (booking.admin()) { %>
+			<span class="label label-info">admin</span>
+		<% } %>
+	</div>
+</div>
+
+
+<div class="row">
+	<div class="span12">
+		<dl class="dl-horizontal">
+			<dt>ID</dt>
+			<dd><%= booking.id() %>
+			</dd>
+			<dt>Time</dt>
+			<dd><%=: booking.time() | isodate %></dd>
+			<dt>Amount</dt>
+			<dd><%=: booking.amount() / 100 | money %></dd>
+			<dt>Type</dt>
+			<dd><%=: booking.type() | capitalize %></dd>
+			<% if (booking.itemId()) { %>
+			<dt>Item</dt>
+			<dd><a href="/item/<%= booking.itemId() %>"><%= booking.name() %></a></dd>
+			<% } else {%>
+			<dt>Name</dt>
+			<dd><%= booking.name() %></dd>
+			<% } %>
+			<dt>Description</dt>
+			<dd><%- booking.description().replace('#' + booking.relatedBookingId(), '<a href="/booking/' + booking.relatedBookingId() + '">#' + booking.relatedBookingId() + '</a>') %></dd>
+		</dl>
+	</div>
+</div>
+
+<% if (booking.type() == 'purchase' && !booking.reversed()) { %>
+<div class="row" style="margin-top: 36px; margin-bottom: 36px;">
+	<div class="span12" style="text-align: center;">
+		<a class="btn btn-large btn-danger" href="/reverse/<%= booking.id() %>">Reverse</a>
+	</div>
+</div>
+<% } %>
+
+<footer>
+<div class="row">
+	<div class="span12" style="text-align: center;">
+		<a class="btn btn-large" href="/">Home</a>
+		<a class="btn btn-large" href="/account">View account</a>
+		<a style="display:inline-block; margin-left: 18px;" href="/about"><img src="/img/irma.svg" style="height: 47px;" /></a>
+	</div>
+</div>
+</footer>
