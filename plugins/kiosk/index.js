@@ -539,7 +539,7 @@ exports.init = function (y, config, messages, cron, logger) {
 				'amount' : amount * -1,
 				'name' : 'CHF ' + formatMoney(amount / 100) + ' to ' + recipient.fullName(),
 				'description' : remark,
-				'relatedBookingId' : targetBooking,
+				'relatedBookingId' : targetBookingId,
 				'type' : 'send money'
 			});
 
