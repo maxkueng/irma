@@ -9,7 +9,7 @@
 	},
 	"author" : "Max Kueng <me@maxkueng.com> (http://maxkueng.com/)",
 	"dependencies" : {
-		"cron" : ">=0.1.2",
+		"cron" : "0.1.2",
 		"datejs" : ">=0.0.2",
 		"googleweather" : ">=0.1.0",
 		"express" : "<=2.5.9",
