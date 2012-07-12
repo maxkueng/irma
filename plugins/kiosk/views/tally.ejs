@@ -26,7 +26,7 @@
 		<div class="control-group">
 			<label for="input-item<%= items[i].id() %>"><%= items[i].name() %></label>
 			<input type="hidden" name="item" value="<%= items[i].id() %>" />
-			<input id="input-item<%= items[i].id() %>" name="marks" type="number" placeholder="Marks" class="span2" />
+			<input id="input-item<%= items[i].id() %>" name="marks" type="number" step="1" placeholder="Marks" class="span2" />
 		</div>
 		<% } %>
 

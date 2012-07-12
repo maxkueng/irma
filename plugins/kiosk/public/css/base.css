@@ -51,8 +51,14 @@ ul.items li.item.stock a {
 	background-color: #414141;
 }
 
+ul.items li.item.sendmoney a {
+	background-color: #0088cc;
+}
+
 ul.items li.item.stock a .name, 
-ul.items li.item.stock a .description {
+ul.items li.item.stock a .description, 
+ul.items li.item.sendmoney a .name, 
+ul.items li.item.sendmoney a .description {
 	color: #fff;
 }
 

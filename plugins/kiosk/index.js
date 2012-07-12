@@ -6,6 +6,7 @@ exports.init = function (y, config, messages, cron, logger) {
 	messages.add('kiosk_tally', "Hey [name], [recs] have been carried over from the tally list to your digital kiosk account. \nYour new account balance is CHF [balance]");
 	messages.add('kiosk_deposit', "Hey [name], you have successfully deposited CHF [deposit] to your digital kiosk account. \nYour new account balance is CHF [balance]");
 	messages.add('kiosk_withdraw', "Hey [name], you have successfully withdrawn CHF [withdrawal] from your digital kiosk account. \nYour new account balance is CHF [balance]");
+	messages.add('kiosk_receivemoney', "Hey [name], [senderName] has sent you CHF [amount] because \"[remark]\". \nYour new account balance is CHF [balance]");
 
 	require('datejs');
 
@@ -451,6 +452,108 @@ exports.init = function (y, config, messages, cron, logger) {
 				kioskLogger.log(userId, account, account.booking(bookingId));
 			});
 
+		});
+	});
+
+	app.get('/sendmoney', function (req, res) {
+		authCheck(req, res, function () {
+			res.render('sendmoney.ejs', {
+				'layout' : 'layout.ejs',
+				'req' : req,
+				'res' : res,
+				'users' : y.users()
+			});
+		});
+	});
+
+	app.post('/sendmoney', function (req, res) {
+		authCheck(req, res, function () {
+			var userId, recipientId, amount, remark,
+				user, recipient,
+				sourceAccount, sourceBooking, sourceBookingId,
+				targetAccount, targetBooking, targetBookingId,
+				text;
+
+			userId = req.userId;
+			recipientId = parseInt(req.body.recipient, 10);
+			amount = parseInt(req.body.amount * 100, 10);
+			remark = req.body.remark;
+			user = y.user(userId);
+			recipient = y.user(recipientId);
+
+			sourceAccount = accounts.get(userId);
+			targetAccount = accounts.get(recipientId);
+
+			sourceBookingId = bookings.uuid();
+			targetBookingId = bookings.uuid();
+
+			sourceBooking = new Booking({
+				'id' : sourceBookingId,
+				'itemId' : null,
+				'time' : Date.now(),
+				'amount' : amount * -1,
+				'name' : 'CHF ' + formatMoney(amount / 100) + ' to ' + recipient.fullName(),
+				'description' : remark,
+				'relatedBookingId' : targetBookingId,
+				'type' : 'send money'
+			});
+
+			targetBooking = new Booking({
+				'id' : targetBookingId,
+				'itemId' : null,
+				'time' : Date.now(),
+				'amount' : amount,
+				'name' : 'CHF ' + formatMoney(amount / 100) + ' from ' + user.fullName(),
+				'description' : remark,
+				'relatedBookingId' : sourceBookingId,
+				'type' : 'send money'
+			});
+
+			sourceAccount.book(sourceBooking, function (err, bookingId) {
+				res.redirect('/transaction/' + bookingId);
+
+				kioskLogger.log(userId, sourceAccount, sourceAccount.booking(bookingId));
+			});
+
+			targetAccount.book(targetBooking, function (err, bookingId) {
+				kioskLogger.log(userId, targetAccount, targetAccount.booking(bookingId));
+
+				text = messages.get('kiosk_receivemoney', {
+					'name' : recipient.fullName(),
+					'senderName' : user.fullName(),
+					'amount' : formatMoney(amount / 100),
+					'remark' : remark,
+					'balance' : formatMoney(targetAccount.balance() / 100)
+				});
+
+				y.sendMessage(function (error, msg) {
+					var thread = y.thread(msg.threadId());
+					thread.setProperty('type', 'kiosk_receivemoney');
+					thread.setProperty('status', 'closed');
+					y.persistThread(thread);
+
+				}, text, { 'direct_to' : recipientId });
+			});
+		});
+	});
+
+	app.get('/transaction/:id', function (req, res) {
+		authCheck(req, res, function () {
+			var userId, account, booking, item;
+
+			userId = req.userId;
+			account = accounts.get(userId);
+			booking = account.booking(req.params.id);
+			item = items.get(booking.itemId());
+
+			res.render('transaction.ejs', {
+				'layout' : 'layout.ejs',
+				'req' : req,
+				'res' : res,
+				'account' : account,
+				'booking' : booking,
+				'item' : item
+			});
 		});
 	});
 
