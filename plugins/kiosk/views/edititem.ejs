@@ -70,8 +70,12 @@
 			</div>
 
 			<div class="form-actions">
+				<% if (item.id()) { %>
+				<a style="float: right;" class="btn btn-warning" href="/item/<%= item.id() %>/delete">Delete</a>
+				<% } %>
 				<input type="hidden" name="itemid" value="<%= itemId %>" />
-				<a class="btn" href="/items">Cancel</a> <button class="btn btn-success" type="submit">Save</button>
+				<a class="btn" href="/items">Cancel</a>
+				<button class="btn btn-primary" type="submit">Save</button>
 			</div>
 		</form>
 	</div>
