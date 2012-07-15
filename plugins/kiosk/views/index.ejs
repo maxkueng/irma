@@ -1,49 +1,44 @@
-
-<div class="row">
+<div class="row noheader">
 	<div class="span12">
-		<div class="page-header">
-			<h1>Purchase</h1>
-		</div>
+		<ul class="items">
+		<% for (var id in items) { %>
+			<% if (items[id].isBuyable()) { %>
+			<li class="item row">
+				<div class="span12">
+					<a href="/pay/<%= id %>">
+						<span class="name"><%= items[id].name() %></span>
+						<% if (items[id].isStockable()) { %>
+						<span class="description"><%= items[id].ration() %> <%=: items[id].unit() | downcase %></span>
+						<% } else { %>
+						<span class="description"><%= items[id].description() %></span>
+						<% } %>
+						<span class="price"><%= items[id].displayPrice() %></span>
+					</a>
+				</div>
+			</li>
+			<% } %>
+		<% } %>
+			<li class="item row stock w">
+				<div class="span12">
+					<a href="/stock">
+						<span class="name">Stock</span>
+						<span class="description">Bought goods?</span>
+						<i class="icon-shopping-cart icon-white"></i>
+					</a>
+				</div>
+			</li>
+			<li class="item row sendmoney w">
+				<div class="span12">
+					<a href="/sendmoney">
+						<span class="name">Send Money</span>
+						<span class="description">Transfer money to another account</span>
+						<i class="icon-gift icon-white"></i>
+					</a>
+				</div>
+			</li>
+		</ul>
 	</div>
 </div>
-
-<ul class="items">
-<% for (var id in items) { %>
-	<% if (items[id].isBuyable()) { %>
-	<li class="item row">
-		<div class="span12">
-			<a href="/pay/<%= id %>">
-				<span class="name"><%= items[id].name() %></span>
-				<% if (items[id].isStockable()) { %>
-				<span class="description"><%= items[id].ration() %> <%=: items[id].unit() | downcase %></span>
-				<% } else { %>
-				<span class="description"><%= items[id].description() %></span>
-				<% } %>
-				<span class="price"><%= items[id].displayPrice() %></span>
-			</a>
-		</div>
-	</li>
-	<% } %>
-<% } %>
-	<li class="item row stock w">
-		<div class="span12">
-			<a href="/stock">
-				<span class="name">Stock</span>
-				<span class="description">Bought goods?</span>
-				<i class="icon-shopping-cart icon-white"></i>
-			</a>
-		</div>
-	</li>
-	<li class="item row sendmoney w">
-		<div class="span12">
-			<a href="/sendmoney">
-				<span class="name">Send Money</span>
-				<span class="description">Transfer money to another account</span>
-				<i class="icon-gift icon-white"></i>
-			</a>
-		</div>
-	</li>
-</ul>
 
 <footer>
 <div class="row">
