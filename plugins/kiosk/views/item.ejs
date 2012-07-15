@@ -1,11 +1,9 @@
-<div class="row">
+<div class="row noheader">
 	<div class="span12">
-		<div class="page-header">
-			<h1><%= item.name() %></h1>
-		</div>
 	</div>
 </div>
 
+<%- partial('partials/item', { 'item' : item, 'mode' : 'default' }) %>
 
 <div class="row">
 	<div class="span12">
@@ -14,14 +12,20 @@
 			<dd><%= item.id() %></dd>
 			<dt>Name</dt>
 			<dd><%= item.name() %></dd>
-			<dt>Description</dt>
-				<% if (item.isStockable()) { %>
+			<% if (item.isStockable()) { %>
+				<dt>Ration</dt>
 				<dd><%= item.ration() %> <%=: item.unit() | downcase %></dd>
-				<% } else { %>
+			<% } else { %>
+				<dt>Description</dt>
 				<dd><%= item.description() %></dd>
-				<% } %>
+			<% } %>
 			<dt>Price</dt>
 			<dd><%= item.displayPrice() %></dd>
+			<dt>Options</dt>
+			<dd>
+				<% if (item.isStockable()) { %> <span class="label label-info">stock</span> <% } %>
+				<% if (item.isBuyable()) { %> <span class="label label-info">buy</span> <% } %>
+			</dd>
 		</dl>
 	</div>
 </div>

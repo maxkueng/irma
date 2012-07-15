@@ -2,11 +2,11 @@
 	var posneg = (balance < 0) ? 'negative' : 'positive';
 %>
 
-<div class="row">
+<div class="row balance">
 	<div class="span12">
-		<div class="well">
-			<p class="balance <%= posneg %>"><%=: balance / 100 | money %></p>
-		</div>
+		<a class="well" href="/account">
+			<span class="balance <%= posneg %>"><%=: balance / 100 | money %></span>
+		</a>
 	</div>
 </div>
 

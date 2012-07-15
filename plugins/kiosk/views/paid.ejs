@@ -1,11 +1,11 @@
-<div class="row">
+<div class="row noheader">
 	<div class="span12">
-		<div class="page-header">
-			<h1>Thank You!</h1>
-			<p>You've just purchased <strong><%= item.name() %></strong> for CHF&nbsp;<%=: item.price() / 100 | money %></p>
-		</div>
 	</div>
 </div>
+
+<%- partial('partials/item', { 'item' : item, 'mode' : 'success' }) %>
+
+<%- partial('partials/booking', { 'booking' : booking }) %>
 
 <%- partial('partials/balance', { 'balance' : account.balance() }) %>
 

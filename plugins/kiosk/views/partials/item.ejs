@@ -1,0 +1,18 @@
+<div class="item row  <%= mode %>">
+	<div class="span12">
+		<a href="/item/<%= item.id() %>">
+			<span class="name"><%= item.name() %></span>
+			<% if (item.isStockable()) { %>
+			<span class="description"><%= item.ration() %> <%=: item.unit() | downcase %></span>
+			<% } else { %>
+			<span class="description"><%= item.description() %></span>
+			<% } %>
+			<% if (mode && mode === 'success') { %>
+				<i class="icon-ok icon-white"></i>
+			<% } else { %>
+				<span class="price"><%= item.displayPrice() %></span>
+			<% } %>
+		</a>
+	</div>
+</div>
+
