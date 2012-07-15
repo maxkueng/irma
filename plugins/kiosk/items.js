@@ -68,6 +68,13 @@ var create = function () {
 	return item;
 };
 
+var remove = function (id) {
+	var idx = itemIds.indexOf(id);
+	itemIds.splice(idx, 1);
+
+	delete items[id];
+};
+
 var all = function () {
 	return items;
 };
@@ -185,4 +192,5 @@ exports.load = load;
 exports.persist = persist;
 exports.get = get;
 exports.create = create;
+exports.remove = remove;
 exports.all = all;

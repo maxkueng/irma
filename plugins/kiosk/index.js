@@ -895,7 +895,7 @@ exports.init = function (y, config, messages, cron, logger) {
 			}
 
 			newData = {
-				'id' : itemId,
+				'id' : item.id(),
 				'name' : sanitize(req.body.name).trim(),
 				'description' : sanitize(req.body.description).trim(),
 				'price' : parseInt(sanitize(req.body.price).toFloat() * 100, 10),
@@ -928,6 +928,17 @@ exports.init = function (y, config, messages, cron, logger) {
 			});
 		});
 
+	});
+
+	app.get('/item/:id/delete', function (req, res) {
+		authCheck(req, res, function () {
+			var item;
+
+			items.remove(req.params.id);
+			items.persist();
+
+			res.redirect('/items');
+		});
 	});
 
 	archiveUserAccount = function (user) {
