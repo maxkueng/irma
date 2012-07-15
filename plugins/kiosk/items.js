@@ -147,7 +147,9 @@ Item.prototype.setData = function (data) {
 };
 
 Item.prototype.updateData = function (data) {
-	this.saveDiff(this.itemData(), data);
+	if (typeof this._data.item.name !== 'undefined') { 
+		this.saveDiff(this.itemData(), data);
+	}
 	this.setData(data);
 };
 
