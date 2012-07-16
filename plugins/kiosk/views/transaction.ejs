@@ -1,12 +1,28 @@
-<%
-balance = account.balance();
-var posneg = (balance < 0) ? 'negative' : 'positive';
-%>
+<div class="row noheader">
+	<div class="span12">
+	</div>
+</div>
+
+<%- partial('partials/booking', { 'booking' : booking }) %>
+
 <div class="row">
 	<div class="span12">
-		<div class="page-header">
-			<h1>Transaction #<%= booking.id() %></h1>
+		<div class="transaction">
+			<% if (sender) { %>
+			<span class="sender" title="<%= booking.description() %>"><i class="icon-user icon-white"></i><%= sender.fullName() %></span> 
+			<% } else {%>
+			<span class="recipient"><i class="icon-user icon-white"></i> ?</span> 
+			<% } %>
+			<span class="arrow"><i class="icon-chevron-right icon-white"></i></span>
+			<span class="amount positive"><%-: booking.amount() / 100 * -1 | money %></span>
+			<span class="arrow"><i class="icon-chevron-right icon-white"></i></span>
+			<% if (recipient) { %>
+			<span class="recipient"><i class="icon-user icon-white"></i><%= recipient.fullName() %></span> 
+			<% } else {%>
+			<span class="recipient"><i class="icon-user icon-white"></i> ?</span> 
+			<% } %>
 		</div>
+		<p style="padding-left: 14px;"><i class="icon-comment"></i> <%= booking.description() %></p>
 	</div>
 </div>
 
@@ -25,31 +41,7 @@ var posneg = (balance < 0) ? 'negative' : 'positive';
 	</div>
 </div>
 
-
-<div class="row">
-	<div class="span12">
-		<dl class="dl-horizontal">
-			<dt>ID</dt>
-			<dd><%= booking.id() %>
-			</dd>
-			<dt>Time</dt>
-			<dd><%=: booking.time() | isodate %></dd>
-			<dt>Amount</dt>
-			<dd><%=: booking.amount() / 100 | money %></dd>
-			<dt>Type</dt>
-			<dd><%=: booking.type() | capitalize %></dd>
-			<% if (booking.itemId()) { %>
-			<dt>Item</dt>
-			<dd><a href="/item/<%= booking.itemId() %>"><%= booking.name() %></a></dd>
-			<% } else {%>
-			<dt>Name</dt>
-			<dd><%= booking.name() %></dd>
-			<% } %>
-			<dt>Description</dt>
-			<dd><%- booking.description().replace('#' + booking.relatedBookingId(), '<a href="/booking/' + booking.relatedBookingId() + '">#' + booking.relatedBookingId() + '</a>') %></dd>
-		</dl>
-	</div>
-</div>
+<%- partial('partials/balance', { 'balance' : account.balance() }) %>
 
 <% if (booking.type() == 'purchase' && !booking.reversed()) { %>
 <div class="row" style="margin-top: 36px; margin-bottom: 36px;">
@@ -58,6 +50,14 @@ var posneg = (balance < 0) ? 'negative' : 'positive';
 	</div>
 </div>
 <% } %>
+
+<script type="text/javascript">
+$(document).ready(function () {
+	$('.sender').tooltip({
+		'placement' : 'bottom'
+	});
+});
+</script>
 
 <footer>
 <div class="row">

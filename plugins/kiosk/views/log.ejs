@@ -1,17 +1,10 @@
-<div class="row">
-	<div class="span12">
-		<div class="page-header">
-			<h1>Log</h1>
-			<p></p>
-		</div>
-	</div>
-</div>
+<%- partial('partials/adminnav', { 'page' : 'log' }) %>
 
 <div class="row log">
 	<div class="span12">
 		<% for (var i = log.length -1; i >= 0; i--) { %>
 		<div class="row">
-			<div class="span12 well">
+			<div class="span12">
 				<span class="time"><time><%=: log[i].time | isodate %></time></span>
 				<span class="user">
 				<% if (users[log[i].user]) { %>
@@ -41,7 +34,7 @@
 				<% } %>
 				<% if (log[i].booking) { %>
 				<div class="booking">
-					<pre><%= JSON.stringify(log[i].booking, null, '\t') %></pre>
+					<pre class="prettyprint"><%= JSON.stringify(log[i].booking, null, '\t') %></pre>
 				</div>
 				<% } %>
 			</div>

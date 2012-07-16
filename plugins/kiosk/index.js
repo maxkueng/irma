@@ -301,13 +301,14 @@ exports.init = function (y, config, messages, cron, logger) {
 			account = accounts.get(user);
 
 			account.deposit(amount, function (err, bookingId) {
-				var text;
+				var text, booking;
 
 				res.render('depositok.ejs', {
 					'layout' : 'layout.ejs',
 					'req' : req,
 					'res' : res,
-					'balance' : account.balance()
+					'balance' : account.balance(),
+					'booking' : account.booking(bookingId)
 				});
 
 				kioskLogger.log(userId, account, account.booking(bookingId));
@@ -358,7 +359,8 @@ exports.init = function (y, config, messages, cron, logger) {
 					'layout' : 'layout.ejs',
 					'req' : req,
 					'res' : res,
-					'balance' : account.balance()
+					'balance' : account.balance(),
+					'booking' : account.booking(bookingId)
 				});
 
 				kioskLogger.log(userId, account, account.booking(bookingId));
@@ -495,7 +497,9 @@ exports.init = function (y, config, messages, cron, logger) {
 				'name' : 'CHF ' + formatMoney(amount / 100) + ' to ' + recipient.fullName(),
 				'description' : remark,
 				'relatedBookingId' : targetBookingId,
-				'type' : 'send money'
+				'type' : 'send money',
+				'sender' : userId,
+				'recipient' : recipientId
 			});
 
 			targetBooking = new Booking({
@@ -506,7 +510,9 @@ exports.init = function (y, config, messages, cron, logger) {
 				'name' : 'CHF ' + formatMoney(amount / 100) + ' from ' + user.fullName(),
 				'description' : remark,
 				'relatedBookingId' : sourceBookingId,
-				'type' : 'send money'
+				'type' : 'send money',
+				'sender' : userId,
+				'recipient' : recipientId
 			});
 
 			sourceAccount.book(sourceBooking, function (err, bookingId) {
@@ -539,12 +545,14 @@ exports.init = function (y, config, messages, cron, logger) {
 
 	app.get('/transaction/:id', function (req, res) {
 		authCheck(req, res, function () {
-			var userId, account, booking, item;
+			var userId, account, booking, item, sender, recipient;
 
 			userId = req.userId;
 			account = accounts.get(userId);
 			booking = account.booking(req.params.id);
 			item = items.get(booking.itemId());
+			sender = y.user(booking.sender());
+			recipient = y.user(booking.recipient());
 
 			res.render('transaction.ejs', {
 				'layout' : 'layout.ejs',
@@ -552,7 +560,9 @@ exports.init = function (y, config, messages, cron, logger) {
 				'res' : res,
 				'account' : account,
 				'booking' : booking,
-				'item' : item
+				'item' : item, 
+				'sender' : sender,
+				'recipient' : recipient
 			});
 		});
 	});
@@ -587,18 +597,22 @@ exports.init = function (y, config, messages, cron, logger) {
 		authCheck(req, res, function () {
 			var userId, user, amount, account,
 				itemIds, marks, wait, recString,
-				item, mark, rec;
+				item, mark, rec, bookings;
 
+			bookings = [];
 			userId = req.userId;
 			user = parseInt(req.body.user, 10);
 			amount = parseInt(req.body.amount * 100, 10);
 			account = accounts.get(user);
 
+			recString = String();
+
 			itemIds = req.body.item;
 			marks = req.body.marks;
 
+			if (!Array.isArray(itemIds)) { itemIds = [itemIds]; }
+			if (!Array.isArray(marks)) { marks = [marks]; }
 			wait = itemIds.length - 1;
-			recString = String();
 
 			for (var i = 0; i < itemIds.length; i++) {
 				item = items.get(itemIds[i]);
@@ -618,6 +632,7 @@ exports.init = function (y, config, messages, cron, logger) {
 						var stock, text;
 
 						kioskLogger.log(userId, account, account.booking(bookingId));
+						bookings.push(account.booking(bookingId));
 
 						if (rec.item.isStockable()) {
 							stock = stocks.get(rec.item.id());
@@ -628,12 +643,14 @@ exports.init = function (y, config, messages, cron, logger) {
 							});
 						}
 
-						if (!--wait) {
+						--wait;
+						if (wait < 0) {
 							res.render('tallyok.ejs', {
 								'layout' : 'layout.ejs',
 								'req' : req,
 								'res' : res,
-								'balance' : account.balance()
+								'balance' : account.balance(),
+								'bookings' : bookings
 							});
 
 							text = messages.get('kiosk_tally', {
@@ -684,7 +701,8 @@ exports.init = function (y, config, messages, cron, logger) {
 					'layout' : 'layout.ejs',
 					'req' : req,
 					'res' : res,
-					'balance' : account.balance()
+					'balance' : account.balance(),
+					'booking' : account.booking(bookingId)
 				});
 
 				kioskLogger.log(userId, account, account.booking(bookingId));

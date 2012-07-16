@@ -1,0 +1,23 @@
+<%
+	var posneg = (booking.amount() < 0) ? 'negative' : 'positive';
+%>
+
+<div class="row booking">
+	<div class="span12">
+		<a class="" href="/booking/<%= booking.id() %>">
+			<span class="id">Booking #<%= booking.id() %></span>
+			<span class="info">
+				<span class="label"><%= booking.type() %></span>
+				<i class="icon-time"></i> <time title="<%-: booking.time() | isodate %>"><%-: booking.time() | isodate %></time>
+				<span class="amount <%= posneg %>"><%=: booking.amount() / 100 | money %></span>
+			</span>
+		</a>
+	</div>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function () {
+	$('time').prettyDate();
+	setInterval(function(){ $('time').prettyDate(); }, 5000);
+});
+</script>

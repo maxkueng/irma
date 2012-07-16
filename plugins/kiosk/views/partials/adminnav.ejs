@@ -3,9 +3,10 @@
 	var withdrawClass = (page === 'withdraw') ? 'active' : '';
 	var tallyClass = (page === 'tally') ? 'active' : '';
 	var stocklistClass = (page === 'stocklist') ? 'active' : '';
-	var moreClass = (page === 'initialize' || page === 'items') ? 'active' : '';
+	var moreClass = (page === 'initialize' || page === 'items' || page === 'log') ? 'active' : '';
 	var initializeClass = (page === 'initialize') ? 'active' : '';
 	var itemsClass = (page === 'items') ? 'active' : '';
+	var logClass = (page === 'log') ? 'active' : '';
 %>
 <div class="row" style="margin-top: 18px;">
 	<div class="span12">
@@ -22,6 +23,7 @@
 				<ul class="dropdown-menu">
 					<li class="<%= initializeClass %>"> <a href="/initialize">Initialize</a> </li>
 					<li class="<%= itemsClass %>"> <a href="/items">Items</a> </li>
+					<li class="<%= logClass %>"> <a href="/log">Log</a> </li>
 				</ul>
 			</li>
 		</ul>

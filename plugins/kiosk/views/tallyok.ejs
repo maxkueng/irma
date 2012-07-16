@@ -1,27 +1,20 @@
-<%
-	var posneg = (balance < 0) ? 'negative' : 'positive';
-%>
-<div class="row">
-	<div class="span12">
-		<div class="page-header">
-			<h1>Tally List</h1>
-			<p>Tally marks successfully carried over</p>
-		</div>
-	</div>
-</div>
+<%- partial('partials/adminnav', { 'page' : 'tally' }) %>
 
+<% for (var i = 0; i < bookings.length; i++) { %>
+<%- partial('partials/booking', { 'booking' : bookings[i] }) %>
+<% } %>
 
-<div class="row">
-	<div class="span12">
-		<div class="well">
-			<p class="balance <%= posneg %>"><%=: balance / 100 | money %></p>
-		</div>
-	</div>
-</div>
+<%- partial('partials/balance', { 'balance' : balance }) %>
+
 
 <div class="row">
 	<div class="span12" style="text-align: center;">
-		<p><a class="btn btn-large btn-success" href="/tally">OK</a></p>
+		<p>
+			<a class="btn btn-large btn-success" href="/tally">
+				<i class="icon-ok icon-white"></i>
+				OK
+			</a>
+		</p>
 	</div>
 </div>
 
