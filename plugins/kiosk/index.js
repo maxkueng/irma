@@ -668,6 +668,9 @@ exports.init = function (y, config, messages, cron, logger) {
 							}, text, { 'direct_to' : user });
 						}
 					});
+
+				} else {
+					--wait;
 				}
 			}
 		});
