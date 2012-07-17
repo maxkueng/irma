@@ -146,7 +146,7 @@ exports.init = function (y, config, messages, cron, logger) {
 		});
 
 		account.book(booking, function () {
-			callback(false, booking.id());
+			callback(false, booking.id(), rec);
 		});
 	};
 
@@ -628,7 +628,7 @@ exports.init = function (y, config, messages, cron, logger) {
 					if (i !== 0) { recString += ', '; }
 					recString += rec.marks + ' x ' + rec.item.name();
 
-					tallyCarryOver(user, rec, function (err, bookingId) {
+					tallyCarryOver(user, rec, function (err, bookingId, rec) {
 						var stock, text;
 
 						kioskLogger.log(userId, account, account.booking(bookingId));
