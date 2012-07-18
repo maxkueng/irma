@@ -64,6 +64,13 @@ exports.init = function (y, config, messages, cron, logger) {
 		return fancyTimestamp(time, true);
 	};
 
+	ejs.filters.round = function (num) {
+		var dec = 2;
+		return Math.round(num * Math.pow(10, dec)) / Math.pow(10, dec);
+	};
+
+
+
 	ejs.filters.money = function (n) {
 		return formatMoney(n);
 	};
