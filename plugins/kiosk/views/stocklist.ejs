@@ -17,7 +17,7 @@
 				<dt>Stock</dt>
 				<dd><%= info.stock %> <%=: item.unit() | downcase %></dd>
 				<dt>Average cons/w</dt>
-				<dd><%= info.avgUnits %> <%=: item.unit() | downcase %></dd>
+				<dd><%=: info.avgUnits | round %> <%=: item.unit() | downcase %></dd>
 				<dt>Health</dt>
 				<dd><%=: info.health | capitalize %></dd>
 			</dl>
