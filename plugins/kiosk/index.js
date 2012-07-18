@@ -429,7 +429,7 @@ exports.init = function (y, config, messages, cron, logger) {
 
 			booking = new Booking({
 				'id' : bookings.uuid(),
-				'itemId' : null,
+				'itemId' : ( (restockMode === 'item') ? itemId : null ),
 				'time' : Date.now(),
 				'amount' : amount,
 				'name' : bookingName,

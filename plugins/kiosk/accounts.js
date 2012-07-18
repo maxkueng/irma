@@ -122,6 +122,7 @@ Account.prototype.reverse = function (bookingId, callback) {
 	this.updateBooking(booking.id(), booking, function () {
 		var reverse = new Booking({
 			'id' : bookings.uuid(),
+			'itemId' : ( (booking.itemId()) ? booking.itemId() : null ),
 			'time' : Date.now(),
 			'amount' : booking.amount() * -1,
 			'name' : 'Reverse #' + booking.id(),
