@@ -15,6 +15,7 @@ exports.init = function (y, config, messages, cron, logger) {
 		express = require('express'),
 		ejs = require('ejs'),
 		sanitize = require('validator').sanitize,
+		fancyTimestamp = require('fancy-timestamp'),
 		items = require('./items'),
 		Item = items.Item,
 		accounts = require('./accounts'),
@@ -57,6 +58,10 @@ exports.init = function (y, config, messages, cron, logger) {
 
 	ejs.filters.isodate_short = function (time) {
 		return new Date(time).toString("MM-dd HH:mm");
+	};
+
+	ejs.filters.fancy_timestamp = function (time) {
+		return fancyTimestamp(time, true);
 	};
 
 	ejs.filters.money = function (n) {

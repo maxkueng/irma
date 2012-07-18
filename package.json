@@ -19,6 +19,7 @@
 		"request" : ">=2.9.0",
 		"validator" : "*",
 		"aspsms" : "*",
+		"fancy-timestamp" : "*",
 		"revjsion" : "git://github.com/maxkueng/revjsion.git"
 	},
 	"devDependencies": {
