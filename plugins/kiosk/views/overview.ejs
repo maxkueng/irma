@@ -35,7 +35,7 @@
 		<th>Total</th>
 		<%
 			var balance = totalBalance;
-			var posneg = (balance < 0) ? 'negative' : 'positive';
+			var posneg = (balance > 0) ? 'negative' : 'positive';
 		%>
 		<th style="min-width: 3em;text-align: right;" class="<%= posneg %>"><%-: balance / 100 | money %></th>
 	</tfoot>
