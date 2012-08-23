@@ -16,6 +16,7 @@
 			<th>User</th>
 			<th style="text-align: right;">Balance</th>
 		</tr>
+		<% var totalBalance = 0; %>
 	</thead>
 	<tbody>
 		<% for (var userId in accounts) { %>
@@ -23,11 +24,21 @@
 			<td><%= users[userId].fullName() %></td>
 			<%
 			var balance = accounts[userId].balance();
-			var posneg = (balance < 0) ? 'negative' : 'positive'; %>
+			var posneg = (balance < 0) ? 'negative' : 'positive';
+			totalBalance += balance;
+			%>
 			<td style="min-width: 3em;text-align: right;" class="<%= posneg %>"><%-: balance / 100 | money %></td>
 		</tr>
 		<% } %>
 	</tbody>
+	<tfoot>
+		<th>Total</th>
+		<%
+			var balance = totalBalance;
+			var posneg = (balance < 0) ? 'negative' : 'positive';
+		%>
+		<th style="min-width: 3em;text-align: right;" class="<%= posneg %>"><%-: balance / 100 | money %></th>
+	</tfoot>
 </table>
 
 
