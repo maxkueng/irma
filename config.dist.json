@@ -1,31 +1,26 @@
 {
 	"yammer" : {
-		"email" : "your.bot@yournetwork.com", 
+		"email" : "your.bot@yournetwork.com",
 		"api" : {
-			"consumer_key" : "YOUR_YAMMER_OAUTH_CONSUMER_KEY", 
+			"consumer_key" : "YOUR_YAMMER_OAUTH_CONSUMER_KEY",
 			"consumer_secret" : "YOUR_YAMMER_OAUTH_CONSUMER_SECRET"
 		}
-	}, 
+	},
 	"webinterface" : {
-		"ip" : "0.0.0.0", 
+		"ip" : "0.0.0.0",
 		"port" : 1337
-	}, 
+	},
 	"spaghetti" : {
-		"cron_open" : "0 0 9 * * 5", 
-		"cron_close" : "0 45 11 * * 5", 
+		"cron_open" : "0 0 9 * * 5",
+		"cron_close" : "0 45 11 * * 5",
 		"chef_user_id" : "0000000"
-	}, 
+	},
 	"spaghetti_autocharge" : {
 		"cron_charge" : "0 0 12 * * 5"
-	}, 
+	},
 	"veggie" : {
 		"cron_start" : "0 30 11 * * 5"
-	}, 
-	"chorewars" : {
-		"username" : "asdfghjk", 
-		"password" : "asdfasdfasdfasdfasdfasdfasdfasdf", 
-		"cron_top3" : "0 30 12 * * *"
-	}, 
+	},
 	"kiosk" : {
 		"port" : 1338
 	}

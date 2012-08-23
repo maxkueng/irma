@@ -1,9 +1,11 @@
+"use strict";
+
 var uuid = require('node-uuid');
 
 var Booking = function (data) {
-	if (typeof data.reversed === 'undefined') data.reversed = false;
-	if (typeof data.automatic === 'undefined') data.automatic = false;
-	if (typeof data.admin === 'undefined') data.admin = false;
+	if (typeof data.reversed === 'undefined') { data.reversed = false; }
+	if (typeof data.automatic === 'undefined') { data.automatic = false; }
+	if (typeof data.admin === 'undefined') { data.admin = false; }
 	this._data = data;
 };
 
@@ -15,6 +17,8 @@ Booking.prototype.name = function () { return this._data.name; };
 Booking.prototype.description = function () { return this._data.description; };
 Booking.prototype.type = function () { return this._data.type; };
 Booking.prototype.amount = function () { return this._data.amount; };
+Booking.prototype.sender = function () { return this._data.sender; };
+Booking.prototype.recipient = function () { return this._data.recipient; };
 Booking.prototype.reversed = function () { return this._data.reversed; };
 Booking.prototype.setReversed = function () { this._data.reversed = true; };
 Booking.prototype.relatedBookingId = function () { return this._data.relatedBookingId; };

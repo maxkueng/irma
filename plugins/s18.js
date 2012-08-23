@@ -1,3 +1,5 @@
+"use strict";
+
 var request = require('request');
 
 exports.init = function (y, config, messages, cron, logger) {
@@ -13,72 +15,78 @@ exports.init = function (y, config, messages, cron, logger) {
 	messages.add('s18_error', "Sorry, I don't do train lookups in my coffee break.");
 
 	y.on('message', function (message) {
-		var thread = y.thread(message.threadId());
+		var thread, s18Url, trains;
 
-		if (/\b(s18|train|forchbahn|bahn|zug)\b/i.test(message.plainBody()) || thread.property('type') == 's18') {
+		thread = y.thread(message.threadId());
+
+		if (/\b(s18|train|forchbahn|bahn|zug)\b/i.test(message.plainBody()) || thread.property('type') === 's18') {
 			thread.setProperty('type', 's18');
 
-			var s18Url = 'http://online.fahrplan.zvv.ch/bin/stboard.exe/dn?L=vs_widgets&input=008503067&boardType=dep&time=now&productsFilter=01001111110&additionalTime=0&disableEquivs=false&maxJourney+s=20&start=yes&selectDate=today&monitor=1&requestType=0&timeFormat=cd&view=preview';
-			var trains = [];
+			s18Url = 'http://online.fahrplan.zvv.ch/bin/stboard.exe/dn?L=vs_widgets&input=008503067&boardType=dep&time=now&productsFilter=01001111110&additionalTime=0&disableEquivs=false&maxJourney+s=20&start=yes&selectDate=today&monitor=1&requestType=0&timeFormat=cd&view=preview';
+			trains = [];
 
-			request({
-				'uri' : s18Url
-			}, function (error, response, body) {
-				var messageKey;
+			request(
+				{
+					'uri' : s18Url
+				},
+				function (error, response, body) {
+					var messageKey, data, journey, first, second,
+						messageParams, messageText;
 
-				if (!error && response.statusCode == 200) {
-					body = body.replace('journeysObj = ', '');
-					var data = JSON.parse(body);
-					if (data.journey) {
-						for (var i = 0; i < data.journey.length; i++) {
-							var journey = data.journey[i];
-							if (journey.pr != 'S18') continue;
-							if (journey.st != 'Zürich, Bahnhof Stadelhofen') continue;
+					if (!error && response.statusCode === 200) {
+						body = body.replace('journeysObj = ', '');
+						data = JSON.parse(body);
+						if (data.journey) {
+							for (var i = 0; i < data.journey.length; i++) {
+								journey = data.journey[i];
+								if (journey.pr !== 'S18') { continue; }
+								if (journey.st !== 'Zürich, Bahnhof Stadelhofen') { continue; }
 
-							trains.push(journey);
-						}
-
-						var first = trains[0];
-						var second = trains[1];
-
-						if (first) {
-							if (first.minutes == 0) {
-								messageKey = 's18_zero';
-							} else if (first.minutes < 3) {
-								if (second) {
-									messageKey = 's18_wontmake';
-								} else {
-									messageKey = 's18_wontmake_nonext';
-								}
-							} else if (first.minutes < 7) {
-								messageKey = 's18_tight';
-							} else if (first.minutes >= 7) {
-								messageKey = 's18_ok';
+								trains.push(journey);
 							}
+
+							first = trains[0];
+							second = trains[1];
+
+							if (first) {
+								if (first.minutes === 0) {
+									messageKey = 's18_zero';
+								} else if (first.minutes < 3) {
+									if (second) {
+										messageKey = 's18_wontmake';
+									} else {
+										messageKey = 's18_wontmake_nonext';
+									}
+								} else if (first.minutes < 7) {
+									messageKey = 's18_tight';
+								} else if (first.minutes >= 7) {
+									messageKey = 's18_ok';
+								}
+							} else {
+								messageKey = 's18_nonext';
+							}
+
 						} else {
 							messageKey = 's18_nonext';
 						}
 
 					} else {
-						messageKey = 's18_nonext';
+						messageKey = 's18_error';
 					}
-				
-				} else {
-					messageKey = 's18_error';
+
+					messageParams = {};
+					if (first) { messageParams.m = first.minutes; }
+					if (first) { messageParams.t = first.ti; }
+					if (second) { messageParams.m2 = second.minutes; }
+					if (second) { messageParams.t2 = second.ti; }
+
+					messageText = messages.get(messageKey, messageParams);
+
+					y.sendMessage(function (error, msg) {
+						logger.info('s18 message OK: ' + msg.id());
+					}, messageText, { 'reply_to' : message.id() });
 				}
-
-				var messageParams = {};
-				if (first) messageParams['m'] = first.minutes;
-				if (first) messageParams['t'] = first.ti;
-				if (second) messageParams['m2'] = second.minutes;
-				if (second) messageParams['t2'] = second.ti;
-
-				var messageText = messages.get(messageKey, messageParams);
-
-				y.sendMessage(function (error, msg) {
-					logger.info('s18 message OK: ' + msg.id());
-				}, messageText, { 'reply_to' : message.id() });
-			});
+			);
 		}
 	});
 

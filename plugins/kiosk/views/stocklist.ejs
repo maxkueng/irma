@@ -1,14 +1,5 @@
-<div class="row" style="margin-top: 18px;">
-	<div class="span12">
-		<ul class="nav nav-tabs">
-			<li> <a href="/deposit">Dep.</a> </li>
-			<li> <a href="/withdraw">With.</a> </li>
-			<li> <a href="/tally">Tally</a> </li>
-			<li class="active"> <a href="/stocklist">Stok.</a> </li>
-			<li> <a href="/initialize">Init</a> </li>
-		</ul>
-	</div>
-</div>
+
+<%- partial('partials/adminnav', { 'page' : 'stocklist' }) %>
 
 <div class="row">
 	<div class="span12">
@@ -26,7 +17,7 @@
 				<dt>Stock</dt>
 				<dd><%= info.stock %> <%=: item.unit() | downcase %></dd>
 				<dt>Average cons/w</dt>
-				<dd><%= info.avgUnits %> <%=: item.unit() | downcase %></dd>
+				<dd><%=: info.avgUnits | round %> <%=: item.unit() | downcase %></dd>
 				<dt>Health</dt>
 				<dd><%=: info.health | capitalize %></dd>
 			</dl>

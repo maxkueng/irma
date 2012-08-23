@@ -1,0 +1,32 @@
+<%
+	var depositClass = (page === 'deposit') ? 'active' : '';
+	var withdrawClass = (page === 'withdraw') ? 'active' : '';
+	var tallyClass = (page === 'tally') ? 'active' : '';
+	var stocklistClass = (page === 'stocklist') ? 'active' : '';
+	var moreClass = (page === 'initialize' || page === 'items' || page === 'log') ? 'active' : '';
+	var initializeClass = (page === 'initialize') ? 'active' : '';
+	var itemsClass = (page === 'items') ? 'active' : '';
+	var logClass = (page === 'log') ? 'active' : '';
+%>
+<div class="row" style="margin-top: 18px;">
+	<div class="span12">
+		<ul class="nav nav-tabs">
+			<li class="<%= depositClass %>"> <a href="/deposit">Dep.</a></li>
+			<li class="<%= withdrawClass %>"> <a href="/withdraw">Wit.</a> </li>
+			<li class="<%= tallyClass %>"> <a href="/tally">Tly.</a> </li>
+			<li class="<%= stocklistClass %>"> <a href="/stocklist">Sto.</a> </li>
+			<li class="dropdown <%= moreClass %>"> 
+				<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+					Mor.
+					<b class="caret"></b>
+				</a> 
+				<ul class="dropdown-menu">
+					<li class="<%= initializeClass %>"> <a href="/initialize">Initialize</a> </li>
+					<li class="<%= itemsClass %>"> <a href="/items">Items</a> </li>
+					<li class="<%= logClass %>"> <a href="/log">Log</a> </li>
+				</ul>
+			</li>
+		</ul>
+	</div>
+</div>
+

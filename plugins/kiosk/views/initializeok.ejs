@@ -1,27 +1,18 @@
-<%
-	var posneg = (balance < 0) ? 'negative' : 'positive';
-%>
-<div class="row">
-	<div class="span12">
-		<div class="page-header">
-			<h1>Initialize</h1>
-			<p>Successfully initialized account</p>
-		</div>
-	</div>
-</div>
+<%- partial('partials/adminnav', { 'page' : 'initialize' }) %>
 
+<%- partial('partials/booking', { 'booking' : booking }) %>
 
-<div class="row">
-	<div class="span12">
-		<div class="well">
-			<p class="balance <%= posneg %>"><%=: balance / 100 | money %></p>
-		</div>
-	</div>
-</div>
+<%- partial('partials/balance', { 'balance' : balance }) %>
+
 
 <div class="row">
 	<div class="span12" style="text-align: center;">
-		<p><a class="btn btn-large btn-success" href="/initialize">OK</a></p>
+		<p>
+			<a class="btn btn-large btn-success" href="/initialize">
+				<i class="icon-ok icon-white"></i>
+				OK
+			</a>
+		</p>
 	</div>
 </div>
 

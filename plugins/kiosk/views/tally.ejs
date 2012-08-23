@@ -1,14 +1,5 @@
-<div class="row" style="margin-top: 18px;">
-	<div class="span12">
-		<ul class="nav nav-tabs">
-			<li> <a href="/deposit">Dep.</a> </li>
-			<li> <a href="/withdraw">With.</a> </li>
-			<li class="active"> <a href="/tally">Tally</a> </li>
-			<li> <a href="/stocklist">Stok.</a> </li>
-			<li> <a href="/initialize">Init</a> </li>
-		</ul>
-	</div>
-</div>
+
+<%- partial('partials/adminnav', { 'page' : 'tally' }) %>
 
 <div class="row">
 	<div class="span12">
@@ -26,7 +17,7 @@
 		<div class="control-group">
 			<label for="input-item<%= items[i].id() %>"><%= items[i].name() %></label>
 			<input type="hidden" name="item" value="<%= items[i].id() %>" />
-			<input id="input-item<%= items[i].id() %>" name="marks" type="number" placeholder="Marks" class="span2" />
+			<input id="input-item<%= items[i].id() %>" name="marks" type="number" step="1" placeholder="Marks" class="span2" />
 		</div>
 		<% } %>
 

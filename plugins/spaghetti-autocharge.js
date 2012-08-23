@@ -1,87 +1,105 @@
+"use strict";
+
 require('datejs');
 var util = require('util');
 
 exports.init = function (y, config, messages, cron, logger) {
-	var accounts = require('./kiosk/accounts');
-	var Account = accounts.Account;
-	var bookings = require('./kiosk/bookings');
-	var Booking = bookings.Booking;
-	var items = require('./kiosk/items');
-	var Item = items.Item;
-	var kioskLogger = require('./kiosk/logger');
-	var stocks = require('./kiosk/stocks');
-	var Stock = stocks.Stock;
+	var accounts = require('./kiosk/accounts'),
+		Account = accounts.Account,
+		bookings = require('./kiosk/bookings'),
+		Booking = bookings.Booking,
+		items = require('./kiosk/items'),
+		Item = items.Item,
+		kioskLogger = require('./kiosk/logger'),
+		stocks = require('./kiosk/stocks'),
+		Stock = stocks.Stock,
+		chargerCron,
+		handleUnchargedThread,
+		book;
 
 	messages.add('spaghetti_autocharge_notify', "Hey [name], I have automatically charged your digital kiosk account with CHF [price] for spaghetti.");
 
-	new cron.CronJob(config.spaghetti_autocharge.cron_charge, function () {
-		for (var threadId in y.threads()) {
-			(function (thId) {
-				var th = y.thread(thId);
-				if (th.createdAt() && th.property('status') == 'closed' && th.property('charged') !== true && th.property('type') == 'spaghetti') {
-					var d = new Date(th.createdAt());
+	book = function (userId, th) {
+		var item, account, booking;
 
-					if (Date.today().compareTo(d.addHours(12)) == -1) {
-						y.updateThreadMessages(th, function (thread) {
-							var message = y.message(thread.messageId());
-							var d = new Date(message.createdAt());
+		item = items.get('03032ac58f81');
+		account = accounts.get(userId);
 
-							var joiners = th.property('joiners');
+		booking = new Booking({
+			'id' : bookings.uuid(),
+			'itemId' : item.id(),
+			'time' : Date.now(),
+			'amount' : item.price() * -1,
+			'name' : item.name(),
+			'description' : item.description(),
+			'type' : 'purchase',
+			'automatic' : true
+		});
 
-							for (var i = 0; i < joiners.length; i++) {
-								(function (_i) {
-									var userId = joiners[_i];
+		account.book(booking, function (err, bookingId) {
+			var text, stock;
 
-									var item = items.get('03032ac58f81');
-									var account = accounts.get(userId);
+			th.setProperty('charged', true);
+			y.persistThread(th);
 
-									var booking = new Booking({
-										'id' : bookings.uuid(), 
-										'itemId' : item.id(), 
-										'time' : Date.now(), 
-										'amount' : item.price() * -1, 
-										'name' : item.name(), 
-										'description' : item.description(), 
-										'type' : 'purchase', 
-										'automatic' : true
-									});
+			text = messages.get('spaghetti_autocharge_notify', {
+				'name' : y.user(userId).fullName(),
+				'price' : item.displayPrice()
+			});
 
-									account.book(booking, function (err, bookingId) {
-										th.setProperty('charged', true);
-										y.persistThread(th);
+			y.sendMessage(function (error, msg) {
+				var thread;
+				thread = y.thread(msg.threadId());
+				thread.setProperty('type', 'spaghetti_autocharge_notify');
+				thread.setProperty('status', 'closed');
+				y.persistThread(thread);
 
-										var text = messages.get('spaghetti_autocharge_notify', {
-											'name' : y.user(userId).fullName(), 
-											'price' : item.displayPrice()
-										});
+			}, text, { 'direct_to' : userId });
 
-										y.sendMessage(function (error, msg) {
-											var thread = y.thread(msg.threadId());
-											thread.setProperty('type', 'spaghetti_autocharge_notify');
-											thread.setProperty('status', 'closed');
-											y.persistThread(thread);
+			if (item.isStockable()) {
+				stock = stocks.get(item.id());
+				stock.update({
+					'bookingId' : bookingId,
+					'type' : 'consumption',
+					'change' : item.ration() * -1
+				});
+			}
 
-										}, text, { 'direct_to' : userId });
+			kioskLogger.log(null, account, account.booking(bookingId));
+		});
+	};
 
-										if (item.isStockable()) {
-											var stock = stocks.get(item.id());
-											stock.update({
-												'bookingId' : bookingId, 
-												'type' : 'consumption', 
-												'change' : item.ration() * -1
-											});
-										}
+	handleUnchargedThread = function (thId) {
+		var th, d;
 
-										kioskLogger.log(null, account, account.booking(bookingId));
-									});
+		th = y.thread(thId);
+		if (th.createdAt() && th.property('status') === 'closed' && th.property('charged') !== true && th.property('type') === 'spaghetti') {
+			d = new Date(th.createdAt());
 
-								})(i);
-							}
-						});
+			if (Date.today().compareTo(d.addHours(12)) === -1) {
+				y.updateThreadMessages(th, function (thread) {
+					var message, d, joiners;
+
+					message = y.message(thread.messageId());
+					d = new Date(message.createdAt());
+					joiners = th.property('joiners');
+
+					for (var i = 0; i < joiners.length; i++) {
+						book(joiners[i], th);
 					}
-				}
-			
-			})(threadId);
+				});
+			}
+		}
+	};
+
+	chargerCron = new cron.CronJob(config.spaghetti_autocharge.cron_charge, function () {
+		var threads;
+
+		threads = y.threads();
+		for (var threadId in threads) {
+			if (threads.hasOwnProperty(threadId)) {
+				handleUnchargedThread(threadId);
+			}
 		}
 	});
 

@@ -1,0 +1,70 @@
+<div class="row noheader">
+	<div class="span12">
+	</div>
+</div>
+
+<%- partial('partials/booking', { 'booking' : booking }) %>
+
+<div class="row">
+	<div class="span12">
+		<div class="transaction">
+			<% if (sender) { %>
+			<span class="sender" title="<%= booking.description() %>"><i class="icon-user icon-white"></i><%= sender.fullName() %></span> 
+			<% } else {%>
+			<span class="recipient"><i class="icon-user icon-white"></i> ?</span> 
+			<% } %>
+			<span class="arrow"><i class="icon-chevron-right icon-white"></i></span>
+			<span class="amount positive"><%-: booking.amount() / 100 * -1 | money %></span>
+			<span class="arrow"><i class="icon-chevron-right icon-white"></i></span>
+			<% if (recipient) { %>
+			<span class="recipient"><i class="icon-user icon-white"></i><%= recipient.fullName() %></span> 
+			<% } else {%>
+			<span class="recipient"><i class="icon-user icon-white"></i> ?</span> 
+			<% } %>
+		</div>
+		<p style="padding-left: 14px;"><i class="icon-comment"></i> <%= booking.description() %></p>
+	</div>
+</div>
+
+<div class="row">
+	<div class="span12">
+		<p>
+		<% if (booking.automatic()) { %>
+			<span class="label ">automatic</span></p>
+		<% } %>
+		<% if (booking.reversed()) { %>
+			<span class="label label-important">reversed</span>
+		<% } %>
+		<% if (booking.admin()) { %>
+			<span class="label label-info">admin</span>
+		<% } %>
+	</div>
+</div>
+
+<%- partial('partials/balance', { 'balance' : account.balance() }) %>
+
+<% if (booking.type() == 'purchase' && !booking.reversed()) { %>
+<div class="row" style="margin-top: 36px; margin-bottom: 36px;">
+	<div class="span12" style="text-align: center;">
+		<a class="btn btn-large btn-danger" href="/reverse/<%= booking.id() %>">Reverse</a>
+	</div>
+</div>
+<% } %>
+
+<script type="text/javascript">
+$(document).ready(function () {
+	$('.sender').tooltip({
+		'placement' : 'bottom'
+	});
+});
+</script>
+
+<footer>
+<div class="row">
+	<div class="span12" style="text-align: center;">
+		<a class="btn btn-large" href="/">Home</a>
+		<a class="btn btn-large" href="/account">View account</a>
+		<a style="display:inline-block; margin-left: 18px;" href="/about"><img src="/img/irma.svg" style="height: 47px;" /></a>
+	</div>
+</div>
+</footer>
