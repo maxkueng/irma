@@ -2,6 +2,7 @@
 
 exports.init = function (y, config, messages, cron, logger) {
 	messages.add('kill_reboot_confirm', "I'll be back.");
+	messages.add('kill_reboot_rebooted', "I'm back.");
 
 	y.on('message', function (message) {
 		if (/!reboot\b/i.test(message.plainBody())) {
@@ -23,7 +24,17 @@ exports.init = function (y, config, messages, cron, logger) {
 	});
 
 	y.on('threadloaded', function (thread) {
-		console.log('thl', thread);
+		if (thread.property('type') === 'reboot' && thread.property('status') === 'open') {
+			var rebootedMessage = messages.get('kill_reboot_rebooted');
+
+			y.sendMessage(function (err, msg) {
+				logger.info('sending rebooted message: OK');
+				var thread = y.thread(msg.threadId());
+				thread.setProperty('status', 'closed');
+				y.persistThread(thread);
+
+			}, rebootedMessage, { 'reply_to' : thread.id() });
+		}
 	});
 
 };
