@@ -4,7 +4,7 @@ exports.init = function (y, config, messages, cron, logger) {
 	messages.add('kill_reboot_confirm', "I'll be back.");
 
 	y.on('message', function (message) {
-		if (/\b!reboot\b/i.test(message.plainBody())) {
+		if (/!reboot\b/i.test(message.plainBody())) {
 			logger.info("!reboot");
 
 			rebootConfirmMessage = messages.get('kill_reboot_confirm');
