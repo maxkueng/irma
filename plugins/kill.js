@@ -7,7 +7,9 @@ exports.init = function (y, config, messages, cron, logger) {
 		if (/!reboot\b/i.test(message.plainBody())) {
 			logger.info("!reboot");
 
-			rebootConfirmMessage = messages.get('kill_reboot_confirm');
+			var rebootConfirmMessage = messages.get('kill_reboot_confirm');
+
+			y.sendMessage(function (msg) {
 				logger.info('sending reboto confirm message: OK');
 				var thread = y.thread(msg.threadId());
 				thread.setProperty('type', 'reboot');
@@ -15,7 +17,7 @@ exports.init = function (y, config, messages, cron, logger) {
 				y.persistThread(thread);
 				logger.warn('exiting');
 				process.exit(0);
-			y.sendMessage(function (msg) {
+
 			}, rebootConfirmMessage, { 'reply_to' : message.id() });
 		}
 	});
