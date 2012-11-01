@@ -3,6 +3,7 @@
 exports.init = function (y, config, messages, cron, logger) {
 	messages.add('kill_reboot_confirm', "I'll be back.");
 	messages.add('kill_reboot_rebooted', "I'm back.");
+	messages.add('kill_reboot_rebooted', "I'm back from the reboot. All fresh and shiny :)");
 
 	y.on('message', function (message) {
 		if (/!reboot\b/i.test(message.plainBody())) {
