@@ -24,6 +24,6 @@ exports.init = function (y, config, messages, cron, logger) {
 
 	y.on('threadloaded', function (thread) {
 		console.log('thl', thread);
-	};
+	});
 
 };
