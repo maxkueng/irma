@@ -9,8 +9,8 @@ exports.init = function (y, config, messages, cron, logger) {
 
 			var rebootConfirmMessage = messages.get('kill_reboot_confirm');
 
-			y.sendMessage(function (msg) {
-				logger.info('sending reboto confirm message: OK');
+			y.sendMessage(function (err, msg) {
+				logger.info('sending reboot confirm message: OK');
 				var thread = y.thread(msg.threadId());
 				thread.setProperty('type', 'reboot');
 				thread.setProperty('status', 'open');
