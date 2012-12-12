@@ -311,6 +311,12 @@ exports.init = function (y, config, messages, cron, logger) {
 			user = parseInt(req.body.user, 10);
 			amount = parseInt(req.body.amount * 100, 10);
 			account = accounts.get(user);
+			
+			var cashAccount = accounts.get(config.kiosk.cashUser);
+			
+			cashAccount.withdraw(amount, function (err, bookingId) {
+				kioskLogger.log(userId, cashAccount, cashAccount.booking(bookingId));
+			});
 
 			account.deposit(amount, function (err, bookingId) {
 				var text, booking;
@@ -363,6 +369,12 @@ exports.init = function (y, config, messages, cron, logger) {
 			user = parseInt(req.body.user, 10);
 			amount = parseInt(req.body.amount * 100, 10);
 			account = accounts.get(user);
+			
+			var cashAccount = accounts.get(config.kiosk.cashUser);
+			
+			cashAccount.deposit(amount, function (err, bookingId) {
+				kioskLogger.log(userId, cashAccount, cashAccount.booking(bookingId));
+			});
 
 			account.withdraw(amount, function (err, bookingId) {
 				var text;

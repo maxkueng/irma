@@ -22,6 +22,7 @@
 		"cron_start" : "0 30 11 * * 5"
 	},
 	"kiosk" : {
-		"port" : 1338
+		"port" : 1338,
+		"cashUser" : 4450357
 	}
 }
