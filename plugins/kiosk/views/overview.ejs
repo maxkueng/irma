@@ -30,6 +30,22 @@
 			<td style="min-width: 3em;text-align: right;" class="<%= posneg %>"><%-: balance / 100 | money %></td>
 		</tr>
 		<% } %>
+		
+		<% 
+		  for (var i = 0; i < stockInfo.length; i++) { 
+		  	var item = stockInfo[i].item;
+		  	var info = stockInfo[i].info;
+		%>
+		<tr id="item-<%= item.id() %>">
+			<td><%= item.name() %>(<%= item.stock %> <%=: item.unit() | downcase %> à <%= item.displayPrice() %>)</td>
+			<%
+			var balance = item.stock * item.price();
+			var posneg = (item.stock <= 0) ? 'negative' : 'positive';
+			totalBalance += balance;
+			%>
+			<td style="min-width: 3em;text-align: right;" class="<%= posneg %>"><%-: balance / 100 | money %></td>
+		</tr>
+		<% } %>
 	</tbody>
 	<tfoot>
 		<th>Total</th>

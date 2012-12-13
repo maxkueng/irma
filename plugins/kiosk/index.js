@@ -819,12 +819,30 @@ exports.init = function (y, config, messages, cron, logger) {
 					accs[userId] = accounts.get(userId);
 				}
 			}
+			
+			var itemList, info, stock;
+
+			itemList = items.all();
+			info = [];
+
+			for (var itemId in itemList) {
+				if (itemList.hasOwnProperty(itemId)) {
+					if (itemList[itemId].isStockable()) {
+						stock = stocks.get(itemId);
+						info.push({
+							'info' : stock.info(),
+							'item' : itemList[itemId]
+						});
+					}
+				}
+			}
 
 			res.render('overview.ejs', {
 				'layout' : 'layout.ejs',
 				'req' : req,
 				'res' : res,
 				'accounts' : accs,
+				'stockInfo' : info,
 				'users' : users
 			});
 		});
