@@ -44,9 +44,9 @@
 			<td>
 				<%= item.name() %>
 				(
-					<%= info.stock %> <%=: item.unit() | downcase %>
-					<%= item.ration() %> <%=: item.unit() | downcase %>
-					/
+					<%= info.stock %>
+					<% if ( item.ration() != 1 ) { %>/<%= item.ration() %><% } %>
+					<%=: item.unit() | downcase %>
 					&agrave;
 					<%= item.displayPrice() %>
 				)
@@ -59,7 +59,7 @@
 		<th>Total</th>
 		<%
 			var balance = totalBalance;
-			var posneg = (balance > 0) ? 'negative' : 'positive';
+			var posneg = (balance > 0) ? 'negative' : '';
 		%>
 		<th style="min-width: 3em;text-align: right;" class="<%= posneg %>"><%-: balance / 100 | money %></th>
 	</tfoot>
