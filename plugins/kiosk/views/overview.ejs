@@ -35,14 +35,22 @@
 		  for (var i = 0; i < stockInfo.length; i++) { 
 		  	var item = stockInfo[i].item;
 		  	var info = stockInfo[i].info;
+		  	
+		  	var balance = info.stock / item.ration() * item.price();
+			var posneg = (info.stock <= 0) ? 'negative' : 'positive';
+			totalBalance -= balance;
 		%>
 		<tr id="item-<%= item.id() %>">
-			<td><%= item.name() %>(<%= info.stock %> <%=: item.unit() | downcase %> &agrave; <%= item.displayPrice() %>)</td>
-			<%
-			var balance = info.stock * item.price();
-			var posneg = (info.stock <= 0) ? 'negative' : 'positive';
-			totalBalance += balance;
-			%>
+			<td>
+				<%= item.name() %>
+				(
+					<%= info.stock %> <%=: item.unit() | downcase %>
+					<%= item.ration() %> <%=: item.unit() | downcase %>
+					/
+					&agrave;
+					<%= item.displayPrice() %>
+				)
+			</td>
 			<td style="min-width: 3em;text-align: right;" class="<%= posneg %>"><%-: balance / 100 | money %></td>
 		</tr>
 		<% } %>
