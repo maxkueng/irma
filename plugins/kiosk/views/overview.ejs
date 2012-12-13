@@ -45,7 +45,7 @@
 				<%= item.name() %>
 				(
 					<%= info.stock %>
-					<% if ( item.ration() != 1 ) { %>/<%= item.ration() %><% } %>
+					<% if ( item.ration() != 1 ) { %>/ <%= item.ration() %><% } %>
 					<%=: item.unit() | downcase %>
 					&agrave;
 					<%= item.displayPrice() %>
