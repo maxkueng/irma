@@ -80,6 +80,7 @@ ul.items li.item span.stockinfo {
 	border-radius: 0 0 4px 4px;
 	overflow: hidden;
 	margin: 0;
+	opacity: 0.75;
 }
 
 ul.items li.item span.stockinfo span.bar {
@@ -109,7 +110,7 @@ ul.items .item.sendmoney a .description,
 
 ul.items .item.stock a:hover, 
 ul.items .item.stock a:active {
-	background-color: #000;
+	background-color: #222;
 }
 
 div.balance a {
