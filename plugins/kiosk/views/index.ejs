@@ -13,6 +13,15 @@
 						<span class="description"><%= items[id].description() %></span>
 						<% } %>
 						<span class="price"><%= items[id].displayPrice() %></span>
+						<% if (stockInfo.hasOwnProperty(id)) { %>
+						<%
+						var progStyle = 'progress-success';
+						if (stockInfo[id].health == 'good') progStyle = 'progress-success';
+						if (stockInfo[id].health == 'critical') progStyle = 'progress-warning';
+						if (stockInfo[id].health == 'bad') progStyle = 'progress-danger';
+						%>
+						<span class="stockinfo progress <%= progStyle %>"><span class="bar" style="width: <%= stockInfo[id].percent %>%"></span></span>
+						<% } %>
 					</a>
 				</div>
 			</li>

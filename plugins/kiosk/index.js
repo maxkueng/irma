@@ -179,13 +179,27 @@ exports.init = function (y, config, messages, cron, logger) {
 
 	app.get('/', function (req, res) {
 		authCheck(req, res, function () {
-			var userId = req.userId;
+			var userId = req.userId,
+				itemList, stockInfo, stock;
+
+			itemList = items.all();
+			stockInfo = {};
+
+			for (var itemId in itemList) {
+				if (itemList.hasOwnProperty(itemId)) {
+					if (itemList[itemId].isStockable()) {
+						stock = stocks.get(itemId);
+						stockInfo[itemId] = stock.info();
+					}
+				}
+			}
 
 			res.render('index.ejs', {
 				'layout' : 'layout.ejs',
 				'req' : req,
 				'res' : res,
-				'items' : items.all()
+				'items' : items.all(),
+				'stockInfo' : stockInfo
 			});
 		});
 

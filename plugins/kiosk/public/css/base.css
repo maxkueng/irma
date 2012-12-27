@@ -10,6 +10,7 @@ ul.items {
 ul.items li.item {
 	list-style-type: none;
 	display: block;
+	position: relative;
 }
 
 div.item a, 
@@ -68,6 +69,24 @@ ul.items li.item a .price {
 	color: #0088cc;
 }
 
+ul.items li.item span.stockinfo {
+	display: block;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	height: 4px;
+	width: 100%;
+	border-top: 1px solid rgba(0, 0, 0, 0.2);
+	border-radius: 0 0 4px 4px;
+	overflow: hidden;
+	margin: 0;
+	opacity: 0.75;
+}
+
+ul.items li.item span.stockinfo span.bar {
+	display: block;
+}
+
 .item.stock .stock,
 ul.items li.item.stock a {
 	background-color: #414141;
@@ -91,7 +110,7 @@ ul.items .item.sendmoney a .description,
 
 ul.items .item.stock a:hover, 
 ul.items .item.stock a:active {
-	background-color: #000;
+	background-color: #222;
 }
 
 div.balance a {
