@@ -20,7 +20,9 @@
 			<label for="select-recipient">Recipient</label>
 			<select id="select-recipient" name="recipient" placeholder="Select" class="span2">
 			<% for (var id in users) { %>
+				<% if (id !== req.userId) { %>
 				<option value="<%= id %>"><%= users[id].fullName() %></option>
+				<% } %>
 			<% } %>
 			</select>
 		</div>
