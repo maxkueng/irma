@@ -3,13 +3,11 @@
 var util = require('util');
 
 exports.init = function (y, config, messages, cron, logger) {
+	messages.add('spaghetti_opening', "Barilla number 7, straight from heaven! Who's in? Hit \"like\" to join. It's spaghetti time!");
 	messages.add('spaghetti_opening', "Spaghetti for lunch? Superzise? Like this message if you'd like to join.");
 	messages.add('spaghetti_opening', "Spaghetti for lunch? Like this message if you'd like to join.");
-	messages.add('spaghetti_opening', "Barilla number 7, straight from heaven! Who's in? Hit \"like\" to join. It's spaghetti time!");
 	messages.add('spaghetti_opening', "Who's a hungry monkey? Press the 'like' button to register for spaghetti.");
-	messages.add('spaghetti_opening', "Spaghetti. Do you want it?");
 
-	messages.add('spaghetti_closing', "Mamma mia ramba zamba! [count] hungry monkeys?? \nThe following are registered for lunch: [joiners]");
 	messages.add('spaghetti_closing', "Ooooohh! [count] hungry monkeys?? \nThe following are registered for lunch: [joiners]");
 	messages.add('spaghetti_closing', "Wow, so many! [count] plates of worms for the birds. \n[joiners] are in for lunch.");
 
