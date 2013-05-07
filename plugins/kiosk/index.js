@@ -205,6 +205,25 @@ exports.init = function (y, config, messages, cron, logger) {
 
 	});
 
+	app.get('/manifest.webapp', function (req, res) {
+		res.setHeader('Content-Type', 'application/x-web-app-manifest+json');
+		var manifest = {
+			"name": "I.R.M.A. Kiosk",
+			"description": "Pausenkiosk",
+			"launch_path": "/",
+			"icons": {
+				"114": "/img/apple-touch-icon-114x114-precomposed.png",
+				"128": "/img/apple-touch-icon-114x114-precomposed.png"
+			},
+			"developer": {
+				"name": "Max Kueng",
+				"url": "http://maxkueng.com/"
+			},
+			"default_locale": "en"
+		};
+		res.send(manifest);
+	});
+
 	app.get('/about', function (req, res) {
 		res.render('about.ejs', {
 			'layout' : 'layout.ejs',

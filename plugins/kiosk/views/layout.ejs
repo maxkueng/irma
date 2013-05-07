@@ -28,5 +28,39 @@
 
 		<script type="text/javascript" src="/js/bootstrap-dropdown.js"></script>
 		<script type="text/javascript" src="/js/bootstrap-tooltip.js"></script>
+		<script type="text/javascript">
+		(function () {
+		 	if (navigator.mozApps) {
+				function install (ev) {
+					ev.preventDefault();
+					var manifest_url = 'http://kiosk.irma.io/manifest.webapp';
+					var myapp = navigator.mozApps.install(manifest_url);
+					myapp.onsuccess = function (data) {
+						this.parentNode.removeChild(this);
+					};
+
+					myapp.onerror = function () {
+					};
+				}
+
+				var button = document.createElement('button');
+				button.innerHTML = 'Install';
+				button.className = 'btn';
+				var body = document.getElementsByTagName('body')[0];
+				body.appendChild(button);
+
+				var request = navigator.mozApps.getSelf();
+				request.onsuccess = function () {
+					if (request.result) {
+						// Pull the name of the app out of the App object
+						button.parentNode.removeChild(button);
+					}
+				};
+				
+
+				button.addEventListener('click', install, false);
+			}
+		 })();
+		</script>
 	</body>
 </html>
