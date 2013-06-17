@@ -12,6 +12,17 @@
 
 <div class="row">
 	<div class="span12">
+		<% if (item.id()) { %>
+		<div id="qrcode" class="pull-right" style="width: 160px;height: 160px; background:#f00"></div>
+		<script type="text/javascript">
+		var qrcode = new QRCode('qrcode', {
+			'width' : 160,
+			'height' : 160,
+			'correctLevel' : QRCode.CorrectLevel.M
+		});
+		qrcode.makeCode('http://kiosk.irma.io/pay/<%= item.id() %>');
+		</script>
+		<% } %>
 		<% 
 		var itemId;
 		if (item.id()) {
