@@ -11,6 +11,9 @@
 	"dependencies" : {
 		"cron" : "0.1.2",
 		"datejs" : ">=0.0.2",
+		"moment" : "*",
+		"nodemailer" : "*",
+		"underscore" : "*",
 		"googleweather" : ">=0.1.0",
 		"express" : "<=2.5.9",
 		"ejs" : ">= 0.7.0",
@@ -18,6 +21,7 @@
 		"jsdom" : ">=0.2.0",
 		"request" : ">=2.9.0",
 		"validator" : "*",
+		"natural" : "*",
 		"aspsms" : "*",
 		"fancy-timestamp" : "*",
 		"revjsion" : "git://github.com/maxkueng/revjsion.git"
